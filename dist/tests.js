@@ -591,8 +591,12 @@ function halt (err) {
   process.exitCode = 1;
 }
 
-{
-  const test = new Test('passing sync test', () => true);
+{ /* new Test() */
+  const root = new Test('tom');
+}
+
+{ /* passing sync test */
+  const test = new Test('tom', () => true);
   test.run()
     .then(result => {
       a.ok(result === true);
@@ -717,6 +721,29 @@ function halt (err) {
     .catch(halt);
 }
 
+{ /* mandatory name */
+  a.throws(
+    () => { const tom = new Test(); }
+  );
+  a.doesNotThrow(
+    () => { const tom = new Test('something'); }
+  );
+}
+
+function halt$1 (err) {
+  console.log(err);
+  process.exitCode = 1;
+}
+
+{ /* test.tree() */
+  const root = new Test('tom');
+  console.log(root);
+  root.add(new Test('one', () => true));
+  const child = root.add(new Test('two', () => true));
+  child.add(new Test('three', () => true));
+  console.log(root.tree());
+}
+
 { /* duplicate test name */
   const tom = new Test('tom');
   tom.test('one', () => 1);
@@ -733,24 +760,18 @@ function halt (err) {
   );
 }
 
-{ /* mandatory name */
-  a.throws(
-    () => { const tom = new Test(); }
-  );
-  a.doesNotThrow(
-    () => { const tom = new Test('something'); }
-  );
-}
-
-{
-  const root = new Test('new Test()');
-}
-
-{
-  const root = new Test('test.tree()');
-  console.log(root);
-  root.add(new Test('one', () => true));
-  const child = root.add(new Test('two', () => true));
-  child.add(new Test('three', () => true));
-  console.log(root.tree());
+{ /* .skip() */
+  const counts = [];
+  const tom = new Test('tom');
+  tom.skip('one', () => 1);
+  a.strictEqual(tom.children.length, 1);
+  a.strictEqual(tom.children[0].name, 'one');
+  tom.on('start', () => counts.push('start'));
+  tom.on('skip', () => counts.push('skip'));
+  tom.run()
+    .then(result => {
+      a.strictEqual(result, undefined);
+      a.deepStrictEqual(counts, [ 'start', 'skip' ]);
+    })
+    .catch(halt$1);
 }

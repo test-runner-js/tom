@@ -1,4 +1,4 @@
-import Test from '../index.mjs'
+import Tom from '../index.mjs'
 import a from 'assert'
 
 function halt (err) {
@@ -6,15 +6,55 @@ function halt (err) {
   process.exitCode = 1
 }
 
-{
-  const root = new Test('new Test()')
+{ /* test.tree() */
+  const root = new Tom('tom')
+  root.add(new Tom('one', () => true))
+  const child = root.add(new Tom('two', () => true))
+  child.add(new Tom('three', () => true))
+  console.log(root.tree())
 }
 
-{
-  const root = new Test('test.tree()')
-  console.log(root)
-  root.add(new Test('one', () => true))
-  const child = root.add(new Test('two', () => true))
-  child.add(new Test('three', () => true))
-  console.log(root.tree())
+{ /* duplicate test name */
+  const tom = new Tom('tom')
+  tom.test('one', () => 1)
+  a.throws(
+    () => tom.test('one', () => 1)
+  )
+}
+
+{ /* deep duplicate test name */
+  const tom = new Tom('tom')
+  const child = tom.test('one', () => 1)
+  a.throws(
+    () => child.test('one', () => 1)
+  )
+}
+
+{ /* .skip() */
+  const counts = []
+  const tom = new Tom('tom')
+  tom.on('start', () => counts.push('start'))
+  tom.on('skip', () => counts.push('skip'))
+  tom.run()
+    .then(result => {
+      a.strictEqual(result, undefined)
+      a.deepStrictEqual(counts, [ 'start', 'skip' ])
+    })
+    .catch(halt)
+}
+
+{ /* child.skip() */
+  const counts = []
+  const tom = new Tom('tom')
+  const child = tom.skip('one', () => 1)
+  a.strictEqual(tom.children.length, 1)
+  a.strictEqual(tom.children[0].name, 'one')
+  tom.on('start', () => counts.push('start'))
+  tom.on('skip', () => counts.push('skip'))
+  child.run()
+    .then(result => {
+      a.strictEqual(result, undefined)
+      a.deepStrictEqual(counts, [ 'start', 'skip' ])
+    })
+    .catch(halt)
 }

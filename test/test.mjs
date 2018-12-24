@@ -6,8 +6,12 @@ function halt (err) {
   process.exitCode = 1
 }
 
-{
-  const test = new Tom('passing sync test', () => true)
+{ /* new Test() */
+  const root = new Tom('tom')
+}
+
+{ /* passing sync test */
+  const test = new Tom('tom', () => true)
   test.run()
     .then(result => {
       a.ok(result === true)
@@ -130,22 +134,6 @@ function halt (err) {
       a.deepStrictEqual(counts, [ 'start', 'skip' ])
     })
     .catch(halt)
-}
-
-{ /* duplicate test name */
-  const tom = new Tom('tom')
-  tom.test('one', () => 1)
-  a.throws(
-    () => tom.test('one', () => 1)
-  )
-}
-
-{ /* deep duplicate test name */
-  const tom = new Tom('tom')
-  const child = tom.test('one', () => 1)
-  a.throws(
-    () => child.test('one', () => 1)
-  )
 }
 
 { /* mandatory name */

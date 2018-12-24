@@ -513,6 +513,7 @@
       this.index = 1;
       this.options = Object.assign({ timeout: 10000 }, options);
       this.state = 'pending';
+      this._skip = null;
     }
 
     toString () {
@@ -533,7 +534,7 @@
 
     skip (name, testFn, options) {
       const test = this.test(name, testFn, options);
-      test.skip = true;
+      test._skip = true;
       return test
     }
 
@@ -550,7 +551,7 @@
      */
     run () {
       this.state = 'start';
-      if (this.testFn) {
+      if (!this._skip && this.testFn) {
         const testFnResult = new Promise((resolve, reject) => {
           try {
             const result = this.testFn.call(new TestContext({
