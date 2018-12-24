@@ -135,12 +135,3 @@ function halt (err) {
     })
     .catch(halt)
 }
-
-{ /* mandatory name */
-  a.throws(
-    () => { const tom = new Tom() }
-  )
-  a.doesNotThrow(
-    () => { const tom = new Tom('something') }
-  )
-}

@@ -500,20 +500,25 @@
    */
   class Test extends createMixin(Composite)(StateMachine) {
     constructor (name, testFn, options) {
+      name = name || 'tom';
       if (!name) throw new Error('name required')
       super ([
         { from: undefined, to: 'pending' },
         { from: 'pending', to: 'start' },
         { from: 'start', to: 'pass' },
         { from: 'start', to: 'fail' },
-        { from: 'start', to: 'skip' }
+        { from: 'start', to: 'skip' },
+        { from: 'pass', to: 'pending' },
+        { from: 'fail', to: 'pending' },
+        { from: 'skip', to: 'pending' },
       ]);
       this.name = name;
       this.testFn = testFn;
-      this.index = 1;
       this.options = Object.assign({ timeout: 10000 }, options);
+      this.index = 1;
       this.state = 'pending';
       this._skip = null;
+      this._only = null;
     }
 
     toString () {
@@ -577,6 +582,19 @@
       } else {
         this.state = 'skip';
         return Promise.resolve()
+      }
+    }
+
+    reset (deep) {
+      if (deep) {
+        for (const tom of this) {
+          tom.reset();
+        }
+      } else {
+        this.index = 1;
+        this.state = 'pending';
+        this._skip = null;
+        this._only = null;
       }
     }
   }
