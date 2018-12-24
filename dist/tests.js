@@ -51,6 +51,10 @@ const _parent = new WeakMap();
  * @alias module:composite-class
  */
 class Composite {
+  /**
+   * Children
+   * @type {Array}
+   */
   get children () {
     if (_children.has(this)) {
       return _children.get(this)
@@ -59,11 +63,16 @@ class Composite {
       return _children.get(this)
     }
   }
-  
+
   set children (val) {
     _children.set(this, val);
   }
 
+
+  /**
+   * Parent
+   * @type {Composite}
+   */
   get parent () {
     return _parent.get(this)
   }
@@ -151,7 +160,7 @@ class Composite {
    */
   root () {
     function getRoot (composite) {
-      return composite.parent === null ? composite : getRoot(composite.parent)
+      return composite.parent ? getRoot(composite.parent) : composite
     }
     return getRoot(this)
   }
@@ -221,6 +230,26 @@ class Test extends createMixin(Composite)(StateMachine) {
 
   toString () {
     return `${this.name}: ${this.state}`
+  }
+
+  test (name, testFn, options) {
+    const test = new this.constructor(name, testFn, options);
+    this.add(test);
+    test.index = this.children.length;
+    return test
+  }
+
+  skip (name, testFn, options) {
+    const test = this.test(name, testFn, options);
+    test.skip = true;
+    return test
+  }
+
+  only (name, testFn, options) {
+    const test = this.test(name, testFn, options);
+    test.only = true;
+    // this._only.push(test)
+    return test
   }
 
   /**
@@ -394,6 +423,14 @@ function halt (err) {
       a.deepStrictEqual(counts, [ 'start', 'skip' ]);
     })
     .catch(halt);
+}
+
+{
+  const tom = new Test();
+  tom.test('one', () => 1);
+  a.throws(
+    () => tom.test('one', () => 1)
+  );
 }
 
 {

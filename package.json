@@ -14,16 +14,16 @@
     "test": "npm run test:js && npm run test:mjs",
     "test:js": "rollup -c dist/tests.config.js && node dist/tests.js",
     "test:mjs": "node --experimental-modules test/tests.mjs",
-    "dist": "rollup -c dist/index.config.js"
+    "dist": "rollup -w -c dist/index.config.js"
   },
   "dependencies": {
-    "composite-class": "file:../../75lb/composite-class",
-    "create-mixin": "file:../../75lb/create-mixin",
-    "fsm-base": "^0.3.0",
+    "composite-class": "^0.3.0",
+    "create-mixin": "^1.1.1",
+    "fsm-base": "^0.4.0",
     "race-timeout-anywhere": "^0.1.1"
   },
   "devDependencies": {
-    "rollup": "^0.68.1"
+    "rollup": "^0.68.2"
   },
   "standard": {
     "ignore": [

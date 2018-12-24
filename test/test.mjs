@@ -131,3 +131,11 @@ function halt (err) {
     })
     .catch(halt)
 }
+
+{ /* duplicate test name */
+  const tom = new Test()
+  tom.test('one', () => 1)
+  a.throws(
+    () => tom.test('one', () => 1)
+  )
+}

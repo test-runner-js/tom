@@ -1,7 +1,7 @@
 import raceTimeout from './node_modules/race-timeout-anywhere/index.mjs'
 import mixin from './node_modules/create-mixin/index.mjs'
 import CompositeClass from './node_modules/composite-class/index.mjs'
-import StateMachine from 'fsm-base'
+import StateMachine from './node_modules/fsm-base/index.mjs'
 
 /**
  * Test function class.
@@ -28,6 +28,26 @@ class Test extends mixin(CompositeClass)(StateMachine) {
 
   toString () {
     return `${this.name}: ${this.state}`
+  }
+
+  test (name, testFn, options) {
+    const test = new this.constructor(name, testFn, options)
+    this.add(test)
+    test.index = this.children.length
+    return test
+  }
+
+  skip (name, testFn, options) {
+    const test = this.test(name, testFn, options)
+    test.skip = true
+    return test
+  }
+
+  only (name, testFn, options) {
+    const test = this.test(name, testFn, options)
+    test.only = true
+    // this._only.push(test)
+    return test
   }
 
   /**
