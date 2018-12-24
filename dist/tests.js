@@ -513,6 +513,7 @@ class Test extends createMixin(Composite)(StateMachine) {
     this.index = 1;
     this.options = Object.assign({ timeout: 10000 }, options);
     this.state = 'pending';
+    this._skip = null;
   }
 
   toString () {
@@ -533,14 +534,18 @@ class Test extends createMixin(Composite)(StateMachine) {
 
   skip (name, testFn, options) {
     const test = this.test(name, testFn, options);
-    test.skip = true;
+    test._skip = true;
     return test
   }
 
   only (name, testFn, options) {
+    for (const test of this) {
+      if (!test._only) {
+        test._skip = true;
+      }
+    }
     const test = this.test(name, testFn, options);
-    test.only = true;
-    // this._only.push(test)
+    test._only = true;
     return test
   }
 
@@ -550,7 +555,7 @@ class Test extends createMixin(Composite)(StateMachine) {
    */
   run () {
     this.state = 'start';
-    if (this.testFn) {
+    if (!this._skip && this.testFn) {
       const testFnResult = new Promise((resolve, reject) => {
         try {
           const result = this.testFn.call(new TestContext({
@@ -737,7 +742,6 @@ function halt$1 (err) {
 
 { /* test.tree() */
   const root = new Test('tom');
-  console.log(root);
   root.add(new Test('one', () => true));
   const child = root.add(new Test('two', () => true));
   child.add(new Test('three', () => true));
@@ -763,9 +767,6 @@ function halt$1 (err) {
 { /* .skip() */
   const counts = [];
   const tom = new Test('tom');
-  tom.skip('one', () => 1);
-  a.strictEqual(tom.children.length, 1);
-  a.strictEqual(tom.children[0].name, 'one');
   tom.on('start', () => counts.push('start'));
   tom.on('skip', () => counts.push('skip'));
   tom.run()
@@ -774,4 +775,37 @@ function halt$1 (err) {
       a.deepStrictEqual(counts, [ 'start', 'skip' ]);
     })
     .catch(halt$1);
+}
+
+{ /* child.skip() */
+  const counts = [];
+  const tom = new Test('tom');
+  const child = tom.skip('one', () => 1);
+  a.strictEqual(tom.children.length, 1);
+  a.strictEqual(tom.children[0].name, 'one');
+  tom.on('start', () => counts.push('start'));
+  tom.on('skip', () => counts.push('skip'));
+  child.run()
+    .then(result => {
+      a.strictEqual(result, undefined);
+      a.deepStrictEqual(counts, [ 'start', 'skip' ]);
+    })
+    .catch(halt$1);
+}
+
+{ /* .only() */
+  const tom = new Test('tom');
+  tom.test('one', () => 1);
+  tom.test('two', () => 2);
+  a.ok(!tom.children[0]._skip);
+  a.ok(!tom.children[1]._skip);
+  a.ok(!tom.children[0]._only);
+  a.ok(!tom.children[1]._only);
+  tom.only('three', () => 3);
+  a.ok(tom.children[0]._skip);
+  a.ok(tom.children[1]._skip);
+  a.ok(!tom.children[2]._skip);
+  a.ok(!tom.children[0]._only);
+  a.ok(!tom.children[1]._only);
+  a.ok(tom.children[2]._only);
 }

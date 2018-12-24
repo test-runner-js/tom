@@ -539,9 +539,13 @@
     }
 
     only (name, testFn, options) {
+      for (const test of this) {
+        if (!test._only) {
+          test._skip = true;
+        }
+      }
       const test = this.test(name, testFn, options);
-      test.only = true;
-      // this._only.push(test)
+      test._only = true;
       return test
     }
 
