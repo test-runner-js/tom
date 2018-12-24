@@ -500,6 +500,7 @@
    */
   class Test extends createMixin(Composite)(StateMachine) {
     constructor (name, testFn, options) {
+      if (!name) throw new Error('name required')
       super ([
         { from: undefined, to: 'pending' },
         { from: 'pending', to: 'start' },
@@ -519,6 +520,11 @@
     }
 
     test (name, testFn, options) {
+      for (const child of this) {
+        if (child.name === name) {
+          throw new Error('Duplicate name: ' + name)
+        }
+      }
       const test = new this.constructor(name, testFn, options);
       this.add(test);
       test.index = this.children.length;

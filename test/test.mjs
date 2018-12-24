@@ -1,4 +1,4 @@
-import Test from '../index.mjs'
+import Tom from '../index.mjs'
 import a from 'assert'
 
 function halt (err) {
@@ -7,7 +7,7 @@ function halt (err) {
 }
 
 {
-  const test = new Test('passing sync test', () => true)
+  const test = new Tom('passing sync test', () => true)
   test.run()
     .then(result => {
       a.ok(result === true)
@@ -16,7 +16,7 @@ function halt (err) {
 }
 
 {
-  const test = new Test('failing sync test', function () {
+  const test = new Tom('failing sync test', function () {
     throw new Error('failed')
   })
   test.run()
@@ -30,7 +30,7 @@ function halt (err) {
 }
 
 {
-  const test = new Test('passing async test', function () {
+  const test = new Tom('passing async test', function () {
     return Promise.resolve(true)
   })
   test.run().then(result => {
@@ -39,7 +39,7 @@ function halt (err) {
 }
 
 {
-  const test = new Test('failing async test: rejected', function () {
+  const test = new Tom('failing async test: rejected', function () {
     return Promise.reject(new Error('failed'))
   })
   test.run()
@@ -53,7 +53,7 @@ function halt (err) {
 }
 
 {
-  const test = new Test(
+  const test = new Tom(
     'failing async test: timeout',
     function () {
       return new Promise((resolve, reject) => {
@@ -71,7 +71,7 @@ function halt (err) {
 }
 
 {
-  const test = new Test(
+  const test = new Tom(
     'passing async test: timeout 2',
     function () {
       return new Promise((resolve, reject) => {
@@ -89,7 +89,7 @@ function halt (err) {
 
 {
   let count = 0
-  const test = new Test('test.run()', function () {
+  const test = new Tom('test.run()', function () {
     count++
     return true
   })
@@ -101,9 +101,9 @@ function halt (err) {
     .catch(halt)
 }
 
-{
+{ /* test.run(): event order */
   let counts = []
-  const test = new Test('test.run(): event order', function () {
+  const test = new Tom('one', function () {
     counts.push('body')
     return true
   })
@@ -119,9 +119,9 @@ function halt (err) {
     .catch(halt)
 }
 
-{
+{ /* no test function: skip event */
   let counts = []
-  const test = new Test('no test function: skip event')
+  const test = new Tom('one')
   test.on('start', test => counts.push('start'))
   test.on('skip', test => counts.push('skip'))
   test.run()
@@ -133,9 +133,26 @@ function halt (err) {
 }
 
 { /* duplicate test name */
-  const tom = new Test()
+  const tom = new Tom('tom')
   tom.test('one', () => 1)
   a.throws(
     () => tom.test('one', () => 1)
+  )
+}
+
+{ /* deep duplicate test name */
+  const tom = new Tom('tom')
+  const child = tom.test('one', () => 1)
+  a.throws(
+    () => child.test('one', () => 1)
+  )
+}
+
+{ /* mandatory name */
+  a.throws(
+    () => { const tom = new Tom() }
+  )
+  a.doesNotThrow(
+    () => { const tom = new Tom('something') }
   )
 }

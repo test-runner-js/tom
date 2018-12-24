@@ -12,6 +12,7 @@ import StateMachine from './node_modules/fsm-base/index.mjs'
  */
 class Test extends mixin(CompositeClass)(StateMachine) {
   constructor (name, testFn, options) {
+    if (!name) throw new Error('name required')
     super ([
       { from: undefined, to: 'pending' },
       { from: 'pending', to: 'start' },
@@ -31,6 +32,11 @@ class Test extends mixin(CompositeClass)(StateMachine) {
   }
 
   test (name, testFn, options) {
+    for (const child of this) {
+      if (child.name === name) {
+        throw new Error('Duplicate name: ' + name)
+      }
+    }
     const test = new this.constructor(name, testFn, options)
     this.add(test)
     test.index = this.children.length
