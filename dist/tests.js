@@ -522,7 +522,7 @@ class Test extends createMixin(Composite)(StateMachine) {
   }
 
   toString () {
-    return `${this.name}: ${this.state}`
+    return `${this.name}`
   }
 
   test (name, testFn, options) {
