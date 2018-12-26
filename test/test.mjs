@@ -135,3 +135,27 @@ function halt (err) {
     })
     .catch(halt)
 }
+
+{ /* nested events */
+  const counts = []
+  const tom = new Tom()
+  const one = tom.test('one', () => 1)
+  const two = one.test('two', () => 2)
+  tom.on('pass', (test, result) => {
+    if (counts.length === 0) {
+      a.strictEqual(test.name, 'one')
+      a.strictEqual(result, 1)
+      counts.push(1)
+    } else {
+      a.strictEqual(test.name, 'two')
+      a.strictEqual(result, 2)
+      counts.push(2)
+    }
+  })
+  one.run()
+    .then(() => {
+      debugger
+      two.run()
+    })
+    .then(() => a.deepStrictEqual(counts, [ 1, 2 ]))
+}
