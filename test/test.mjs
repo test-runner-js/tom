@@ -19,8 +19,8 @@ function halt (err) {
     .catch(halt)
 }
 
-{
-  const test = new Tom('failing sync test', function () {
+{ /* failing sync test */
+  const test = new Tom('tom', function () {
     throw new Error('failed')
   })
   test.run()
