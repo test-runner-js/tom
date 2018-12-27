@@ -597,6 +597,18 @@
         this._only = null;
       }
     }
+
+    static combine (toms, name) {
+      if (toms.length > 1) {
+        const tom = new this(name);
+        for (const subTom of toms) {
+          tom.add(subTom);
+        }
+        return tom
+      } else {
+        return toms[0]
+      }
+    }
   }
 
   /**
