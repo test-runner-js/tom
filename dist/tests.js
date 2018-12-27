@@ -270,7 +270,7 @@ class Emitter {
     }
 
     /* bubble event up */
-    if (this.parent) this.parent.emitTarget(target || this, eventName, ...args);
+    if (this.parent) this.parent.emitTarget(eventName, target || this, ...args);
   }
 
    /**
@@ -577,8 +577,10 @@ class Test extends createMixin(Composite)(StateMachine) {
         }
       });
       return Promise.race([ testFnResult, raceTimeout(this.options.timeout) ])
-    } else {
+    } else if (this._skip) {
       this.setState('skip', this);
+      return Promise.resolve()
+    } else {
       return Promise.resolve()
     }
   }
@@ -729,7 +731,7 @@ function halt (err) {
     .catch(halt);
 }
 
-{ /* no test function: skip event */
+{ /* no test function: ignore, don't skip event */
   let counts = [];
   const test = new Test('one');
   test.on('start', test => counts.push('start'));
@@ -737,9 +739,33 @@ function halt (err) {
   test.run()
     .then(result => {
       a.strictEqual(result, undefined);
-      a.deepStrictEqual(counts, [ 'start', 'skip' ]);
+      a.deepStrictEqual(counts, [ 'start' ]);
     })
     .catch(halt);
+}
+
+{ /* nested events */
+  const counts = [];
+  const tom = new Test();
+  const one = tom.test('one', () => 1);
+  const two = one.test('two', () => 2);
+  tom.on('pass', (test, result) => {
+    if (counts.length === 0) {
+      a.strictEqual(test.name, 'one');
+      a.strictEqual(result, 1);
+      counts.push(1);
+    } else {
+      a.strictEqual(test.name, 'two');
+      a.strictEqual(result, 2);
+      counts.push(2);
+    }
+  });
+  one.run()
+    .then(() => {
+      debugger
+      two.run();
+    })
+    .then(() => a.deepStrictEqual(counts, [ 1, 2 ]));
 }
 
 function halt$1 (err) {
@@ -769,19 +795,6 @@ function halt$1 (err) {
   a.throws(
     () => child.test('one', () => 1)
   );
-}
-
-{ /* .skip() */
-  const counts = [];
-  const tom = new Test('tom');
-  tom.on('start', () => counts.push('start'));
-  tom.on('skip', () => counts.push('skip'));
-  tom.run()
-    .then(result => {
-      a.strictEqual(result, undefined);
-      a.deepStrictEqual(counts, [ 'start', 'skip' ]);
-    })
-    .catch(halt$1);
 }
 
 { /* child.skip() */

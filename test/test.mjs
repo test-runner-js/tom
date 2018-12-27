@@ -123,7 +123,7 @@ function halt (err) {
     .catch(halt)
 }
 
-{ /* no test function: skip event */
+{ /* no test function: ignore, don't skip event */
   let counts = []
   const test = new Tom('one')
   test.on('start', test => counts.push('start'))
@@ -131,7 +131,7 @@ function halt (err) {
   test.run()
     .then(result => {
       a.strictEqual(result, undefined)
-      a.deepStrictEqual(counts, [ 'start', 'skip' ])
+      a.deepStrictEqual(counts, [ 'start' ])
     })
     .catch(halt)
 }

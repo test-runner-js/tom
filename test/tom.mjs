@@ -30,19 +30,6 @@ function halt (err) {
   )
 }
 
-{ /* .skip() */
-  const counts = []
-  const tom = new Tom('tom')
-  tom.on('start', () => counts.push('start'))
-  tom.on('skip', () => counts.push('skip'))
-  tom.run()
-    .then(result => {
-      a.strictEqual(result, undefined)
-      a.deepStrictEqual(counts, [ 'start', 'skip' ])
-    })
-    .catch(halt)
-}
-
 { /* child.skip() */
   const counts = []
   const tom = new Tom('tom')

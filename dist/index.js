@@ -577,8 +577,10 @@
           }
         });
         return Promise.race([ testFnResult, raceTimeout(this.options.timeout) ])
-      } else {
+      } else if (this._skip) {
         this.setState('skip', this);
+        return Promise.resolve()
+      } else {
         return Promise.resolve()
       }
     }
