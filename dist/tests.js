@@ -500,6 +500,7 @@ class Test extends createMixin(Composite)(StateMachine) {
       { from: 'start', to: 'pass' },
       { from: 'start', to: 'fail' },
       { from: 'start', to: 'skip' },
+      { from: 'start', to: 'pending' },
       { from: 'pass', to: 'pending' },
       { from: 'fail', to: 'pending' },
       { from: 'skip', to: 'pending' },
