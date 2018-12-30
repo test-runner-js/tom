@@ -12,8 +12,12 @@ import StateMachine from './node_modules/fsm-base/index.mjs'
  */
 class Test extends mixin(CompositeClass)(StateMachine) {
   constructor (name, testFn, options) {
+    if (typeof name !== 'string') {
+      options = testFn
+      testFn = name
+      name = ''
+    }
     name = name || 'tom'
-    if (!name) throw new Error('name required')
     super ([
       { from: undefined, to: 'pending' },
       { from: 'pending', to: 'start' },
@@ -72,8 +76,9 @@ class Test extends mixin(CompositeClass)(StateMachine) {
    * @returns {Promise}
    */
   run () {
+    if (!this.testFn) return Promise.resolve()
     this.state = 'start'
-    if (!this._skip && this.testFn) {
+    if (!this._skip) {
       const testFnResult = new Promise((resolve, reject) => {
         try {
           const result = this.testFn.call(new TestContext({
