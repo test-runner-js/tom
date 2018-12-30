@@ -939,9 +939,18 @@ function halt$1 (err) {
   a.ok(!tom.children[1]._only);
   tom.only('three', () => 3);
   a.ok(tom.children[0]._skip);
-  a.ok(tom.children[1]._skip);
-  a.ok(!tom.children[2]._skip);
   a.ok(!tom.children[0]._only);
+  a.ok(tom.children[1]._skip);
   a.ok(!tom.children[1]._only);
+  a.ok(!tom.children[2]._skip);
   a.ok(tom.children[2]._only);
+  tom.only('four', () => 4);
+  a.ok(tom.children[0]._skip);
+  a.ok(!tom.children[0]._only);
+  a.ok(tom.children[1]._skip);
+  a.ok(!tom.children[1]._only);
+  a.ok(!tom.children[2]._skip);
+  a.ok(tom.children[2]._only);
+  a.ok(!tom.children[3]._skip);
+  a.ok(tom.children[3]._only);
 }

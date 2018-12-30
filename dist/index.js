@@ -493,14 +493,19 @@
    */
   class Test extends createMixin(Composite)(StateMachine) {
     constructor (name, testFn, options) {
+      if (typeof name !== 'string') {
+        options = testFn;
+        testFn = name;
+        name = '';
+      }
       name = name || 'tom';
-      if (!name) throw new Error('name required')
       super ([
         { from: undefined, to: 'pending' },
         { from: 'pending', to: 'start' },
+        { from: 'pending', to: 'skip' },
         { from: 'start', to: 'pass' },
         { from: 'start', to: 'fail' },
-        { from: 'start', to: 'skip' },
+        /* reset */
         { from: 'start', to: 'pending' },
         { from: 'pass', to: 'pending' },
         { from: 'fail', to: 'pending' },
@@ -553,35 +558,37 @@
      * @returns {Promise}
      */
     run () {
-      this.state = 'start';
-      if (!this._skip && this.testFn) {
-        const testFnResult = new Promise((resolve, reject) => {
-          try {
-            const result = this.testFn.call(new TestContext({
-              name: this.name,
-              index: this.index
-            }));
+      if (this.testFn) {
+        if (this._skip) {
+          this.setState('skip', this);
+          return Promise.resolve()
+        } else {
+          this.state = 'start';
+          const testFnResult = new Promise((resolve, reject) => {
+            try {
+              const result = this.testFn.call(new TestContext({
+                name: this.name,
+                index: this.index
+              }));
 
-            if (result && result.then) {
-              result
-                .then(testResult => {
-                  this.setState('pass', this, testResult);
-                  resolve(testResult);
-                })
-                .catch(reject);
-            } else {
-              this.setState('pass', this, result);
-              resolve(result);
+              if (result && result.then) {
+                result
+                  .then(testResult => {
+                    this.setState('pass', this, testResult);
+                    resolve(testResult);
+                  })
+                  .catch(reject);
+              } else {
+                this.setState('pass', this, result);
+                resolve(result);
+              }
+            } catch (err) {
+              this.setState('fail', this, err);
+              reject(err);
             }
-          } catch (err) {
-            this.setState('fail', this, err);
-            reject(err);
-          }
-        });
-        return Promise.race([ testFnResult, raceTimeout(this.options.timeout) ])
-      } else if (this._skip) {
-        this.setState('skip', this);
-        return Promise.resolve()
+          });
+          return Promise.race([ testFnResult, raceTimeout(this.options.timeout) ])
+        }
       } else {
         return Promise.resolve()
       }
