@@ -19,11 +19,11 @@
   "dependencies": {
     "composite-class": "^0.3.0",
     "create-mixin": "^1.1.1",
-    "fsm-base": "file:../../75lb/fsm-base",
+    "fsm-base": "^0.4.3",
     "race-timeout-anywhere": "^0.1.1"
   },
   "devDependencies": {
-    "rollup": "^0.68.2"
+    "rollup": "^1.0.0"
   },
   "standard": {
     "ignore": [
