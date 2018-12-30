@@ -21,9 +21,10 @@ class Test extends mixin(CompositeClass)(StateMachine) {
     super ([
       { from: undefined, to: 'pending' },
       { from: 'pending', to: 'start' },
+      { from: 'pending', to: 'skip' },
       { from: 'start', to: 'pass' },
       { from: 'start', to: 'fail' },
-      { from: 'start', to: 'skip' },
+      /* reset */
       { from: 'start', to: 'pending' },
       { from: 'pass', to: 'pending' },
       { from: 'fail', to: 'pending' },
@@ -76,36 +77,37 @@ class Test extends mixin(CompositeClass)(StateMachine) {
    * @returns {Promise}
    */
   run () {
-    if (!this.testFn) return Promise.resolve()
-    this.state = 'start'
-    if (!this._skip) {
-      const testFnResult = new Promise((resolve, reject) => {
-        try {
-          const result = this.testFn.call(new TestContext({
-            name: this.name,
-            index: this.index
-          }))
+    if (this.testFn) {
+      if (this._skip) {
+        this.setState('skip', this)
+        return Promise.resolve()
+      } else {
+        this.state = 'start'
+        const testFnResult = new Promise((resolve, reject) => {
+          try {
+            const result = this.testFn.call(new TestContext({
+              name: this.name,
+              index: this.index
+            }))
 
-          if (result && result.then) {
-            result
-              .then(testResult => {
-                this.setState('pass', this, testResult)
-                resolve(testResult)
-              })
-              .catch(reject)
-          } else {
-            this.setState('pass', this, result)
-            resolve(result)
+            if (result && result.then) {
+              result
+                .then(testResult => {
+                  this.setState('pass', this, testResult)
+                  resolve(testResult)
+                })
+                .catch(reject)
+            } else {
+              this.setState('pass', this, result)
+              resolve(result)
+            }
+          } catch (err) {
+            this.setState('fail', this, err)
+            reject(err)
           }
-        } catch (err) {
-          this.setState('fail', this, err)
-          reject(err)
-        }
-      })
-      return Promise.race([ testFnResult, raceTimeout(this.options.timeout) ])
-    } else if (this._skip) {
-      this.setState('skip', this)
-      return Promise.resolve()
+        })
+        return Promise.race([ testFnResult, raceTimeout(this.options.timeout) ])
+      }
     } else {
       return Promise.resolve()
     }

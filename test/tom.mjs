@@ -6,14 +6,6 @@ function halt (err) {
   process.exitCode = 1
 }
 
-{ /* test.tree() */
-  const root = new Tom('tom')
-  root.add(new Tom('one', () => true))
-  const child = root.add(new Tom('two', () => true))
-  child.add(new Tom('three', () => true))
-  console.log(root.tree())
-}
-
 { /* duplicate test name */
   const tom = new Tom('tom')
   tom.test('one', () => 1)
@@ -32,16 +24,30 @@ function halt (err) {
 
 { /* child.skip() */
   const counts = []
-  const tom = new Tom('tom')
+  const tom = new Tom()
   const child = tom.skip('one', () => 1)
-  a.strictEqual(tom.children.length, 1)
-  a.strictEqual(tom.children[0].name, 'one')
   tom.on('start', () => counts.push('start'))
   tom.on('skip', () => counts.push('skip'))
   child.run()
     .then(result => {
       a.strictEqual(result, undefined)
-      a.deepStrictEqual(counts, [ 'start', 'skip' ])
+      a.deepStrictEqual(counts, [ 'skip' ])
+    })
+    .catch(halt)
+}
+
+{ /* child.skip(): multiple */
+  const counts = []
+  const tom = new Tom()
+  const one = tom.skip('one', () => 1)
+  const two = tom.skip('two', () => 2)
+  tom.on('start', () => counts.push('start'))
+  tom.on('skip', () => counts.push('skip'))
+  Promise
+    .all([ tom.run(), one.run(), two.run() ])
+    .then(results => {
+      a.deepStrictEqual(results, [ undefined, undefined, undefined ])
+      a.deepStrictEqual(counts, [ 'skip', 'skip' ])
     })
     .catch(halt)
 }

@@ -502,9 +502,10 @@ class Test extends createMixin(Composite)(StateMachine) {
     super ([
       { from: undefined, to: 'pending' },
       { from: 'pending', to: 'start' },
+      { from: 'pending', to: 'skip' },
       { from: 'start', to: 'pass' },
       { from: 'start', to: 'fail' },
-      { from: 'start', to: 'skip' },
+      /* reset */
       { from: 'start', to: 'pending' },
       { from: 'pass', to: 'pending' },
       { from: 'fail', to: 'pending' },
@@ -557,36 +558,37 @@ class Test extends createMixin(Composite)(StateMachine) {
    * @returns {Promise}
    */
   run () {
-    if (!this.testFn) return Promise.resolve()
-    this.state = 'start';
-    if (!this._skip) {
-      const testFnResult = new Promise((resolve, reject) => {
-        try {
-          const result = this.testFn.call(new TestContext({
-            name: this.name,
-            index: this.index
-          }));
+    if (this.testFn) {
+      if (this._skip) {
+        this.setState('skip', this);
+        return Promise.resolve()
+      } else {
+        this.state = 'start';
+        const testFnResult = new Promise((resolve, reject) => {
+          try {
+            const result = this.testFn.call(new TestContext({
+              name: this.name,
+              index: this.index
+            }));
 
-          if (result && result.then) {
-            result
-              .then(testResult => {
-                this.setState('pass', this, testResult);
-                resolve(testResult);
-              })
-              .catch(reject);
-          } else {
-            this.setState('pass', this, result);
-            resolve(result);
+            if (result && result.then) {
+              result
+                .then(testResult => {
+                  this.setState('pass', this, testResult);
+                  resolve(testResult);
+                })
+                .catch(reject);
+            } else {
+              this.setState('pass', this, result);
+              resolve(result);
+            }
+          } catch (err) {
+            this.setState('fail', this, err);
+            reject(err);
           }
-        } catch (err) {
-          this.setState('fail', this, err);
-          reject(err);
-        }
-      });
-      return Promise.race([ testFnResult, raceTimeout(this.options.timeout) ])
-    } else if (this._skip) {
-      this.setState('skip', this);
-      return Promise.resolve()
+        });
+        return Promise.race([ testFnResult, raceTimeout(this.options.timeout) ])
+      }
     } else {
       return Promise.resolve()
     }
@@ -801,6 +803,42 @@ function halt (err) {
     .catch(halt);
 }
 
+{ /* test.run(): pass event args */
+  const test = new Test('one', () => 1);
+  test.on('pass', (t, result) => {
+    a.strictEqual(t, test);
+    a.strictEqual(result, 1);
+  });
+  test.run()
+    .catch(halt);
+}
+
+{ /* test.run(): skip event args */
+  const tom = new Test();
+  const test = tom.skip('one', () => 1);
+  test.on('skip', (t, result) => {
+    a.strictEqual(t, test);
+    a.strictEqual(result, undefined);
+  });
+  test.run()
+    .catch(halt);
+}
+
+{ /* test.run(): fail event args */
+  const test = new Test('one', () => {
+    throw new Error('broken')
+  });
+  test.on('fail', (t, err) => {
+    a.strictEqual(t, test);
+    a.strictEqual(err.message, 'broken');
+  });
+  test.run()
+    .catch(err => {
+      if (err.message !== 'broken') throw err
+    })
+    .catch(halt);
+}
+
 { /* no test function: ignore, don't start, skip, pass or fail event */
   let counts = [];
   const test = new Test('one');
@@ -845,14 +883,6 @@ function halt$1 (err) {
   process.exitCode = 1;
 }
 
-{ /* test.tree() */
-  const root = new Test('tom');
-  root.add(new Test('one', () => true));
-  const child = root.add(new Test('two', () => true));
-  child.add(new Test('three', () => true));
-  console.log(root.tree());
-}
-
 { /* duplicate test name */
   const tom = new Test('tom');
   tom.test('one', () => 1);
@@ -871,16 +901,30 @@ function halt$1 (err) {
 
 { /* child.skip() */
   const counts = [];
-  const tom = new Test('tom');
+  const tom = new Test();
   const child = tom.skip('one', () => 1);
-  a.strictEqual(tom.children.length, 1);
-  a.strictEqual(tom.children[0].name, 'one');
   tom.on('start', () => counts.push('start'));
   tom.on('skip', () => counts.push('skip'));
   child.run()
     .then(result => {
       a.strictEqual(result, undefined);
-      a.deepStrictEqual(counts, [ 'start', 'skip' ]);
+      a.deepStrictEqual(counts, [ 'skip' ]);
+    })
+    .catch(halt$1);
+}
+
+{ /* child.skip(): multiple */
+  const counts = [];
+  const tom = new Test();
+  const one = tom.skip('one', () => 1);
+  const two = tom.skip('two', () => 2);
+  tom.on('start', () => counts.push('start'));
+  tom.on('skip', () => counts.push('skip'));
+  Promise
+    .all([ tom.run(), one.run(), two.run() ])
+    .then(results => {
+      a.deepStrictEqual(results, [ undefined, undefined, undefined ]);
+      a.deepStrictEqual(counts, [ 'skip', 'skip' ]);
     })
     .catch(halt$1);
 }

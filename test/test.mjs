@@ -174,6 +174,45 @@ function halt (err) {
     .catch(halt)
 }
 
+{ /* test.run(): pass event args */
+  let counts = []
+  const test = new Tom('one', () => 1)
+  test.on('pass', (t, result) => {
+    a.strictEqual(t, test)
+    a.strictEqual(result, 1)
+  })
+  test.run()
+    .catch(halt)
+}
+
+{ /* test.run(): skip event args */
+  let counts = []
+  const tom = new Tom()
+  const test = tom.skip('one', () => 1)
+  test.on('skip', (t, result) => {
+    a.strictEqual(t, test)
+    a.strictEqual(result, undefined)
+  })
+  test.run()
+    .catch(halt)
+}
+
+{ /* test.run(): fail event args */
+  let counts = []
+  const test = new Tom('one', () => {
+    throw new Error('broken')
+  })
+  test.on('fail', (t, err) => {
+    a.strictEqual(t, test)
+    a.strictEqual(err.message, 'broken')
+  })
+  test.run()
+    .catch(err => {
+      if (err.message !== 'broken') throw err
+    })
+    .catch(halt)
+}
+
 { /* no test function: ignore, don't start, skip, pass or fail event */
   let counts = []
   const test = new Tom('one')
