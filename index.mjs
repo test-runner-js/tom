@@ -17,6 +17,7 @@ class Test extends mixin(CompositeClass)(StateMachine) {
       testFn = name
       name = ''
     }
+    options = options || {}
     name = name || 'tom'
     super ([
       { from: undefined, to: 'pending' },
@@ -35,8 +36,9 @@ class Test extends mixin(CompositeClass)(StateMachine) {
     this.options = Object.assign({ timeout: 10000 }, options)
     this.index = 1
     this.state = 'pending'
+    this._markSkip = options._markSkip
     this._skip = null
-    this._only = null
+    this._only = options.only
   }
 
   toString () {
@@ -52,23 +54,41 @@ class Test extends mixin(CompositeClass)(StateMachine) {
     const test = new this.constructor(name, testFn, options)
     this.add(test)
     test.index = this.children.length
+    this.skipLogic()
     return test
   }
 
+  onlyExists () {
+    return Array.from(this.root()).some(t => t._only)
+  }
+
+  skipLogic () {
+    if (this.onlyExists()) {
+      for (const test of this.root()) {
+        if (test._markSkip) {
+          test._skip = true
+        } else {
+          test._skip = !test._only
+        }
+      }
+    } else {
+      for (const test of this.root()) {
+        test._skip = test._markSkip
+      }
+    }
+  }
+
   skip (name, testFn, options) {
+    options = options || {}
+    options._markSkip = true
     const test = this.test(name, testFn, options)
-    test._skip = true
     return test
   }
 
   only (name, testFn, options) {
-    for (const test of this) {
-      if (!test._only) {
-        test._skip = true
-      }
-    }
+    options = options || {}
+    options.only = true
     const test = this.test(name, testFn, options)
-    test._only = true
     return test
   }
 

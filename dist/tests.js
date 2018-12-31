@@ -498,6 +498,7 @@ class Test extends createMixin(Composite)(StateMachine) {
       testFn = name;
       name = '';
     }
+    options = options || {};
     name = name || 'tom';
     super ([
       { from: undefined, to: 'pending' },
@@ -516,8 +517,9 @@ class Test extends createMixin(Composite)(StateMachine) {
     this.options = Object.assign({ timeout: 10000 }, options);
     this.index = 1;
     this.state = 'pending';
+    this._markSkip = options._markSkip;
     this._skip = null;
-    this._only = null;
+    this._only = options.only;
   }
 
   toString () {
@@ -533,23 +535,41 @@ class Test extends createMixin(Composite)(StateMachine) {
     const test = new this.constructor(name, testFn, options);
     this.add(test);
     test.index = this.children.length;
+    this.skipLogic();
     return test
   }
 
+  onlyExists () {
+    return Array.from(this.root()).some(t => t._only)
+  }
+
+  skipLogic () {
+    if (this.onlyExists()) {
+      for (const test of this.root()) {
+        if (test._markSkip) {
+          test._skip = true;
+        } else {
+          test._skip = !test._only;
+        }
+      }
+    } else {
+      for (const test of this.root()) {
+        test._skip = test._markSkip;
+      }
+    }
+  }
+
   skip (name, testFn, options) {
+    options = options || {};
+    options._markSkip = true;
     const test = this.test(name, testFn, options);
-    test._skip = true;
     return test
   }
 
   only (name, testFn, options) {
-    for (const test of this) {
-      if (!test._only) {
-        test._skip = true;
-      }
-    }
+    options = options || {};
+    options.only = true;
     const test = this.test(name, testFn, options);
-    test._only = true;
     return test
   }
 
@@ -931,26 +951,49 @@ function halt$1 (err) {
 
 { /* .only() */
   const tom = new Test('tom');
-  tom.test('one', () => 1);
-  tom.test('two', () => 2);
-  a.ok(!tom.children[0]._skip);
-  a.ok(!tom.children[1]._skip);
-  a.ok(!tom.children[0]._only);
-  a.ok(!tom.children[1]._only);
-  tom.only('three', () => 3);
-  a.ok(tom.children[0]._skip);
-  a.ok(!tom.children[0]._only);
-  a.ok(tom.children[1]._skip);
-  a.ok(!tom.children[1]._only);
-  a.ok(!tom.children[2]._skip);
-  a.ok(tom.children[2]._only);
-  tom.only('four', () => 4);
-  a.ok(tom.children[0]._skip);
-  a.ok(!tom.children[0]._only);
-  a.ok(tom.children[1]._skip);
-  a.ok(!tom.children[1]._only);
-  a.ok(!tom.children[2]._skip);
-  a.ok(tom.children[2]._only);
-  a.ok(!tom.children[3]._skip);
-  a.ok(tom.children[3]._only);
+  const one = tom.test('one', () => 1);
+  const two = tom.test('two', () => 2);
+  a.ok(!one._skip);
+  a.ok(!two._skip);
+  a.ok(!one._only);
+  a.ok(!two._only);
+  const three = tom.only('three', () => 3);
+  a.ok(one._skip);
+  a.ok(!one._only);
+  a.ok(two._skip);
+  a.ok(!two._only);
+  a.ok(!three._skip);
+  a.ok(three._only);
+  const four = tom.only('four', () => 4);
+  a.ok(one._skip);
+  a.ok(!one._only);
+  a.ok(two._skip);
+  a.ok(!two._only);
+  a.ok(!three._skip);
+  a.ok(three._only);
+  a.ok(!four._skip);
+  a.ok(four._only);
+}
+
+{ /* .only() first */
+  const tom = new Test('tom');
+  const one = tom.only('one', () => 1);
+  const two = tom.test('two', () => 2);
+  a.ok(!one._skip);
+  a.ok(one._only);
+  a.ok(two._skip);
+  a.ok(!two._only);
+}
+
+{ /* deep only with skip */
+  const tom = new Test();
+  const one = tom.only('one', () => 1);
+  const two = one.test('two', () => 2);
+  const three = two.skip('three', () => 3);
+  a.ok(!one._skip);
+  a.ok(one._only);
+  a.ok(two._skip);
+  a.ok(!two._only);
+  a.ok(three._skip);
+  a.ok(!three._only);
 }
