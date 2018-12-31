@@ -493,9 +493,13 @@
    */
   class Test extends createMixin(Composite)(StateMachine) {
     constructor (name, testFn, options) {
-      if (typeof name !== 'string') {
+      if (typeof name === 'string') ; else if (typeof name === 'function') {
         options = testFn;
         testFn = name;
+        name = '';
+      } else if (typeof name === 'object') {
+        options = name;
+        testFn = undefined;
         name = '';
       }
       options = options || {};

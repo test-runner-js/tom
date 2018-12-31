@@ -12,9 +12,14 @@ import StateMachine from './node_modules/fsm-base/index.mjs'
  */
 class Test extends mixin(CompositeClass)(StateMachine) {
   constructor (name, testFn, options) {
-    if (typeof name !== 'string') {
+    if (typeof name === 'string') {
+    } else if (typeof name === 'function') {
       options = testFn
       testFn = name
+      name = ''
+    } else if (typeof name === 'object') {
+      options = name
+      testFn = undefined
       name = ''
     }
     options = options || {}

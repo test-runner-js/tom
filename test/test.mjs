@@ -25,6 +25,14 @@ function halt (err) {
   a.strictEqual(tom.options.timeout, 1)
 }
 
+{ /* new Test(): options only */
+  const options = { timeout: 1 }
+  const tom = new Tom(options)
+  a.ok(tom.name)
+  a.strictEqual(tom.testFn, undefined)
+  a.strictEqual(tom.options.timeout, 1)
+}
+
 { /* passing sync test */
   const test = new Tom('tom', () => true)
   test.run()
