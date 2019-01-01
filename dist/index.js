@@ -601,7 +601,10 @@
                     this.setState('pass', this, testResult);
                     resolve(testResult);
                   })
-                  .catch(reject);
+                  .catch(err => {
+                    this.setState('fail', this, err);
+                    reject(err);
+                  });
               } else {
                 this.setState('pass', this, result);
                 resolve(result);

@@ -601,7 +601,10 @@ class Test extends createMixin(Composite)(StateMachine) {
                   this.setState('pass', this, testResult);
                   resolve(testResult);
                 })
-                .catch(reject);
+                .catch(err => {
+                  this.setState('fail', this, err);
+                  reject(err);
+                });
             } else {
               this.setState('pass', this, result);
               resolve(result);
@@ -821,6 +824,25 @@ function halt (err) {
   const test = new Test('one', function () {
     counts.push('body');
     throw new Error('broken')
+  });
+  test.on('start', test => counts.push('start'));
+  test.on('fail', test => counts.push('fail'));
+  test.run()
+    .then(() => {
+      throw new Error('should not reach here')
+    })
+    .catch(err => {
+      a.strictEqual(err.message, 'broken');
+      a.deepStrictEqual(counts, [ 'start', 'body', 'fail' ]);
+    })
+    .catch(halt);
+}
+
+{ /* test.run(): event order, failing test, rejected */
+  let counts = [];
+  const test = new Test('one', function () {
+    counts.push('body');
+    return Promise.reject(new Error('broken'))
   });
   test.on('start', test => counts.push('start'));
   test.on('fail', test => counts.push('fail'));

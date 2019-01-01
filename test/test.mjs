@@ -182,6 +182,25 @@ function halt (err) {
     .catch(halt)
 }
 
+{ /* test.run(): event order, failing test, rejected */
+  let counts = []
+  const test = new Tom('one', function () {
+    counts.push('body')
+    return Promise.reject(new Error('broken'))
+  })
+  test.on('start', test => counts.push('start'))
+  test.on('fail', test => counts.push('fail'))
+  test.run()
+    .then(() => {
+      throw new Error('should not reach here')
+    })
+    .catch(err => {
+      a.strictEqual(err.message, 'broken')
+      a.deepStrictEqual(counts, [ 'start', 'body', 'fail' ])
+    })
+    .catch(halt)
+}
+
 { /* test.run(): pass event args */
   let counts = []
   const test = new Tom('one', () => 1)
