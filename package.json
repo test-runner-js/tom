@@ -3,7 +3,7 @@
   "author": "Lloyd Brookes <75pound@gmail.com>",
   "version": "0.2.4",
   "description": "test-object-model",
-  "repository": "https://github.com/75lb/test-object-model",
+  "repository": "https://github.com/test-runner-js/test-object-model",
   "main": "dist/index.js",
   "keywords": [],
   "license": "MIT",
@@ -14,7 +14,8 @@
     "test": "npm run test:js && npm run test:mjs",
     "test:js": "rollup -c dist/tests.config.js && node dist/tests.js",
     "test:mjs": "node --experimental-modules test/tests.mjs",
-    "dist": "rollup -w -c dist/index.config.js"
+    "dist": "rollup -w -c dist/index.config.js",
+    "docs": "jsdoc2md -c dist/jsdoc.conf -t README.hbs index.mjs > README.md"
   },
   "dependencies": {
     "composite-class": "^0.3.0",
@@ -23,7 +24,7 @@
     "race-timeout-anywhere": "^0.1.1"
   },
   "devDependencies": {
-    "rollup": "^1.0.0"
+    "rollup": "^1.1.1"
   },
   "standard": {
     "ignore": [

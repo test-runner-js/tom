@@ -485,13 +485,17 @@ function flatten (prev, curr) {
 }
 
 /**
- * Test function class.
- * @param {string} name
- * @param {function} testFn
+ * @module test-object-model
+ */
+
+/**
+ * @param {string} [name]
+ * @param {function} [testFn]
  * @param {object} [options]
  * @param {number} [options.timeout]
+ * @alias module:test-object-model
  */
-class Test extends createMixin(Composite)(StateMachine) {
+class Tom extends createMixin(Composite)(StateMachine) {
   constructor (name, testFn, options) {
     if (typeof name === 'string') ; else if (typeof name === 'function') {
       options = testFn;
@@ -516,20 +520,40 @@ class Test extends createMixin(Composite)(StateMachine) {
       { from: 'fail', to: 'pending' },
       { from: 'skip', to: 'pending' },
     ]);
+    /**
+     * Test name
+     * @type {string}
+     */
     this.name = name;
+
+    /**
+     * Test function
+     * @type {function}
+     */
     this.testFn = testFn;
-    this.options = Object.assign({ timeout: 10000 }, options);
+
+    /**
+     * Position of this test within its parents children
+     */
     this.index = 1;
+
+    /**
+     * Test state: pending, start, skip, pass or fail.
+     */
     this.state = 'pending';
     this._markSkip = options._markSkip;
     this._skip = null;
     this._only = options.only;
+    this.options = Object.assign({ timeout: 10000 }, options);
   }
 
   toString () {
     return `${this.name}`
   }
 
+  /**
+   * Add a test.
+   */
   test (name, testFn, options) {
     for (const child of this) {
       if (child.name === name) {
@@ -539,16 +563,36 @@ class Test extends createMixin(Composite)(StateMachine) {
     const test = new this.constructor(name, testFn, options);
     this.add(test);
     test.index = this.children.length;
-    this.skipLogic();
+    this._skipLogic();
     return test
   }
 
-  onlyExists () {
+  /**
+   * Add a skipped test
+   */
+  skip (name, testFn, options) {
+    options = options || {};
+    options._markSkip = true;
+    const test = this.test(name, testFn, options);
+    return test
+  }
+
+  /**
+   * Add an only test
+   */
+  only (name, testFn, options) {
+    options = options || {};
+    options.only = true;
+    const test = this.test(name, testFn, options);
+    return test
+  }
+
+  _onlyExists () {
     return Array.from(this.root()).some(t => t._only)
   }
 
-  skipLogic () {
-    if (this.onlyExists()) {
+  _skipLogic () {
+    if (this._onlyExists()) {
       for (const test of this.root()) {
         if (test._markSkip) {
           test._skip = true;
@@ -561,20 +605,6 @@ class Test extends createMixin(Composite)(StateMachine) {
         test._skip = test._markSkip;
       }
     }
-  }
-
-  skip (name, testFn, options) {
-    options = options || {};
-    options._markSkip = true;
-    const test = this.test(name, testFn, options);
-    return test
-  }
-
-  only (name, testFn, options) {
-    options = options || {};
-    options.only = true;
-    const test = this.test(name, testFn, options);
-    return test
   }
 
   /**
@@ -621,6 +651,9 @@ class Test extends createMixin(Composite)(StateMachine) {
     }
   }
 
+  /**
+   * Reset state
+   */
   reset (deep) {
     if (deep) {
       for (const tom of this) {
@@ -634,6 +667,12 @@ class Test extends createMixin(Composite)(StateMachine) {
     }
   }
 
+  /**
+   * Combine several TOM instances into a common root
+   * @param {Array.<Tom>} toms
+   * @param {string} [name]
+   * @return {Tom}
+   */
   static combine (toms, name) {
     if (toms.length > 1) {
       const tom = new this(name);
@@ -663,19 +702,19 @@ function halt (err) {
 }
 
 { /* new Test() */
-  const tom = new Test('tom');
+  const tom = new Tom('tom');
   a.strictEqual(tom.name, 'tom');
 }
 
 { /* new Test(): has a default name */
-  const tom = new Test();
+  const tom = new Tom();
   a.ok(tom.name);
 }
 
 { /* new Test(): default name and testFn */
   const testFn = function () {};
   const options = { timeout: 1 };
-  const tom = new Test(testFn, options);
+  const tom = new Tom(testFn, options);
   a.ok(tom.name);
   a.strictEqual(tom.testFn, testFn);
   a.strictEqual(tom.options.timeout, 1);
@@ -683,14 +722,14 @@ function halt (err) {
 
 { /* new Test(): options only */
   const options = { timeout: 1 };
-  const tom = new Test(options);
+  const tom = new Tom(options);
   a.ok(tom.name);
   a.strictEqual(tom.testFn, undefined);
   a.strictEqual(tom.options.timeout, 1);
 }
 
 { /* passing sync test */
-  const test = new Test('tom', () => true);
+  const test = new Tom('tom', () => true);
   test.run()
     .then(result => {
       a.ok(result === true);
@@ -699,7 +738,7 @@ function halt (err) {
 }
 
 { /* failing sync test */
-  const test = new Test('tom', function () {
+  const test = new Tom('tom', function () {
     throw new Error('failed')
   });
   test.run()
@@ -713,7 +752,7 @@ function halt (err) {
 }
 
 { /* passing async test */
-  const test = new Test('tom', function () {
+  const test = new Tom('tom', function () {
     return Promise.resolve(true)
   });
   test.run().then(result => {
@@ -722,7 +761,7 @@ function halt (err) {
 }
 
 { /* failing async test: rejected */
-  const test = new Test('tom', function () {
+  const test = new Tom('tom', function () {
     return Promise.reject(new Error('failed'))
   });
   test.run()
@@ -736,7 +775,7 @@ function halt (err) {
 }
 
 { /* failing async test: timeout */
-  const test = new Test(
+  const test = new Tom(
     'tom',
     function () {
       return new Promise((resolve, reject) => {
@@ -754,7 +793,7 @@ function halt (err) {
 }
 
 { /* passing async test: timeout 2 */
-  const test = new Test(
+  const test = new Tom(
     'tom',
     function () {
       return new Promise((resolve, reject) => {
@@ -772,7 +811,7 @@ function halt (err) {
 
 { /* test.run(): state, passing test */
   let counts = [];
-  const test = new Test('one', function () {
+  const test = new Tom('one', function () {
     counts.push('start');
     return true
   });
@@ -787,7 +826,7 @@ function halt (err) {
 
 { /* test.run(): state, failing test */
   let counts = [];
-  const test = new Test('one', function () {
+  const test = new Tom('one', function () {
     counts.push('start');
     throw new Error('broken')
   });
@@ -805,7 +844,7 @@ function halt (err) {
 
 { /* test.run(): event order, passing test */
   let counts = [];
-  const test = new Test('one', function () {
+  const test = new Tom('one', function () {
     counts.push('body');
     return true
   });
@@ -821,7 +860,7 @@ function halt (err) {
 
 { /* test.run(): event order, failing test */
   let counts = [];
-  const test = new Test('one', function () {
+  const test = new Tom('one', function () {
     counts.push('body');
     throw new Error('broken')
   });
@@ -840,7 +879,7 @@ function halt (err) {
 
 { /* test.run(): event order, failing test, rejected */
   let counts = [];
-  const test = new Test('one', function () {
+  const test = new Tom('one', function () {
     counts.push('body');
     return Promise.reject(new Error('broken'))
   });
@@ -858,7 +897,7 @@ function halt (err) {
 }
 
 { /* test.run(): pass event args */
-  const test = new Test('one', () => 1);
+  const test = new Tom('one', () => 1);
   test.on('pass', (t, result) => {
     a.strictEqual(t, test);
     a.strictEqual(result, 1);
@@ -868,7 +907,7 @@ function halt (err) {
 }
 
 { /* test.run(): skip event args */
-  const tom = new Test();
+  const tom = new Tom();
   const test = tom.skip('one', () => 1);
   test.on('skip', (t, result) => {
     a.strictEqual(t, test);
@@ -879,7 +918,7 @@ function halt (err) {
 }
 
 { /* test.run(): fail event args */
-  const test = new Test('one', () => {
+  const test = new Tom('one', () => {
     throw new Error('broken')
   });
   test.on('fail', (t, err) => {
@@ -895,7 +934,7 @@ function halt (err) {
 
 { /* no test function: ignore, don't start, skip, pass or fail event */
   let counts = [];
-  const test = new Test('one');
+  const test = new Tom('one');
   test.on('start', test => counts.push('start'));
   test.on('skip', test => counts.push('skip'));
   test.on('pass', test => counts.push('pass'));
@@ -911,7 +950,7 @@ function halt (err) {
 
 { /* nested events: root should receive child events */
   const counts = [];
-  const tom = new Test();
+  const tom = new Tom();
   const one = tom.test('one', () => 1);
   const two = one.test('two', () => 2);
   tom.on('pass', (test, result) => {
@@ -938,7 +977,7 @@ function halt$1 (err) {
 }
 
 { /* duplicate test name */
-  const tom = new Test('tom');
+  const tom = new Tom('tom');
   tom.test('one', () => 1);
   a.throws(
     () => tom.test('one', () => 1)
@@ -946,7 +985,7 @@ function halt$1 (err) {
 }
 
 { /* deep duplicate test name */
-  const tom = new Test('tom');
+  const tom = new Tom('tom');
   const child = tom.test('one', () => 1);
   a.throws(
     () => child.test('one', () => 1)
@@ -955,7 +994,7 @@ function halt$1 (err) {
 
 { /* child.skip() */
   const counts = [];
-  const tom = new Test();
+  const tom = new Tom();
   const child = tom.skip('one', () => 1);
   tom.on('start', () => counts.push('start'));
   tom.on('skip', () => counts.push('skip'));
@@ -969,7 +1008,7 @@ function halt$1 (err) {
 
 { /* child.skip(): multiple */
   const counts = [];
-  const tom = new Test();
+  const tom = new Tom();
   const one = tom.skip('one', () => 1);
   const two = tom.skip('two', () => 2);
   tom.on('start', () => counts.push('start'));
@@ -984,7 +1023,7 @@ function halt$1 (err) {
 }
 
 { /* .only() */
-  const tom = new Test('tom');
+  const tom = new Tom('tom');
   const one = tom.test('one', () => 1);
   const two = tom.test('two', () => 2);
   a.ok(!one._skip);
@@ -1010,7 +1049,7 @@ function halt$1 (err) {
 }
 
 { /* .only() first */
-  const tom = new Test('tom');
+  const tom = new Tom('tom');
   const one = tom.only('one', () => 1);
   const two = tom.test('two', () => 2);
   a.ok(!one._skip);
@@ -1020,7 +1059,7 @@ function halt$1 (err) {
 }
 
 { /* deep only with skip */
-  const tom = new Test();
+  const tom = new Tom();
   const one = tom.only('one', () => 1);
   const two = one.test('two', () => 2);
   const three = two.skip('three', () => 3);

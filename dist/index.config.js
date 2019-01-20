@@ -3,7 +3,7 @@ export default {
   output: {
     file: 'dist/index.js',
     format: 'umd',
-    name: 'Test'
+    name: 'Tom'
   },
   external: [ 'assert', 'events', 'fsm-base' ]
 }

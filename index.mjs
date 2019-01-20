@@ -4,13 +4,17 @@ import CompositeClass from './node_modules/composite-class/index.mjs'
 import StateMachine from './node_modules/fsm-base/index.mjs'
 
 /**
- * Test function class.
- * @param {string} name
- * @param {function} testFn
+ * @module test-object-model
+ */
+
+/**
+ * @param {string} [name]
+ * @param {function} [testFn]
  * @param {object} [options]
  * @param {number} [options.timeout]
+ * @alias module:test-object-model
  */
-class Test extends mixin(CompositeClass)(StateMachine) {
+class Tom extends mixin(CompositeClass)(StateMachine) {
   constructor (name, testFn, options) {
     if (typeof name === 'string') {
     } else if (typeof name === 'function') {
@@ -36,20 +40,40 @@ class Test extends mixin(CompositeClass)(StateMachine) {
       { from: 'fail', to: 'pending' },
       { from: 'skip', to: 'pending' },
     ])
+    /**
+     * Test name
+     * @type {string}
+     */
     this.name = name
+
+    /**
+     * Test function
+     * @type {function}
+     */
     this.testFn = testFn
-    this.options = Object.assign({ timeout: 10000 }, options)
+
+    /**
+     * Position of this test within its parents children
+     */
     this.index = 1
+
+    /**
+     * Test state: pending, start, skip, pass or fail.
+     */
     this.state = 'pending'
     this._markSkip = options._markSkip
     this._skip = null
     this._only = options.only
+    this.options = Object.assign({ timeout: 10000 }, options)
   }
 
   toString () {
     return `${this.name}`
   }
 
+  /**
+   * Add a test.
+   */
   test (name, testFn, options) {
     for (const child of this) {
       if (child.name === name) {
@@ -59,16 +83,36 @@ class Test extends mixin(CompositeClass)(StateMachine) {
     const test = new this.constructor(name, testFn, options)
     this.add(test)
     test.index = this.children.length
-    this.skipLogic()
+    this._skipLogic()
     return test
   }
 
-  onlyExists () {
+  /**
+   * Add a skipped test
+   */
+  skip (name, testFn, options) {
+    options = options || {}
+    options._markSkip = true
+    const test = this.test(name, testFn, options)
+    return test
+  }
+
+  /**
+   * Add an only test
+   */
+  only (name, testFn, options) {
+    options = options || {}
+    options.only = true
+    const test = this.test(name, testFn, options)
+    return test
+  }
+
+  _onlyExists () {
     return Array.from(this.root()).some(t => t._only)
   }
 
-  skipLogic () {
-    if (this.onlyExists()) {
+  _skipLogic () {
+    if (this._onlyExists()) {
       for (const test of this.root()) {
         if (test._markSkip) {
           test._skip = true
@@ -81,20 +125,6 @@ class Test extends mixin(CompositeClass)(StateMachine) {
         test._skip = test._markSkip
       }
     }
-  }
-
-  skip (name, testFn, options) {
-    options = options || {}
-    options._markSkip = true
-    const test = this.test(name, testFn, options)
-    return test
-  }
-
-  only (name, testFn, options) {
-    options = options || {}
-    options.only = true
-    const test = this.test(name, testFn, options)
-    return test
   }
 
   /**
@@ -141,6 +171,9 @@ class Test extends mixin(CompositeClass)(StateMachine) {
     }
   }
 
+  /**
+   * Reset state
+   */
   reset (deep) {
     if (deep) {
       for (const tom of this) {
@@ -154,6 +187,12 @@ class Test extends mixin(CompositeClass)(StateMachine) {
     }
   }
 
+  /**
+   * Combine several TOM instances into a common root
+   * @param {Array.<Tom>} toms
+   * @param {string} [name]
+   * @return {Tom}
+   */
   static combine (toms, name) {
     if (toms.length > 1) {
       const tom = new this(name)
@@ -177,4 +216,4 @@ class TestContext {
   }
 }
 
-export default Test
+export default Tom
