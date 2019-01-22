@@ -1,4 +1,4 @@
-import Tom from '../index.mjs'
+import Test from '../index.mjs'
 import a from 'assert'
 
 function halt (err) {
@@ -7,24 +7,25 @@ function halt (err) {
 }
 
 { /* duplicate test name */
-  const tom = new Tom('tom')
+  const tom = new Test()
   tom.test('one', () => 1)
   a.throws(
-    () => tom.test('one', () => 1)
+    () => test.test('one', () => 1)
   )
 }
 
 { /* deep duplicate test name */
-  const tom = new Tom('tom')
+  const tom = new Test('tom')
   const child = tom.test('one', () => 1)
   a.throws(
-    () => child.test('one', () => 1)
+    () => child.test('one', () => 1),
+    /duplicate/i
   )
 }
 
 { /* child.skip() */
   const counts = []
-  const tom = new Tom()
+  const tom = new Test()
   const child = tom.skip('one', () => 1)
   tom.on('start', () => counts.push('start'))
   tom.on('skip', () => counts.push('skip'))
@@ -38,7 +39,7 @@ function halt (err) {
 
 { /* child.skip(): multiple */
   const counts = []
-  const tom = new Tom()
+  const tom = new Test()
   const one = tom.skip('one', () => 1)
   const two = tom.skip('two', () => 2)
   tom.on('start', () => counts.push('start'))
@@ -54,7 +55,7 @@ function halt (err) {
 
 { /* .only() */
   const counts = []
-  const tom = new Tom('tom')
+  const tom = new Test('tom')
   const one = tom.test('one', () => 1)
   const two = tom.test('two', () => 2)
   a.ok(!one._skip)
@@ -81,7 +82,7 @@ function halt (err) {
 
 { /* .only() first */
   const counts = []
-  const tom = new Tom('tom')
+  const tom = new Test('tom')
   const one = tom.only('one', () => 1)
   const two = tom.test('two', () => 2)
   a.ok(!one._skip)
@@ -91,7 +92,7 @@ function halt (err) {
 }
 
 { /* deep only with skip */
-  const tom = new Tom()
+  const tom = new Test()
   const one = tom.only('one', () => 1)
   const two = one.test('two', () => 2)
   const three = two.skip('three', () => 3)

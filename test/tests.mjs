@@ -1,2 +1,5 @@
 import './test.mjs'
 import './tom.mjs'
+import './new-test.mjs'
+import './test-run-result.mjs'
+import './test-state.mjs'
