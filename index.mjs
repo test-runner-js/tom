@@ -223,7 +223,7 @@ class Test extends mixin(CompositeClass)(StateMachine) {
     } else {
       test = tests[0]
     }
-    test.skipLogic()
+    test._skipLogic()
     return test
   }
 }
