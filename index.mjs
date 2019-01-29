@@ -213,15 +213,18 @@ class Test extends mixin(CompositeClass)(StateMachine) {
    * @return {Test}
    */
   static combine (tests, name) {
+    let test
     if (tests.length > 1) {
-      const test = new this(name)
+      test = new this(name)
       for (const subTom of tests) {
         test.add(subTom)
       }
-      return test
+
     } else {
-      return tests[0]
+      test = tests[0]
     }
+    test.skipLogic()
+    return test
   }
 }
 
