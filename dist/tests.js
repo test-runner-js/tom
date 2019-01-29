@@ -510,12 +510,12 @@ class Test extends createMixin(Composite)(StateMachine) {
     name = name || 'tom';
     super ([
       { from: undefined, to: 'pending' },
-      { from: 'pending', to: 'start' },
+      { from: 'pending', to: 'in-progress' },
       { from: 'pending', to: 'skip' },
-      { from: 'start', to: 'pass' },
-      { from: 'start', to: 'fail' },
+      { from: 'in-progress', to: 'pass' },
+      { from: 'in-progress', to: 'fail' },
       /* reset */
-      { from: 'start', to: 'pending' },
+      { from: 'in-progress', to: 'pending' },
       { from: 'pass', to: 'pending' },
       { from: 'fail', to: 'pending' },
       { from: 'skip', to: 'pending' },
@@ -545,6 +545,11 @@ class Test extends createMixin(Composite)(StateMachine) {
     this._skip = null;
     this._only = options.only;
     this.options = Object.assign({ timeout: 10000 }, options);
+
+    /**
+     * True if ended
+     */
+    this.ended = false;
   }
 
   toString () {
@@ -607,6 +612,16 @@ class Test extends createMixin(Composite)(StateMachine) {
     }
   }
 
+  setState (state, target, data) {
+    if (state === 'pass' || state === 'fail') {
+      this.ended = true;
+    }
+    super.setState(state, target, data);
+    if (state === 'pass' || state === 'fail') {
+      this.emit('end');
+    }
+  }
+
   /**
    * Execute the stored test function.
    * @returns {Promise}
@@ -617,7 +632,8 @@ class Test extends createMixin(Composite)(StateMachine) {
         this.setState('skip', this);
         return Promise.resolve()
       } else {
-        this.state = 'start';
+        this.state = 'in-progress';
+        this.emit('start');
         const testFnResult = new Promise((resolve, reject) => {
           try {
             const result = this.testFn.call(new TestContext({
@@ -709,10 +725,11 @@ function halt (err) {
   });
   test.on('start', test => counts.push('start'));
   test.on('pass', test => counts.push('pass'));
+  test.on('end', test => counts.push('end'));
   test.run()
     .then(result => {
       a.strictEqual(result, true);
-      a.deepStrictEqual(counts, [ 'start', 'body', 'pass' ]);
+      a.deepStrictEqual(counts, [ 'start', 'body', 'pass', 'end' ]);
     })
     .catch(halt);
 }
@@ -725,13 +742,14 @@ function halt (err) {
   });
   test.on('start', test => counts.push('start'));
   test.on('fail', test => counts.push('fail'));
+  test.on('end', test => counts.push('end'));
   test.run()
     .then(() => {
       throw new Error('should not reach here')
     })
     .catch(err => {
       a.strictEqual(err.message, 'broken');
-      a.deepStrictEqual(counts, [ 'start', 'body', 'fail' ]);
+      a.deepStrictEqual(counts, [ 'start', 'body', 'fail', 'end' ]);
     })
     .catch(halt);
 }
@@ -744,13 +762,14 @@ function halt (err) {
   });
   test.on('start', test => counts.push('start'));
   test.on('fail', test => counts.push('fail'));
+  test.on('end', test => counts.push('end'));
   test.run()
     .then(() => {
       throw new Error('should not reach here')
     })
     .catch(err => {
       a.strictEqual(err.message, 'broken');
-      a.deepStrictEqual(counts, [ 'start', 'body', 'fail' ]);
+      a.deepStrictEqual(counts, [ 'start', 'body', 'fail', 'end' ]);
     })
     .catch(halt);
 }
@@ -798,6 +817,7 @@ function halt (err) {
   test.on('skip', test => counts.push('skip'));
   test.on('pass', test => counts.push('pass'));
   test.on('fail', test => counts.push('fail'));
+  test.on('end', test => counts.push('end'));
   test.run()
     .then(result => {
       a.strictEqual(result, undefined);
@@ -1056,22 +1076,33 @@ function halt$2 (err) {
     .catch(halt$2);
 }
 
+{ /* no test function: ignore, don't start, skip, pass or fail event */
+  const test = new Test('one');
+  test.run()
+    .then(result => {
+      a.strictEqual(result, undefined);
+      a.strictEqual(test.state, 'pending');
+    })
+    .catch(halt$2);
+}
+
 function halt$3 (err) {
-  console.log(err);
+  console.error(err);
   process.exitCode = 1;
 }
 
 { /* test.run(): state, passing test */
   let counts = [];
   const test = new Test('one', function () {
-    counts.push('start');
-    return true
+    counts.push(test.state);
   });
-  counts.push('pending');
+  counts.push(test.state);
+  a.strictEqual(test.ended, false);
   test.run()
     .then(result => {
-      counts.push('pass');
-      a.deepStrictEqual(counts, [ 'pending', 'start', 'pass' ]);
+      counts.push(test.state);
+      a.deepStrictEqual(counts, [ 'pending', 'in-progress', 'pass' ]);
+      a.strictEqual(test.ended, true);
     })
     .catch(halt$3);
 }
@@ -1079,27 +1110,40 @@ function halt$3 (err) {
 { /* test.run(): state, failing test */
   let counts = [];
   const test = new Test('one', function () {
-    counts.push('start');
+    counts.push(test.state);
     throw new Error('broken')
   });
-  counts.push('pending');
+  counts.push(test.state);
   test.run()
-    .then(() => {
-      throw new Error('should not reach here')
+    .then(result => {
+      counts.push(test.state);
     })
     .catch(err => {
-      counts.push('fail');
-      a.deepStrictEqual(counts, [ 'pending', 'start', 'fail' ]);
+      counts.push(test.state);
+      a.deepStrictEqual(counts, [ 'pending', 'in-progress', 'fail' ]);
+      a.strictEqual(test.ended, true);
     })
     .catch(halt$3);
 }
 
-{ /* no test function: ignore, don't start, skip, pass or fail event */
-  const test = new Test('one');
+{ /* test.run(): ended, passing test */
+  const test = new Test('one', function () {});
+  a.strictEqual(test.ended, false);
   test.run()
     .then(result => {
-      a.strictEqual(result, undefined);
-      a.strictEqual(test.state, 'pending');
+      a.strictEqual(test.ended, true);
+    })
+    .catch(halt$3);
+}
+
+{ /* test.run(): ended, failing test */
+  const test = new Test('one', function () {
+    throw new Error('broken')
+  });
+  a.strictEqual(test.ended, false);
+  test.run()
+    .catch(err => {
+      a.strictEqual(test.ended, true);
     })
     .catch(halt$3);
 }

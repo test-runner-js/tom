@@ -14,10 +14,11 @@ function halt (err) {
   })
   test.on('start', test => counts.push('start'))
   test.on('pass', test => counts.push('pass'))
+  test.on('end', test => counts.push('end'))
   test.run()
     .then(result => {
       a.strictEqual(result, true)
-      a.deepStrictEqual(counts, [ 'start', 'body', 'pass' ])
+      a.deepStrictEqual(counts, [ 'start', 'body', 'pass', 'end' ])
     })
     .catch(halt)
 }
@@ -30,13 +31,14 @@ function halt (err) {
   })
   test.on('start', test => counts.push('start'))
   test.on('fail', test => counts.push('fail'))
+  test.on('end', test => counts.push('end'))
   test.run()
     .then(() => {
       throw new Error('should not reach here')
     })
     .catch(err => {
       a.strictEqual(err.message, 'broken')
-      a.deepStrictEqual(counts, [ 'start', 'body', 'fail' ])
+      a.deepStrictEqual(counts, [ 'start', 'body', 'fail', 'end' ])
     })
     .catch(halt)
 }
@@ -49,13 +51,14 @@ function halt (err) {
   })
   test.on('start', test => counts.push('start'))
   test.on('fail', test => counts.push('fail'))
+  test.on('end', test => counts.push('end'))
   test.run()
     .then(() => {
       throw new Error('should not reach here')
     })
     .catch(err => {
       a.strictEqual(err.message, 'broken')
-      a.deepStrictEqual(counts, [ 'start', 'body', 'fail' ])
+      a.deepStrictEqual(counts, [ 'start', 'body', 'fail', 'end' ])
     })
     .catch(halt)
 }
@@ -106,6 +109,7 @@ function halt (err) {
   test.on('skip', test => counts.push('skip'))
   test.on('pass', test => counts.push('pass'))
   test.on('fail', test => counts.push('fail'))
+  test.on('end', test => counts.push('end'))
   test.run()
     .then(result => {
       a.strictEqual(result, undefined)

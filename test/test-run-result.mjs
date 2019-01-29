@@ -86,3 +86,13 @@ function halt (err) {
     })
     .catch(halt)
 }
+
+{ /* no test function: ignore, don't start, skip, pass or fail event */
+  const test = new Test('one')
+  test.run()
+    .then(result => {
+      a.strictEqual(result, undefined)
+      a.strictEqual(test.state, 'pending')
+    })
+    .catch(halt)
+}

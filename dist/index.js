@@ -510,12 +510,12 @@
       name = name || 'tom';
       super ([
         { from: undefined, to: 'pending' },
-        { from: 'pending', to: 'start' },
+        { from: 'pending', to: 'in-progress' },
         { from: 'pending', to: 'skip' },
-        { from: 'start', to: 'pass' },
-        { from: 'start', to: 'fail' },
+        { from: 'in-progress', to: 'pass' },
+        { from: 'in-progress', to: 'fail' },
         /* reset */
-        { from: 'start', to: 'pending' },
+        { from: 'in-progress', to: 'pending' },
         { from: 'pass', to: 'pending' },
         { from: 'fail', to: 'pending' },
         { from: 'skip', to: 'pending' },
@@ -545,6 +545,11 @@
       this._skip = null;
       this._only = options.only;
       this.options = Object.assign({ timeout: 10000 }, options);
+
+      /**
+       * True if ended
+       */
+      this.ended = false;
     }
 
     toString () {
@@ -607,6 +612,16 @@
       }
     }
 
+    setState (state, target, data) {
+      if (state === 'pass' || state === 'fail') {
+        this.ended = true;
+      }
+      super.setState(state, target, data);
+      if (state === 'pass' || state === 'fail') {
+        this.emit('end');
+      }
+    }
+
     /**
      * Execute the stored test function.
      * @returns {Promise}
@@ -617,7 +632,8 @@
           this.setState('skip', this);
           return Promise.resolve()
         } else {
-          this.state = 'start';
+          this.state = 'in-progress';
+          this.emit('start');
           const testFnResult = new Promise((resolve, reject) => {
             try {
               const result = this.testFn.call(new TestContext({

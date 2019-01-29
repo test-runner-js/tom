@@ -1,22 +1,19 @@
 import Test from '../index.mjs'
 import a from 'assert'
-
-function halt (err) {
-  console.log(err)
-  process.exitCode = 1
-}
+import { halt } from './lib/util.mjs'
 
 { /* test.run(): state, passing test */
   let counts = []
   const test = new Test('one', function () {
-    counts.push('start')
-    return true
+    counts.push(test.state)
   })
-  counts.push('pending')
+  counts.push(test.state)
+  a.strictEqual(test.ended, false)
   test.run()
     .then(result => {
-      counts.push('pass')
-      a.deepStrictEqual(counts, [ 'pending', 'start', 'pass' ])
+      counts.push(test.state)
+      a.deepStrictEqual(counts, [ 'pending', 'in-progress', 'pass' ])
+      a.strictEqual(test.ended, true)
     })
     .catch(halt)
 }
@@ -24,27 +21,40 @@ function halt (err) {
 { /* test.run(): state, failing test */
   let counts = []
   const test = new Test('one', function () {
-    counts.push('start')
+    counts.push(test.state)
     throw new Error('broken')
   })
-  counts.push('pending')
+  counts.push(test.state)
   test.run()
-    .then(() => {
-      throw new Error('should not reach here')
+    .then(result => {
+      counts.push(test.state)
     })
     .catch(err => {
-      counts.push('fail')
-      a.deepStrictEqual(counts, [ 'pending', 'start', 'fail' ])
+      counts.push(test.state)
+      a.deepStrictEqual(counts, [ 'pending', 'in-progress', 'fail' ])
+      a.strictEqual(test.ended, true)
     })
     .catch(halt)
 }
 
-{ /* no test function: ignore, don't start, skip, pass or fail event */
-  const test = new Test('one')
+{ /* test.run(): ended, passing test */
+  const test = new Test('one', function () {})
+  a.strictEqual(test.ended, false)
   test.run()
     .then(result => {
-      a.strictEqual(result, undefined)
-      a.strictEqual(test.state, 'pending')
+      a.strictEqual(test.ended, true)
+    })
+    .catch(halt)
+}
+
+{ /* test.run(): ended, failing test */
+  const test = new Test('one', function () {
+    throw new Error('broken')
+  })
+  a.strictEqual(test.ended, false)
+  test.run()
+    .catch(err => {
+      a.strictEqual(test.ended, true)
     })
     .catch(halt)
 }
