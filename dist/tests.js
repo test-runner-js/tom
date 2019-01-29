@@ -512,6 +512,7 @@ class Test extends createMixin(Composite)(StateMachine) {
       { from: undefined, to: 'pending' },
       { from: 'pending', to: 'in-progress' },
       { from: 'pending', to: 'skip' },
+      { from: 'pending', to: 'ignored' },
       { from: 'in-progress', to: 'pass' },
       { from: 'in-progress', to: 'fail' },
       /* reset */
@@ -519,6 +520,7 @@ class Test extends createMixin(Composite)(StateMachine) {
       { from: 'pass', to: 'pending' },
       { from: 'fail', to: 'pending' },
       { from: 'skip', to: 'pending' },
+      { from: 'ignored', to: 'pending' },
     ]);
     /**
      * Test name
@@ -632,7 +634,7 @@ class Test extends createMixin(Composite)(StateMachine) {
         this.setState('skip', this);
         return Promise.resolve()
       } else {
-        this.state = 'in-progress';
+        this.setState('in-progress', this);
         this.emit('start');
         const testFnResult = new Promise((resolve, reject) => {
           try {
@@ -663,6 +665,7 @@ class Test extends createMixin(Composite)(StateMachine) {
         return Promise.race([ testFnResult, raceTimeout(this.options.timeout) ])
       }
     } else {
+      this.setState('ignored', this);
       return Promise.resolve()
     }
   }
@@ -713,7 +716,7 @@ class TestContext {
 }
 
 function halt (err) {
-  console.log(err);
+  console.error(err);
   process.exitCode = 1;
 }
 
@@ -849,11 +852,6 @@ function halt (err) {
     .then(() => a.deepStrictEqual(counts, [ 1, 2 ]));
 }
 
-function halt$1 (err) {
-  console.log(err);
-  process.exitCode = 1;
-}
-
 { /* duplicate test name */
   const tom = new Test();
   tom.test('one', () => 1);
@@ -882,7 +880,7 @@ function halt$1 (err) {
       a.strictEqual(result, undefined);
       a.deepStrictEqual(counts, [ 'skip' ]);
     })
-    .catch(halt$1);
+    .catch(halt);
 }
 
 { /* child.skip(): multiple */
@@ -898,7 +896,7 @@ function halt$1 (err) {
       a.deepStrictEqual(results, [ undefined, undefined, undefined ]);
       a.deepStrictEqual(counts, [ 'skip', 'skip' ]);
     })
-    .catch(halt$1);
+    .catch(halt);
 }
 
 { /* .only() */
@@ -990,18 +988,13 @@ function halt$1 (err) {
   a.strictEqual(test.options.timeout, 1);
 }
 
-function halt$2 (err) {
-  console.log(err);
-  process.exitCode = 1;
-}
-
 { /* passing sync test */
   const test = new Test('tom', () => true);
   test.run()
     .then(result => {
       a.ok(result === true);
     })
-    .catch(halt$2);
+    .catch(halt);
 }
 
 { /* failing sync test */
@@ -1015,7 +1008,7 @@ function halt$2 (err) {
     .catch(err => {
       a.ok(/failed/.test(err.message));
     })
-    .catch(halt$2);
+    .catch(halt);
 }
 
 { /* passing async test */
@@ -1038,7 +1031,7 @@ function halt$2 (err) {
     .catch(err => {
       a.ok(/failed/.test(err.message));
     })
-    .catch(halt$2);
+    .catch(halt);
 }
 
 { /* failing async test: timeout */
@@ -1056,7 +1049,7 @@ function halt$2 (err) {
     .catch(err => {
       a.ok(/Timeout expired/.test(err.message));
     })
-    .catch(halt$2);
+    .catch(halt);
 }
 
 { /* passing async test: timeout 2 */
@@ -1073,7 +1066,7 @@ function halt$2 (err) {
     .then(result => {
       a.ok(result === 'ok');
     })
-    .catch(halt$2);
+    .catch(halt);
 }
 
 { /* no test function: ignore, don't start, skip, pass or fail event */
@@ -1081,14 +1074,10 @@ function halt$2 (err) {
   test.run()
     .then(result => {
       a.strictEqual(result, undefined);
-      a.strictEqual(test.state, 'pending');
+      a.strictEqual(test.ended, false);
+      a.strictEqual(test.state, 'ignored');
     })
-    .catch(halt$2);
-}
-
-function halt$3 (err) {
-  console.error(err);
-  process.exitCode = 1;
+    .catch(halt);
 }
 
 { /* test.run(): state, passing test */
@@ -1104,7 +1093,7 @@ function halt$3 (err) {
       a.deepStrictEqual(counts, [ 'pending', 'in-progress', 'pass' ]);
       a.strictEqual(test.ended, true);
     })
-    .catch(halt$3);
+    .catch(halt);
 }
 
 { /* test.run(): state, failing test */
@@ -1123,7 +1112,19 @@ function halt$3 (err) {
       a.deepStrictEqual(counts, [ 'pending', 'in-progress', 'fail' ]);
       a.strictEqual(test.ended, true);
     })
-    .catch(halt$3);
+    .catch(halt);
+}
+
+{ /* test.run(): state, no test */
+  let counts = [];
+  const test = new Test('one');
+  counts.push(test.state);
+  test.run()
+    .then(result => {
+      counts.push(test.state);
+      a.deepStrictEqual(counts, [ 'pending', 'ignored' ]);
+    })
+    .catch(halt);
 }
 
 { /* test.run(): ended, passing test */
@@ -1133,7 +1134,7 @@ function halt$3 (err) {
     .then(result => {
       a.strictEqual(test.ended, true);
     })
-    .catch(halt$3);
+    .catch(halt);
 }
 
 { /* test.run(): ended, failing test */
@@ -1145,5 +1146,5 @@ function halt$3 (err) {
     .catch(err => {
       a.strictEqual(test.ended, true);
     })
-    .catch(halt$3);
+    .catch(halt);
 }

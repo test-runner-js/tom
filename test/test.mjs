@@ -1,10 +1,6 @@
 import Test from '../index.mjs'
 import a from 'assert'
-
-function halt (err) {
-  console.log(err)
-  process.exitCode = 1
-}
+import { halt } from './lib/util.mjs'
 
 { /* test.run(): event order, passing test */
   let counts = []

@@ -37,6 +37,18 @@ import { halt } from './lib/util.mjs'
     .catch(halt)
 }
 
+{ /* test.run(): state, no test */
+  let counts = []
+  const test = new Test('one')
+  counts.push(test.state)
+  test.run()
+    .then(result => {
+      counts.push(test.state)
+      a.deepStrictEqual(counts, [ 'pending', 'ignored' ])
+    })
+    .catch(halt)
+}
+
 { /* test.run(): ended, passing test */
   const test = new Test('one', function () {})
   a.strictEqual(test.ended, false)

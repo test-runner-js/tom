@@ -512,6 +512,7 @@
         { from: undefined, to: 'pending' },
         { from: 'pending', to: 'in-progress' },
         { from: 'pending', to: 'skip' },
+        { from: 'pending', to: 'ignored' },
         { from: 'in-progress', to: 'pass' },
         { from: 'in-progress', to: 'fail' },
         /* reset */
@@ -519,6 +520,7 @@
         { from: 'pass', to: 'pending' },
         { from: 'fail', to: 'pending' },
         { from: 'skip', to: 'pending' },
+        { from: 'ignored', to: 'pending' },
       ]);
       /**
        * Test name
@@ -632,7 +634,7 @@
           this.setState('skip', this);
           return Promise.resolve()
         } else {
-          this.state = 'in-progress';
+          this.setState('in-progress', this);
           this.emit('start');
           const testFnResult = new Promise((resolve, reject) => {
             try {
@@ -663,6 +665,7 @@
           return Promise.race([ testFnResult, raceTimeout(this.options.timeout) ])
         }
       } else {
+        this.setState('ignored', this);
         return Promise.resolve()
       }
     }

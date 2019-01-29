@@ -1,10 +1,6 @@
 import Test from '../index.mjs'
 import a from 'assert'
-
-function halt (err) {
-  console.log(err)
-  process.exitCode = 1
-}
+import { halt } from './lib/util.mjs'
 
 { /* passing sync test */
   const test = new Test('tom', () => true)
@@ -92,7 +88,8 @@ function halt (err) {
   test.run()
     .then(result => {
       a.strictEqual(result, undefined)
-      a.strictEqual(test.state, 'pending')
+      a.strictEqual(test.ended, false)
+      a.strictEqual(test.state, 'ignored')
     })
     .catch(halt)
 }
