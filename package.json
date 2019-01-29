@@ -16,7 +16,7 @@
     "test:mjs": "node --experimental-modules test/tests.mjs",
     "dist": "rollup -w -c dist/index.config.js",
     "docs": "jsdoc2md -c dist/jsdoc.conf -t README.hbs index.mjs > README.md",
-    "prepare": "rollup -c dist/index.config.js"
+    "preversion": "rollup -c dist/index.config.js"
   },
   "dependencies": {
     "composite-class": "^0.3.0",
