@@ -1,8 +1,4 @@
-'use strict';
-
-function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
-
-var a = _interopDefault(require('assert'));
+import a from 'assert';
 
 function raceTimeout (ms, msg) {
   return new Promise((resolve, reject) => {
