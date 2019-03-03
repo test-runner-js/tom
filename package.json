@@ -8,24 +8,24 @@
   "keywords": [],
   "license": "MIT",
   "engines": {
-    "node": ">=6"
+    "node": ">=8"
   },
   "scripts": {
     "test": "npm run test:js && npm run test:mjs && npm run test:esm",
     "test:js": "rollup -c build/tests.config.js && node dist/tests.js",
     "test:mjs": "node --experimental-modules test/tests.mjs",
     "test:esm": "rollup -c build/tests-esm.config.js && node --experimental-modules dist/tests.mjs",
-    "dist": "rollup -w -c dist/index.config.js",
+    "dist": "rollup -c build/index.config.js && rollup -c build/index-esm.config.js",
     "docs": "jsdoc2md -c build/jsdoc.conf -t README.hbs index.mjs > README.md"
   },
   "dependencies": {
     "composite-class": "^0.3.0",
     "create-mixin": "^1.1.1",
-    "fsm-base": "^0.4.3",
+    "fsm-base": "^0.4.4",
     "race-timeout-anywhere": "^0.1.1"
   },
   "devDependencies": {
-    "rollup": "^1.3.2"
+    "rollup": "^1.4.0"
   },
   "standard": {
     "ignore": [
@@ -35,6 +35,6 @@
   },
   "files": [
     "index.mjs",
-    "dist/index.js"
+    "dist"
   ]
 }

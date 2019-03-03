@@ -11,30 +11,31 @@
 ## test-object-model
 
 * [test-object-model](#module_test-object-model)
-    * [Tom](#exp_module_test-object-model--Tom) ⏏
-        * [new Tom([name], [testFn], [options])](#new_module_test-object-model--Tom_new)
+    * [Test](#exp_module_test-object-model--Test) ⏏
+        * [new Test([name], [testFn], [options])](#new_module_test-object-model--Test_new)
         * _instance_
-            * [.name](#module_test-object-model--Tom+name) : <code>string</code>
-            * [.testFn](#module_test-object-model--Tom+testFn) : <code>function</code>
-            * [.index](#module_test-object-model--Tom+index)
-            * [.state](#module_test-object-model--Tom+state)
-            * [.test()](#module_test-object-model--Tom+test)
-            * [.skip()](#module_test-object-model--Tom+skip)
-            * [.only()](#module_test-object-model--Tom+only)
-            * [.run()](#module_test-object-model--Tom+run) ⇒ <code>Promise</code>
-            * [.reset()](#module_test-object-model--Tom+reset)
+            * [.name](#module_test-object-model--Test+name) : <code>string</code>
+            * [.testFn](#module_test-object-model--Test+testFn) : <code>function</code>
+            * [.index](#module_test-object-model--Test+index)
+            * [.state](#module_test-object-model--Test+state)
+            * [.ended](#module_test-object-model--Test+ended)
+            * [.test()](#module_test-object-model--Test+test)
+            * [.skip()](#module_test-object-model--Test+skip)
+            * [.only()](#module_test-object-model--Test+only)
+            * [.run()](#module_test-object-model--Test+run) ⇒ <code>Promise</code>
+            * [.reset()](#module_test-object-model--Test+reset)
         * _static_
-            * [.combine(toms, [name])](#module_test-object-model--Tom.combine) ⇒ <code>Tom</code>
+            * [.combine(tests, [name])](#module_test-object-model--Test.combine) ⇒ <code>Test</code>
         * _inner_
-            * [~TestContext](#module_test-object-model--Tom..TestContext)
+            * [~TestContext](#module_test-object-model--Test..TestContext)
 
-<a name="exp_module_test-object-model--Tom"></a>
+<a name="exp_module_test-object-model--Test"></a>
 
-### Tom ⏏
+### Test ⏏
 **Kind**: Exported class  
-<a name="new_module_test-object-model--Tom_new"></a>
+<a name="new_module_test-object-model--Test_new"></a>
 
-#### new Tom([name], [testFn], [options])
+#### new Test([name], [testFn], [options])
 
 | Param | Type |
 | --- | --- |
@@ -43,78 +44,84 @@
 | [options] | <code>object</code> | 
 | [options.timeout] | <code>number</code> | 
 
-<a name="module_test-object-model--Tom+name"></a>
+<a name="module_test-object-model--Test+name"></a>
 
-#### tom.name : <code>string</code>
+#### test.name : <code>string</code>
 Test name
 
-**Kind**: instance property of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
-<a name="module_test-object-model--Tom+testFn"></a>
+**Kind**: instance property of [<code>Test</code>](#exp_module_test-object-model--Test)  
+<a name="module_test-object-model--Test+testFn"></a>
 
-#### tom.testFn : <code>function</code>
+#### test.testFn : <code>function</code>
 Test function
 
-**Kind**: instance property of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
-<a name="module_test-object-model--Tom+index"></a>
+**Kind**: instance property of [<code>Test</code>](#exp_module_test-object-model--Test)  
+<a name="module_test-object-model--Test+index"></a>
 
-#### tom.index
+#### test.index
 Position of this test within its parents children
 
-**Kind**: instance property of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
-<a name="module_test-object-model--Tom+state"></a>
+**Kind**: instance property of [<code>Test</code>](#exp_module_test-object-model--Test)  
+<a name="module_test-object-model--Test+state"></a>
 
-#### tom.state
+#### test.state
 Test state: pending, start, skip, pass or fail.
 
-**Kind**: instance property of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
-<a name="module_test-object-model--Tom+test"></a>
+**Kind**: instance property of [<code>Test</code>](#exp_module_test-object-model--Test)  
+<a name="module_test-object-model--Test+ended"></a>
 
-#### tom.test()
+#### test.ended
+True if ended
+
+**Kind**: instance property of [<code>Test</code>](#exp_module_test-object-model--Test)  
+<a name="module_test-object-model--Test+test"></a>
+
+#### test.test()
 Add a test.
 
-**Kind**: instance method of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
-<a name="module_test-object-model--Tom+skip"></a>
+**Kind**: instance method of [<code>Test</code>](#exp_module_test-object-model--Test)  
+<a name="module_test-object-model--Test+skip"></a>
 
-#### tom.skip()
+#### test.skip()
 Add a skipped test
 
-**Kind**: instance method of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
-<a name="module_test-object-model--Tom+only"></a>
+**Kind**: instance method of [<code>Test</code>](#exp_module_test-object-model--Test)  
+<a name="module_test-object-model--Test+only"></a>
 
-#### tom.only()
+#### test.only()
 Add an only test
 
-**Kind**: instance method of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
-<a name="module_test-object-model--Tom+run"></a>
+**Kind**: instance method of [<code>Test</code>](#exp_module_test-object-model--Test)  
+<a name="module_test-object-model--Test+run"></a>
 
-#### tom.run() ⇒ <code>Promise</code>
+#### test.run() ⇒ <code>Promise</code>
 Execute the stored test function.
 
-**Kind**: instance method of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
-<a name="module_test-object-model--Tom+reset"></a>
+**Kind**: instance method of [<code>Test</code>](#exp_module_test-object-model--Test)  
+<a name="module_test-object-model--Test+reset"></a>
 
-#### tom.reset()
+#### test.reset()
 Reset state
 
-**Kind**: instance method of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
-<a name="module_test-object-model--Tom.combine"></a>
+**Kind**: instance method of [<code>Test</code>](#exp_module_test-object-model--Test)  
+<a name="module_test-object-model--Test.combine"></a>
 
-#### Tom.combine(toms, [name]) ⇒ <code>Tom</code>
+#### Test.combine(tests, [name]) ⇒ <code>Test</code>
 Combine several TOM instances into a common root
 
-**Kind**: static method of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
+**Kind**: static method of [<code>Test</code>](#exp_module_test-object-model--Test)  
 
 | Param | Type |
 | --- | --- |
-| toms | <code>Array.&lt;Tom&gt;</code> | 
+| tests | <code>Array.&lt;Test&gt;</code> | 
 | [name] | <code>string</code> | 
 
-<a name="module_test-object-model--Tom..TestContext"></a>
+<a name="module_test-object-model--Test..TestContext"></a>
 
-#### Tom~TestContext
+#### Test~TestContext
 The test context, available as `this` within each test function.
 
-**Kind**: inner class of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
+**Kind**: inner class of [<code>Test</code>](#exp_module_test-object-model--Test)  
 
 * * *
 
