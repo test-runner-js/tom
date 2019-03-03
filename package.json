@@ -1,7 +1,7 @@
 {
   "name": "test-object-model",
   "author": "Lloyd Brookes <75pound@gmail.com>",
-  "version": "0.3.6",
+  "version": "0.3.7",
   "description": "test-object-model",
   "repository": "https://github.com/test-runner-js/test-object-model",
   "main": "dist/index.js",
