@@ -720,239 +720,6 @@ class TestContext {
   }
 }
 
-function halt (err) {
-  console.error(err);
-  process.exitCode = 1;
-}
-
-{ /* test.run(): event order, passing test */
-  let counts = [];
-  const test = new Test('one', function () {
-    counts.push('body');
-    return true
-  });
-  test.on('start', test => counts.push('start'));
-  test.on('pass', test => counts.push('pass'));
-  test.on('end', test => counts.push('end'));
-  test.run()
-    .then(result => {
-      a.strictEqual(result, true);
-      a.deepStrictEqual(counts, [ 'start', 'body', 'pass', 'end' ]);
-    })
-    .catch(halt);
-}
-
-{ /* test.run(): event order, failing test */
-  let counts = [];
-  const test = new Test('one', function () {
-    counts.push('body');
-    throw new Error('broken')
-  });
-  test.on('start', test => counts.push('start'));
-  test.on('fail', test => counts.push('fail'));
-  test.on('end', test => counts.push('end'));
-  test.run()
-    .then(() => {
-      throw new Error('should not reach here')
-    })
-    .catch(err => {
-      a.strictEqual(err.message, 'broken');
-      a.deepStrictEqual(counts, [ 'start', 'body', 'fail', 'end' ]);
-    })
-    .catch(halt);
-}
-
-{ /* test.run(): event order, failing test, rejected */
-  let counts = [];
-  const test = new Test('one', function () {
-    counts.push('body');
-    return Promise.reject(new Error('broken'))
-  });
-  test.on('start', test => counts.push('start'));
-  test.on('fail', test => counts.push('fail'));
-  test.on('end', test => counts.push('end'));
-  test.run()
-    .then(() => {
-      throw new Error('should not reach here')
-    })
-    .catch(err => {
-      a.strictEqual(err.message, 'broken');
-      a.deepStrictEqual(counts, [ 'start', 'body', 'fail', 'end' ]);
-    })
-    .catch(halt);
-}
-
-{ /* test.run(): pass event args */
-  const test = new Test('one', () => 1);
-  test.on('pass', (t, result) => {
-    a.strictEqual(t, test);
-    a.strictEqual(result, 1);
-  });
-  test.run()
-    .catch(halt);
-}
-
-{ /* test.run(): skip event args */
-  const tom = new Test();
-  const test = tom.skip('one', () => 1);
-  test.on('skip', (t, result) => {
-    a.strictEqual(t, test);
-    a.strictEqual(result, undefined);
-  });
-  test.run()
-    .catch(halt);
-}
-
-{ /* test.run(): fail event args */
-  const test = new Test('one', () => {
-    throw new Error('broken')
-  });
-  test.on('fail', (t, err) => {
-    a.strictEqual(t, test);
-    a.strictEqual(err.message, 'broken');
-  });
-  test.run()
-    .catch(err => {
-      if (err.message !== 'broken') throw err
-    })
-    .catch(halt);
-}
-
-{ /* no test function: ignore, don't start, skip, pass or fail event */
-  let counts = [];
-  const test = new Test('one');
-  test.on('start', test => counts.push('start'));
-  test.on('skip', test => counts.push('skip'));
-  test.on('pass', test => counts.push('pass'));
-  test.on('fail', test => counts.push('fail'));
-  test.on('end', test => counts.push('end'));
-  test.run()
-    .then(result => {
-      a.strictEqual(result, undefined);
-      a.deepStrictEqual(counts, []);
-    })
-    .catch(halt);
-}
-
-{ /* nested events: root should receive child events */
-  const counts = [];
-  const tom = new Test();
-  const one = tom.test('one', () => 1);
-  const two = one.test('two', () => 2);
-  tom.on('pass', (test, result) => {
-    if (counts.length === 0) {
-      a.strictEqual(test.name, 'one');
-      a.strictEqual(result, 1);
-      counts.push(1);
-    } else {
-      a.strictEqual(test.name, 'two');
-      a.strictEqual(result, 2);
-      counts.push(2);
-    }
-  });
-  one.run()
-    .then(() => {
-      two.run();
-    })
-    .then(() => a.deepStrictEqual(counts, [ 1, 2 ]));
-}
-
-{ /* duplicate test name */
-  const tom = new Test();
-  tom.test('one', () => 1);
-  a.throws(
-    () => test.test('one', () => 1)
-  );
-}
-
-{ /* deep duplicate test name */
-  const tom = new Test('tom');
-  const child = tom.test('one', () => 1);
-  a.throws(
-    () => child.test('one', () => 1),
-    /duplicate/i
-  );
-}
-
-{ /* child.skip() */
-  const counts = [];
-  const tom = new Test();
-  const child = tom.skip('one', () => 1);
-  tom.on('start', () => counts.push('start'));
-  tom.on('skip', () => counts.push('skip'));
-  child.run()
-    .then(result => {
-      a.strictEqual(result, undefined);
-      a.deepStrictEqual(counts, [ 'skip' ]);
-    })
-    .catch(halt);
-}
-
-{ /* child.skip(): multiple */
-  const counts = [];
-  const tom = new Test();
-  const one = tom.skip('one', () => 1);
-  const two = tom.skip('two', () => 2);
-  tom.on('start', () => counts.push('start'));
-  tom.on('skip', () => counts.push('skip'));
-  Promise
-    .all([ tom.run(), one.run(), two.run() ])
-    .then(results => {
-      a.deepStrictEqual(results, [ undefined, undefined, undefined ]);
-      a.deepStrictEqual(counts, [ 'skip', 'skip' ]);
-    })
-    .catch(halt);
-}
-
-{ /* .only() */
-  const tom = new Test('tom');
-  const one = tom.test('one', () => 1);
-  const two = tom.test('two', () => 2);
-  a.ok(!one._skip);
-  a.ok(!two._skip);
-  a.ok(!one._only);
-  a.ok(!two._only);
-  const three = tom.only('three', () => 3);
-  a.ok(one._skip);
-  a.ok(!one._only);
-  a.ok(two._skip);
-  a.ok(!two._only);
-  a.ok(!three._skip);
-  a.ok(three._only);
-  const four = tom.only('four', () => 4);
-  a.ok(one._skip);
-  a.ok(!one._only);
-  a.ok(two._skip);
-  a.ok(!two._only);
-  a.ok(!three._skip);
-  a.ok(three._only);
-  a.ok(!four._skip);
-  a.ok(four._only);
-}
-
-{ /* .only() first */
-  const tom = new Test('tom');
-  const one = tom.only('one', () => 1);
-  const two = tom.test('two', () => 2);
-  a.ok(!one._skip);
-  a.ok(one._only);
-  a.ok(two._skip);
-  a.ok(!two._only);
-}
-
-{ /* deep only with skip */
-  const tom = new Test();
-  const one = tom.only('one', () => 1);
-  const two = one.test('two', () => 2);
-  const three = two.skip('three', () => 3);
-  a.ok(!one._skip);
-  a.ok(one._only);
-  a.ok(two._skip);
-  a.ok(!two._only);
-  a.ok(three._skip);
-  a.ok(!three._only);
-}
-
 { /* new Test(): default name, default options */
   const test = new Test();
   a.ok(test.name);
@@ -991,6 +758,11 @@ function halt (err) {
   a.ok(test.name);
   a.strictEqual(test.testFn, undefined);
   a.strictEqual(test.options.timeout, 1);
+}
+
+function halt (err) {
+  console.error(err);
+  process.exitCode = 1;
 }
 
 { /* passing sync test */
@@ -1152,4 +924,248 @@ function halt (err) {
       a.strictEqual(test.ended, true);
     })
     .catch(halt);
+}
+
+{ /* test.run(): event order, passing test */
+  let counts = [];
+  const test = new Test('one', function () {
+    counts.push('body');
+    return true
+  });
+  test.on('start', test => counts.push('start'));
+  test.on('pass', test => counts.push('pass'));
+  test.on('end', test => counts.push('end'));
+  test.run()
+    .then(result => {
+      a.strictEqual(result, true);
+      a.deepStrictEqual(counts, [ 'start', 'body', 'pass', 'end' ]);
+    })
+    .catch(halt);
+}
+
+{ /* test.run(): event order, failing test */
+  let counts = [];
+  const test = new Test('one', function () {
+    counts.push('body');
+    throw new Error('broken')
+  });
+  test.on('start', test => counts.push('start'));
+  test.on('fail', test => counts.push('fail'));
+  test.on('end', test => counts.push('end'));
+  test.run()
+    .then(() => {
+      throw new Error('should not reach here')
+    })
+    .catch(err => {
+      a.strictEqual(err.message, 'broken');
+      a.deepStrictEqual(counts, [ 'start', 'body', 'fail', 'end' ]);
+    })
+    .catch(halt);
+}
+
+{ /* test.run(): event order, failing test, rejected */
+  let counts = [];
+  const test = new Test('one', function () {
+    counts.push('body');
+    return Promise.reject(new Error('broken'))
+  });
+  test.on('start', test => counts.push('start'));
+  test.on('fail', test => counts.push('fail'));
+  test.on('end', test => counts.push('end'));
+  test.run()
+    .then(() => {
+      throw new Error('should not reach here')
+    })
+    .catch(err => {
+      a.strictEqual(err.message, 'broken');
+      a.deepStrictEqual(counts, [ 'start', 'body', 'fail', 'end' ]);
+    })
+    .catch(halt);
+}
+
+{ /* test.run(): pass event args */
+  const test = new Test('one', () => 1);
+  test.on('pass', (t, result) => {
+    a.strictEqual(t, test);
+    a.strictEqual(result, 1);
+  });
+  test.run()
+    .catch(halt);
+}
+
+{ /* test.run(): skip event args */
+  const tom = new Test();
+  const test = tom.skip('one', () => 1);
+  test.on('skip', (t, result) => {
+    a.strictEqual(t, test);
+    a.strictEqual(result, undefined);
+  });
+  test.run()
+    .catch(halt);
+}
+
+{ /* test.run(): fail event args */
+  const test = new Test('one', () => {
+    throw new Error('broken')
+  });
+  test.on('fail', (t, err) => {
+    a.strictEqual(t, test);
+    a.strictEqual(err.message, 'broken');
+  });
+  test.run()
+    .catch(err => {
+      if (err.message !== 'broken') throw err
+    })
+    .catch(halt);
+}
+
+{ /* no test function: ignore, don't start, skip, pass or fail event */
+  let counts = [];
+  const test = new Test('one');
+  test.on('start', test => counts.push('start'));
+  test.on('skip', test => counts.push('skip'));
+  test.on('pass', test => counts.push('pass'));
+  test.on('fail', test => counts.push('fail'));
+  test.on('end', test => counts.push('end'));
+  test.run()
+    .then(result => {
+      a.strictEqual(result, undefined);
+      a.deepStrictEqual(counts, []);
+    })
+    .catch(halt);
+}
+
+{ /* nested events: root should receive child events */
+  const counts = [];
+  const tom = new Test();
+  const one = tom.test('one', () => 1);
+  const two = one.test('two', () => 2);
+  tom.on('pass', (test, result) => {
+    if (counts.length === 0) {
+      a.strictEqual(test.name, 'one');
+      a.strictEqual(result, 1);
+      counts.push(1);
+    } else {
+      a.strictEqual(test.name, 'two');
+      a.strictEqual(result, 2);
+      counts.push(2);
+    }
+  });
+  one.run()
+    .then(() => {
+      two.run();
+    })
+    .then(() => a.deepStrictEqual(counts, [ 1, 2 ]));
+}
+
+{ /* bug in test function */
+  const test = new Test('one', function () {
+    asdf();
+  });
+
+  test.run()
+    .then(() => {
+      throw new Error('should not reach here')
+    })
+    .catch(err => {
+      a.strictEqual(test.state, 'fail');
+      a.ok(/asdf is not defined/.test(err.message));
+    })
+    .catch(halt);
+}
+
+{ /* duplicate test name */
+  const tom = new Test();
+  tom.test('one', () => 1);
+  a.throws(
+    () => test.test('one', () => 1)
+  );
+}
+
+{ /* deep duplicate test name */
+  const tom = new Test('tom');
+  const child = tom.test('one', () => 1);
+  a.throws(
+    () => child.test('one', () => 1),
+    /duplicate/i
+  );
+}
+
+{ /* child.skip() */
+  const counts = [];
+  const tom = new Test();
+  const child = tom.skip('one', () => 1);
+  tom.on('start', () => counts.push('start'));
+  tom.on('skip', () => counts.push('skip'));
+  child.run()
+    .then(result => {
+      a.strictEqual(result, undefined);
+      a.deepStrictEqual(counts, [ 'skip' ]);
+    })
+    .catch(halt);
+}
+
+{ /* child.skip(): multiple */
+  const counts = [];
+  const tom = new Test();
+  const one = tom.skip('one', () => 1);
+  const two = tom.skip('two', () => 2);
+  tom.on('start', () => counts.push('start'));
+  tom.on('skip', () => counts.push('skip'));
+  Promise
+    .all([ tom.run(), one.run(), two.run() ])
+    .then(results => {
+      a.deepStrictEqual(results, [ undefined, undefined, undefined ]);
+      a.deepStrictEqual(counts, [ 'skip', 'skip' ]);
+    })
+    .catch(halt);
+}
+
+{ /* .only() */
+  const tom = new Test('tom');
+  const one = tom.test('one', () => 1);
+  const two = tom.test('two', () => 2);
+  a.ok(!one._skip);
+  a.ok(!two._skip);
+  a.ok(!one._only);
+  a.ok(!two._only);
+  const three = tom.only('three', () => 3);
+  a.ok(one._skip);
+  a.ok(!one._only);
+  a.ok(two._skip);
+  a.ok(!two._only);
+  a.ok(!three._skip);
+  a.ok(three._only);
+  const four = tom.only('four', () => 4);
+  a.ok(one._skip);
+  a.ok(!one._only);
+  a.ok(two._skip);
+  a.ok(!two._only);
+  a.ok(!three._skip);
+  a.ok(three._only);
+  a.ok(!four._skip);
+  a.ok(four._only);
+}
+
+{ /* .only() first */
+  const tom = new Test('tom');
+  const one = tom.only('one', () => 1);
+  const two = tom.test('two', () => 2);
+  a.ok(!one._skip);
+  a.ok(one._only);
+  a.ok(two._skip);
+  a.ok(!two._only);
+}
+
+{ /* deep only with skip */
+  const tom = new Test();
+  const one = tom.only('one', () => 1);
+  const two = one.test('two', () => 2);
+  const three = two.skip('three', () => 3);
+  a.ok(!one._skip);
+  a.ok(one._only);
+  a.ok(two._skip);
+  a.ok(!two._only);
+  a.ok(three._skip);
+  a.ok(!three._only);
 }

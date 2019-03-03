@@ -136,3 +136,19 @@ import { halt } from './lib/util.mjs'
     })
     .then(() => a.deepStrictEqual(counts, [ 1, 2 ]))
 }
+
+{ /* bug in test function */
+  const test = new Test('one', function () {
+    asdf()
+  })
+
+  test.run()
+    .then(() => {
+      throw new Error('should not reach here')
+    })
+    .catch(err => {
+      a.strictEqual(test.state, 'fail')
+      a.ok(/asdf is not defined/.test(err.message))
+    })
+    .catch(halt)
+}
