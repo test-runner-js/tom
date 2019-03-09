@@ -40,3 +40,11 @@ import a from 'assert'
   a.strictEqual(test.testFn, undefined)
   a.strictEqual(test.options.timeout, 1)
 }
+
+{ /* new Test(name, options) */
+  const options = { timeout: 1 }
+  const test = new Test('one', options)
+  a.strictEqual(test.name, 'one')
+  a.strictEqual(test.testFn, undefined)
+  a.strictEqual(test.options.timeout, 1)
+}

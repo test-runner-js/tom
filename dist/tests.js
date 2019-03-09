@@ -503,7 +503,12 @@ function flatten (prev, curr) {
  */
 class Test extends createMixin(Composite)(StateMachine) {
   constructor (name, testFn, options) {
-    if (typeof name === 'string') ; else if (typeof name === 'function') {
+    if (typeof name === 'string') {
+      if (isPlainObject(testFn)) {
+        options = testFn;
+        testFn = undefined;
+      }
+    } else if (typeof name === 'function') {
       options = testFn;
       testFn = name;
       name = '';
@@ -724,6 +729,10 @@ class TestContext {
   }
 }
 
+function isPlainObject (input) {
+  return input !== null && typeof input === 'object' && input.constructor === Object
+}
+
 { /* new Test(): default name, default options */
   const test = new Test();
   a.ok(test.name);
@@ -760,6 +769,14 @@ class TestContext {
   const options = { timeout: 1 };
   const test = new Test(options);
   a.ok(test.name);
+  a.strictEqual(test.testFn, undefined);
+  a.strictEqual(test.options.timeout, 1);
+}
+
+{ /* new Test(name, options) */
+  const options = { timeout: 1 };
+  const test = new Test('one', options);
+  a.strictEqual(test.name, 'one');
   a.strictEqual(test.testFn, undefined);
   a.strictEqual(test.options.timeout, 1);
 }

@@ -17,6 +17,10 @@ import StateMachine from './node_modules/fsm-base/dist/index.mjs'
 class Test extends mixin(CompositeClass)(StateMachine) {
   constructor (name, testFn, options) {
     if (typeof name === 'string') {
+      if (isPlainObject(testFn)) {
+        options = testFn
+        testFn = undefined
+      }
     } else if (typeof name === 'function') {
       options = testFn
       testFn = name
@@ -236,6 +240,10 @@ class TestContext {
     this.name = context.name
     this.index = context.index
   }
+}
+
+function isPlainObject (input) {
+  return input !== null && typeof input === 'object' && input.constructor === Object
 }
 
 export default Test
