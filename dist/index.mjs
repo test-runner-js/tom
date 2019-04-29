@@ -511,7 +511,7 @@ class TestContext {
  * @param {number} [options.timeout]
  * @alias module:test-object-model
  */
-class Test extends createMixin(Composite)(StateMachine) {
+class Tom extends createMixin(Composite)(StateMachine) {
   constructor (name, testFn, options) {
     if (typeof name === 'string') {
       if (isPlainObject(testFn)) {
@@ -550,7 +550,7 @@ class Test extends createMixin(Composite)(StateMachine) {
     this.name = name;
 
     /**
-     * Test function
+     * Tree function
      * @type {function}
      */
     this.testFn = testFn;
@@ -731,9 +731,9 @@ class Test extends createMixin(Composite)(StateMachine) {
 
   /**
    * Combine several TOM instances into a common root
-   * @param {Array.<Test>} tests
+   * @param {Array.<Tom>} tests
    * @param {string} [name]
-   * @return {Test}
+   * @return {Tom}
    */
   static combine (tests, name) {
     let test;
@@ -755,4 +755,4 @@ function isPlainObject (input) {
   return input !== null && typeof input === 'object' && input.constructor === Object
 }
 
-export default Test;
+export default Tom;

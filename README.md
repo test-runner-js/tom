@@ -24,16 +24,59 @@ const assert = require('assert')
 const tom = new Tom()
 
 tom.test('Quick maths', function () {
-	const result = 2 + 2 - 1
-	assert.strictEqual(result, 3)
+  const result = 2 + 2 - 1
+  assert.strictEqual(result, 3)
 })
 
 module.exports = tom
 ```
 
+## Usage 
+
+Create a simple test.
+
+```js
+tom.test('Quick maths', function () {
+  // test
+})
+```
+
+Skip a test.
+
+```js
+tom.skip('Quick maths', function () {
+  // test
+})
+```
+
+Skip all but this test.
+
+```js
+tom.only('Quick maths', function () {
+  // test
+})
+```
+
+Ignore a test.
+
+```js
+tom.skip('Quick maths')
+```
+
+Test context.
+
+```js
+tom.test('Quick maths', function () {
+	const testName = this.name
+	const testNumber = this.index
+})
+```
+
 Pass the TOM as input into a test-runner.
 
+## Documentation
 
+* [API reference](https://github.com/test-runner-js/test-object-model/blob/master/docs/API.md)
 
 * * *
 

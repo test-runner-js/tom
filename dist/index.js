@@ -517,7 +517,7 @@
    * @param {number} [options.timeout]
    * @alias module:test-object-model
    */
-  class Test extends createMixin(Composite)(StateMachine) {
+  class Tom extends createMixin(Composite)(StateMachine) {
     constructor (name, testFn, options) {
       if (typeof name === 'string') {
         if (isPlainObject(testFn)) {
@@ -556,7 +556,7 @@
       this.name = name;
 
       /**
-       * Test function
+       * Tree function
        * @type {function}
        */
       this.testFn = testFn;
@@ -737,9 +737,9 @@
 
     /**
      * Combine several TOM instances into a common root
-     * @param {Array.<Test>} tests
+     * @param {Array.<Tom>} tests
      * @param {string} [name]
-     * @return {Test}
+     * @return {Tom}
      */
     static combine (tests, name) {
       let test;
@@ -761,6 +761,6 @@
     return input !== null && typeof input === 'object' && input.constructor === Object
   }
 
-  return Test;
+  return Tom;
 
 }));

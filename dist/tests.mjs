@@ -513,7 +513,7 @@ class TestContext {
  * @param {number} [options.timeout]
  * @alias module:test-object-model
  */
-class Test extends createMixin(Composite)(StateMachine) {
+class Tom extends createMixin(Composite)(StateMachine) {
   constructor (name, testFn, options) {
     if (typeof name === 'string') {
       if (isPlainObject(testFn)) {
@@ -552,7 +552,7 @@ class Test extends createMixin(Composite)(StateMachine) {
     this.name = name;
 
     /**
-     * Test function
+     * Tree function
      * @type {function}
      */
     this.testFn = testFn;
@@ -733,9 +733,9 @@ class Test extends createMixin(Composite)(StateMachine) {
 
   /**
    * Combine several TOM instances into a common root
-   * @param {Array.<Test>} tests
+   * @param {Array.<Tom>} tests
    * @param {string} [name]
-   * @return {Test}
+   * @return {Tom}
    */
   static combine (tests, name) {
     let test;
@@ -758,14 +758,14 @@ function isPlainObject (input) {
 }
 
 { /* new Test(): default name, default options */
-  const test = new Test();
+  const test = new Tom();
   a.ok(test.name);
   a.strictEqual(test.testFn, undefined);
   a.strictEqual(test.timeout, 10000);
 }
 
 { /* new Test(name) */
-  const test = new Test('name');
+  const test = new Tom('name');
   a.strictEqual(test.name, 'name');
   a.strictEqual(test.testFn, undefined);
   a.strictEqual(test.timeout, 10000);
@@ -774,7 +774,7 @@ function isPlainObject (input) {
 { /* new Test(name, testFn, options) */
   const testFn = function () {};
   const options = { timeout: 1 };
-  const test = new Test('one', testFn, options);
+  const test = new Tom('one', testFn, options);
   a.strictEqual(test.name, 'one');
   a.strictEqual(test.testFn, testFn);
   a.strictEqual(test.timeout, 1);
@@ -783,7 +783,7 @@ function isPlainObject (input) {
 { /* new Test(testFn, options): default name and testFn */
   const testFn = function () {};
   const options = { timeout: 1 };
-  const test = new Test(testFn, options);
+  const test = new Tom(testFn, options);
   a.ok(test.name);
   a.strictEqual(test.testFn, testFn);
   a.strictEqual(test.timeout, 1);
@@ -791,7 +791,7 @@ function isPlainObject (input) {
 
 { /* new Test(options): options only */
   const options = { timeout: 1 };
-  const test = new Test(options);
+  const test = new Tom(options);
   a.ok(test.name);
   a.strictEqual(test.testFn, undefined);
   a.strictEqual(test.timeout, 1);
@@ -799,7 +799,7 @@ function isPlainObject (input) {
 
 { /* new Test(name, options) */
   const options = { timeout: 1 };
-  const test = new Test('one', options);
+  const test = new Tom('one', options);
   a.strictEqual(test.name, 'one');
   a.strictEqual(test.testFn, undefined);
   a.strictEqual(test.timeout, 1);
@@ -811,7 +811,7 @@ function halt (err) {
 }
 
 { /* test.skip(): event args */
-  const tom = new Test();
+  const tom = new Tom();
   const skippedTest = tom.skip('one', () => 1);
   skippedTest.on('skip', (test, result) => {
     a.strictEqual(test, skippedTest);
@@ -823,7 +823,7 @@ function halt (err) {
 
 { /* skippedTest.skip(): don't emit "start", emit "skip" */
   const actuals = [];
-  const tom = new Test();
+  const tom = new Tom();
   const skippedTest = tom.skip('one', () => 1);
   tom.on('start', () => actuals.push('start'));
   tom.on('skip', () => actuals.push('skip'));
@@ -836,7 +836,7 @@ function halt (err) {
 
 { /* child.skip(): testFn is not run */
   const actuals = [];
-  const tom = new Test();
+  const tom = new Tom();
   const skippedTest = tom.skip('one', () => { actuals.push('one' ); });
   Promise
     .all([ tom.run(), skippedTest.run() ])
@@ -848,7 +848,7 @@ function halt (err) {
 
 { /* child.skip(): multiple */
   const actuals = [];
-  const tom = new Test();
+  const tom = new Tom();
   const one = tom.skip('one', () => 1);
   const two = tom.skip('two', () => 2);
   tom.on('start', () => actuals.push('start'));
@@ -863,7 +863,7 @@ function halt (err) {
 
 { /* test.run(): event order, passing test */
   let actuals = [];
-  const test = new Test('one', function () {
+  const test = new Tom('one', function () {
     actuals.push('body');
     return true
   });
@@ -880,7 +880,7 @@ function halt (err) {
 
 { /* test.run(): event order, failing test */
   let actuals = [];
-  const test = new Test('one', function () {
+  const test = new Tom('one', function () {
     actuals.push('body');
     throw new Error('broken')
   });
@@ -900,7 +900,7 @@ function halt (err) {
 
 { /* test.run(): event order, failing test, rejected */
   let actuals = [];
-  const test = new Test('one', function () {
+  const test = new Tom('one', function () {
     actuals.push('body');
     return Promise.reject(new Error('broken'))
   });
@@ -919,7 +919,7 @@ function halt (err) {
 }
 
 { /* test.run(): pass event args */
-  const test = new Test('one', () => 1);
+  const test = new Tom('one', () => 1);
   test.on('pass', (t, result) => {
     a.strictEqual(t, test);
     a.strictEqual(result, 1);
@@ -929,7 +929,7 @@ function halt (err) {
 }
 
 { /* test.run(): skip event args */
-  const tom = new Test();
+  const tom = new Tom();
   const test = tom.skip('one', () => 1);
   test.on('skip', (t, result) => {
     a.strictEqual(t, test);
@@ -940,7 +940,7 @@ function halt (err) {
 }
 
 { /* test.run(): fail event args */
-  const test = new Test('one', () => {
+  const test = new Tom('one', () => {
     throw new Error('broken')
   });
   test.on('fail', (t, err) => {
@@ -956,7 +956,7 @@ function halt (err) {
 
 { /* no test function: ignore, don't start, skip, pass or fail event */
   let actuals = [];
-  const test = new Test('one');
+  const test = new Tom('one');
   test.on('start', test => actuals.push('start'));
   test.on('skip', test => actuals.push('skip'));
   test.on('pass', test => actuals.push('pass'));
@@ -972,7 +972,7 @@ function halt (err) {
 
 { /* nested events: root should receive child events */
   const actuals = [];
-  const tom = new Test();
+  const tom = new Tom();
   const one = tom.test('one', () => 1);
   const two = one.test('two', () => 2);
   tom.on('pass', (test, result) => {
@@ -994,7 +994,7 @@ function halt (err) {
 }
 
 { /* passing sync test */
-  const test = new Test('tom', () => true);
+  const test = new Tom('tom', () => true);
   test.run()
     .then(result => {
       a.ok(result === true);
@@ -1003,7 +1003,7 @@ function halt (err) {
 }
 
 { /* failing sync test */
-  const test = new Test('tom', function () {
+  const test = new Tom('tom', function () {
     throw new Error('failed')
   });
   test.run()
@@ -1017,7 +1017,7 @@ function halt (err) {
 }
 
 { /* passing async test */
-  const test = new Test('tom', function () {
+  const test = new Tom('tom', function () {
     return Promise.resolve(true)
   });
   test.run().then(result => {
@@ -1026,7 +1026,7 @@ function halt (err) {
 }
 
 { /* failing async test: rejected */
-  const test = new Test('tom', function () {
+  const test = new Tom('tom', function () {
     return Promise.reject(new Error('failed'))
   });
   test.run()
@@ -1040,7 +1040,7 @@ function halt (err) {
 }
 
 { /* failing async test: timeout */
-  const test = new Test(
+  const test = new Tom(
     'tom',
     function () {
       return new Promise((resolve, reject) => {
@@ -1058,7 +1058,7 @@ function halt (err) {
 }
 
 { /* passing async test: timeout 2 */
-  const test = new Test(
+  const test = new Tom(
     'tom',
     function () {
       return new Promise((resolve, reject) => {
@@ -1075,7 +1075,7 @@ function halt (err) {
 }
 
 { /* no test function: ignore, don't start, skip, pass or fail event */
-  const test = new Test('one');
+  const test = new Tom('one');
   test.run()
     .then(result => {
       a.strictEqual(result, undefined);
@@ -1087,7 +1087,7 @@ function halt (err) {
 
 { /* test.run(): state, passing test */
   let actuals = [];
-  const test = new Test('one', function () {
+  const test = new Tom('one', function () {
     actuals.push(test.state);
   });
   actuals.push(test.state);
@@ -1103,7 +1103,7 @@ function halt (err) {
 
 { /* test.run(): state, failing test */
   let actuals = [];
-  const test = new Test('one', function () {
+  const test = new Tom('one', function () {
     actuals.push(test.state);
     throw new Error('broken')
   });
@@ -1122,7 +1122,7 @@ function halt (err) {
 
 { /* test.run(): state, no test */
   let actuals = [];
-  const test = new Test('one');
+  const test = new Tom('one');
   actuals.push(test.state);
   test.run()
     .then(result => {
@@ -1133,7 +1133,7 @@ function halt (err) {
 }
 
 { /* test.run(): ended, passing test */
-  const test = new Test('one', function () {});
+  const test = new Tom('one', function () {});
   a.strictEqual(test.ended, false);
   test.run()
     .then(result => {
@@ -1143,7 +1143,7 @@ function halt (err) {
 }
 
 { /* test.run(): ended, failing test */
-  const test = new Test('one', function () {
+  const test = new Tom('one', function () {
     throw new Error('broken')
   });
   a.strictEqual(test.ended, false);
@@ -1155,7 +1155,7 @@ function halt (err) {
 }
 
 { /* bug in test function */
-  const test = new Test('one', function () {
+  const test = new Tom('one', function () {
     asdf();
   });
 
@@ -1171,7 +1171,7 @@ function halt (err) {
 }
 
 { /* duplicate test name */
-  const tom = new Test();
+  const tom = new Tom();
   tom.test('one', () => 1);
   a.throws(
     () => test.test('one', () => 1)
@@ -1179,7 +1179,7 @@ function halt (err) {
 }
 
 { /* deep duplicate test name */
-  const tom = new Test('tom');
+  const tom = new Tom('tom');
   const child = tom.test('one', () => 1);
   a.throws(
     () => child.test('one', () => 1),
@@ -1188,7 +1188,7 @@ function halt (err) {
 }
 
 { /* .only() */
-  const tom = new Test('tom');
+  const tom = new Tom('tom');
   const one = tom.test('one', () => 1);
   const two = tom.test('two', () => 2);
   a.ok(!one._skip);
@@ -1214,7 +1214,7 @@ function halt (err) {
 }
 
 { /* .only() first */
-  const tom = new Test('tom');
+  const tom = new Tom('tom');
   const one = tom.only('one', () => 1);
   const two = tom.test('two', () => 2);
   a.ok(!one._skip);
@@ -1224,7 +1224,7 @@ function halt (err) {
 }
 
 { /* deep only with skip */
-  const tom = new Test();
+  const tom = new Tom();
   const one = tom.only('one', () => 1);
   const two = one.test('two', () => 2);
   const three = two.skip('three', () => 3);
@@ -1237,7 +1237,7 @@ function halt (err) {
 }
 
 { /* .test() not chainable */
-  const tom = new Test();
+  const tom = new Tom();
   const result = tom.test('one', () => 1);
   a.notStrictEqual(result, tom);
 }
