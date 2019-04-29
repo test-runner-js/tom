@@ -36,7 +36,7 @@ module.exports = tom
 Create a simple test.
 
 ```js
-tom.test('Quick maths', function () {
+tom.test('name', function () {
   // test
 })
 ```
@@ -44,7 +44,7 @@ tom.test('Quick maths', function () {
 Skip a test.
 
 ```js
-tom.skip('Quick maths', function () {
+tom.skip('name', function () {
   // test
 })
 ```
@@ -52,7 +52,7 @@ tom.skip('Quick maths', function () {
 Skip all but this test.
 
 ```js
-tom.only('Quick maths', function () {
+tom.only('name', function () {
   // test
 })
 ```
@@ -60,15 +60,15 @@ tom.only('Quick maths', function () {
 Ignore a test.
 
 ```js
-tom.skip('Quick maths')
+tom.skip('name')
 ```
 
 Test context.
 
 ```js
-tom.test('Quick maths', function () {
-	const testName = this.name
-	const testNumber = this.index
+tom.test('name', function () {
+  const testName = this.name
+  const testNumber = this.index
 })
 ```
 
