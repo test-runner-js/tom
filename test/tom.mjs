@@ -19,38 +19,8 @@ import { halt } from './lib/util.mjs'
   )
 }
 
-{ /* child.skip() */
-  const counts = []
-  const tom = new Test()
-  const child = tom.skip('one', () => 1)
-  tom.on('start', () => counts.push('start'))
-  tom.on('skip', () => counts.push('skip'))
-  child.run()
-    .then(result => {
-      a.strictEqual(result, undefined)
-      a.deepStrictEqual(counts, [ 'skip' ])
-    })
-    .catch(halt)
-}
-
-{ /* child.skip(): multiple */
-  const counts = []
-  const tom = new Test()
-  const one = tom.skip('one', () => 1)
-  const two = tom.skip('two', () => 2)
-  tom.on('start', () => counts.push('start'))
-  tom.on('skip', () => counts.push('skip'))
-  Promise
-    .all([ tom.run(), one.run(), two.run() ])
-    .then(results => {
-      a.deepStrictEqual(results, [ undefined, undefined, undefined ])
-      a.deepStrictEqual(counts, [ 'skip', 'skip' ])
-    })
-    .catch(halt)
-}
-
 { /* .only() */
-  const counts = []
+  const actuals = []
   const tom = new Test('tom')
   const one = tom.test('one', () => 1)
   const two = tom.test('two', () => 2)
@@ -77,7 +47,7 @@ import { halt } from './lib/util.mjs'
 }
 
 { /* .only() first */
-  const counts = []
+  const actuals = []
   const tom = new Test('tom')
   const one = tom.only('one', () => 1)
   const two = tom.test('two', () => 2)
@@ -98,4 +68,10 @@ import { halt } from './lib/util.mjs'
   a.ok(!two._only)
   a.ok(three._skip)
   a.ok(!three._only)
+}
+
+{ /* .test() not chainable */
+  const tom = new Test()
+  const result = tom.test('one', () => 1)
+  a.notStrictEqual(result, tom)
 }

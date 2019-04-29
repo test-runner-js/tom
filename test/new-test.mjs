@@ -5,14 +5,14 @@ import a from 'assert'
   const test = new Test()
   a.ok(test.name)
   a.strictEqual(test.testFn, undefined)
-  a.deepStrictEqual(test.options, { timeout: 10000 })
+  a.strictEqual(test.timeout, 10000)
 }
 
 { /* new Test(name) */
   const test = new Test('name')
   a.strictEqual(test.name, 'name')
   a.strictEqual(test.testFn, undefined)
-  a.deepStrictEqual(test.options, { timeout: 10000 })
+  a.strictEqual(test.timeout, 10000)
 }
 
 { /* new Test(name, testFn, options) */
@@ -21,7 +21,7 @@ import a from 'assert'
   const test = new Test('one', testFn, options)
   a.strictEqual(test.name, 'one')
   a.strictEqual(test.testFn, testFn)
-  a.strictEqual(test.options.timeout, 1)
+  a.strictEqual(test.timeout, 1)
 }
 
 { /* new Test(testFn, options): default name and testFn */
@@ -30,7 +30,7 @@ import a from 'assert'
   const test = new Test(testFn, options)
   a.ok(test.name)
   a.strictEqual(test.testFn, testFn)
-  a.strictEqual(test.options.timeout, 1)
+  a.strictEqual(test.timeout, 1)
 }
 
 { /* new Test(options): options only */
@@ -38,7 +38,7 @@ import a from 'assert'
   const test = new Test(options)
   a.ok(test.name)
   a.strictEqual(test.testFn, undefined)
-  a.strictEqual(test.options.timeout, 1)
+  a.strictEqual(test.timeout, 1)
 }
 
 { /* new Test(name, options) */
@@ -46,5 +46,5 @@ import a from 'assert'
   const test = new Test('one', options)
   a.strictEqual(test.name, 'one')
   a.strictEqual(test.testFn, undefined)
-  a.strictEqual(test.options.timeout, 1)
+  a.strictEqual(test.timeout, 1)
 }

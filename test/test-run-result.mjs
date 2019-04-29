@@ -30,7 +30,7 @@ import { halt } from './lib/util.mjs'
     return Promise.resolve(true)
   })
   test.run().then(result => {
-    a.ok(result === true)
+    a.strictEqual(result, true)
   })
 }
 

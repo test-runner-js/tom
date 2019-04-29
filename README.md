@@ -6,122 +6,34 @@
 
 # test-object-model
 
-<a name="module_test-object-model"></a>
+A test tree - used as input to one of several runners:
 
-## test-object-model
+* [test-runner](https://github.com/test-runner-js/cli)
+* [web-runner](https://github.com/test-runner-js/web-runner)
+* [esm-runner](https://github.com/test-runner-js/esm-runner)
+* [mc-runner](https://github.com/test-runner-js/mc-runner)
 
-* [test-object-model](#module_test-object-model)
-    * [Test](#exp_module_test-object-model--Test) ⏏
-        * [new Test([name], [testFn], [options])](#new_module_test-object-model--Test_new)
-        * _instance_
-            * [.name](#module_test-object-model--Test+name) : <code>string</code>
-            * [.testFn](#module_test-object-model--Test+testFn) : <code>function</code>
-            * [.index](#module_test-object-model--Test+index)
-            * [.state](#module_test-object-model--Test+state)
-            * [.ended](#module_test-object-model--Test+ended)
-            * [.test()](#module_test-object-model--Test+test)
-            * [.skip()](#module_test-object-model--Test+skip)
-            * [.only()](#module_test-object-model--Test+only)
-            * [.run()](#module_test-object-model--Test+run) ⇒ <code>Promise</code>
-            * [.reset()](#module_test-object-model--Test+reset)
-        * _static_
-            * [.combine(tests, [name])](#module_test-object-model--Test.combine) ⇒ <code>Test</code>
-        * _inner_
-            * [~TestContext](#module_test-object-model--Test..TestContext)
+## Synopsis
 
-<a name="exp_module_test-object-model--Test"></a>
+Create a module which exports one or more tests.
 
-### Test ⏏
-**Kind**: Exported class  
-<a name="new_module_test-object-model--Test_new"></a>
+```js
+const Tom = require('test-object-model')
+const assert = require('assert')
 
-#### new Test([name], [testFn], [options])
+const tom = new Tom()
 
-| Param | Type |
-| --- | --- |
-| [name] | <code>string</code> | 
-| [testFn] | <code>function</code> | 
-| [options] | <code>object</code> | 
-| [options.timeout] | <code>number</code> | 
+tom.test('Quick maths', function () {
+	const result = 2 + 2 - 1
+	assert.strictEqual(result, 3)
+})
 
-<a name="module_test-object-model--Test+name"></a>
+module.exports = tom
+```
 
-#### test.name : <code>string</code>
-Test name
+Pass the TOM as input into a test-runner.
 
-**Kind**: instance property of [<code>Test</code>](#exp_module_test-object-model--Test)  
-<a name="module_test-object-model--Test+testFn"></a>
 
-#### test.testFn : <code>function</code>
-Test function
-
-**Kind**: instance property of [<code>Test</code>](#exp_module_test-object-model--Test)  
-<a name="module_test-object-model--Test+index"></a>
-
-#### test.index
-Position of this test within its parents children
-
-**Kind**: instance property of [<code>Test</code>](#exp_module_test-object-model--Test)  
-<a name="module_test-object-model--Test+state"></a>
-
-#### test.state
-Test state: pending, start, skip, pass or fail.
-
-**Kind**: instance property of [<code>Test</code>](#exp_module_test-object-model--Test)  
-<a name="module_test-object-model--Test+ended"></a>
-
-#### test.ended
-True if ended
-
-**Kind**: instance property of [<code>Test</code>](#exp_module_test-object-model--Test)  
-<a name="module_test-object-model--Test+test"></a>
-
-#### test.test()
-Add a test.
-
-**Kind**: instance method of [<code>Test</code>](#exp_module_test-object-model--Test)  
-<a name="module_test-object-model--Test+skip"></a>
-
-#### test.skip()
-Add a skipped test
-
-**Kind**: instance method of [<code>Test</code>](#exp_module_test-object-model--Test)  
-<a name="module_test-object-model--Test+only"></a>
-
-#### test.only()
-Add an only test
-
-**Kind**: instance method of [<code>Test</code>](#exp_module_test-object-model--Test)  
-<a name="module_test-object-model--Test+run"></a>
-
-#### test.run() ⇒ <code>Promise</code>
-Execute the stored test function.
-
-**Kind**: instance method of [<code>Test</code>](#exp_module_test-object-model--Test)  
-<a name="module_test-object-model--Test+reset"></a>
-
-#### test.reset()
-Reset state
-
-**Kind**: instance method of [<code>Test</code>](#exp_module_test-object-model--Test)  
-<a name="module_test-object-model--Test.combine"></a>
-
-#### Test.combine(tests, [name]) ⇒ <code>Test</code>
-Combine several TOM instances into a common root
-
-**Kind**: static method of [<code>Test</code>](#exp_module_test-object-model--Test)  
-
-| Param | Type |
-| --- | --- |
-| tests | <code>Array.&lt;Test&gt;</code> | 
-| [name] | <code>string</code> | 
-
-<a name="module_test-object-model--Test..TestContext"></a>
-
-#### Test~TestContext
-The test context, available as `this` within each test function.
-
-**Kind**: inner class of [<code>Test</code>](#exp_module_test-object-model--Test)  
 
 * * *
 

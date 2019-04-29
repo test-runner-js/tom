@@ -16,7 +16,7 @@
     "test:mjs": "node --experimental-modules test/tests.mjs",
     "test:esm": "rollup -c build/tests-esm.config.js && node --experimental-modules dist/tests.mjs",
     "dist": "rollup -c build/index.config.js && rollup -c build/index-esm.config.js",
-    "docs": "jsdoc2md -c build/jsdoc.conf -t README.hbs index.mjs > README.md"
+    "docs": "jsdoc2md -c build/jsdoc.conf index.mjs lib/*.mjs > docs/API.md"
   },
   "dependencies": {
     "composite-class": "^0.3.0",
@@ -25,7 +25,8 @@
     "race-timeout-anywhere": "^0.1.1"
   },
   "devDependencies": {
-    "rollup": "^1.6.0"
+    "rollup": "^1.10.1",
+    "test-runner": "^0.6.0-14"
   },
   "standard": {
     "ignore": [
@@ -35,6 +36,7 @@
   },
   "files": [
     "index.mjs",
+    "lib",
     "dist"
   ]
 }

@@ -491,6 +491,22 @@
   }
 
   /**
+   * The test context, available as `this` within each test function.
+   */
+  class TestContext {
+    constructor (context) {
+      /**
+       * The name given to this test.
+       */
+      this.name = context.name;
+      /**
+       * The test index within the current set.
+       */
+      this.index = context.index;
+    }
+  }
+
+  /**
    * @module test-object-model
    */
 
@@ -517,7 +533,7 @@
         testFn = undefined;
         name = '';
       }
-      options = options || {};
+      options = Object.assign({ timeout: 10000 }, options);
       name = name || 'tom';
       super ([
         { from: undefined, to: 'pending' },
@@ -547,22 +563,40 @@
 
       /**
        * Position of this test within its parents children
+       * @type {number}
        */
       this.index = 1;
 
       /**
        * Test state: pending, start, skip, pass or fail.
+       * @type {string}
        */
       this.state = 'pending';
+
+      /**
+       * Timeout in ms
+       * @type {number}
+       */
+      this.timeout = options.timeout;
+
+      /**
+       * True if the test has ended
+       * @type {boolean}
+       */
+      this.ended = false;
+
+      /**
+       * The max concurrency that asynchronous child jobs can run.
+       * @type {number}
+       * @default 10
+       */
+      this.maxConcurrency = options.maxConcurrency || 10;
+
       this._markSkip = options._markSkip;
       this._skip = null;
       this._only = options.only;
-      this.options = Object.assign({ timeout: 10000 }, options);
 
-      /**
-       * True if ended
-       */
-      this.ended = false;
+      this.options = options;
     }
 
     toString () {
@@ -571,6 +605,7 @@
 
     /**
      * Add a test.
+     * @return {module:test-object-model}
      */
     test (name, testFn, options) {
       for (const child of this) {
@@ -587,6 +622,7 @@
 
     /**
      * Add a skipped test
+     * @return {module:test-object-model}
      */
     skip (name, testFn, options) {
       options = options || {};
@@ -597,6 +633,7 @@
 
     /**
      * Add an only test
+     * @return {module:test-object-model}
      */
     only (name, testFn, options) {
       options = options || {};
@@ -638,6 +675,7 @@
     /**
      * Execute the stored test function.
      * @returns {Promise}
+     * @fulfil {*}
      */
     run () {
       if (this.testFn) {
@@ -673,7 +711,7 @@
               reject(err);
             }
           });
-          return Promise.race([ testFnResult, raceTimeout(this.options.timeout) ])
+          return Promise.race([ testFnResult, raceTimeout(this.timeout) ])
         }
       } else {
         this.setState('ignored', this);
@@ -716,16 +754,6 @@
       }
       test._skipLogic();
       return test
-    }
-  }
-
-  /**
-   * The test context, available as `this` within each test function.
-   */
-  class TestContext {
-    constructor (context) {
-      this.name = context.name;
-      this.index = context.index;
     }
   }
 

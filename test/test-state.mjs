@@ -3,48 +3,48 @@ import a from 'assert'
 import { halt } from './lib/util.mjs'
 
 { /* test.run(): state, passing test */
-  let counts = []
+  let actuals = []
   const test = new Test('one', function () {
-    counts.push(test.state)
+    actuals.push(test.state)
   })
-  counts.push(test.state)
+  actuals.push(test.state)
   a.strictEqual(test.ended, false)
   test.run()
     .then(result => {
-      counts.push(test.state)
-      a.deepStrictEqual(counts, [ 'pending', 'in-progress', 'pass' ])
+      actuals.push(test.state)
+      a.deepStrictEqual(actuals, [ 'pending', 'in-progress', 'pass' ])
       a.strictEqual(test.ended, true)
     })
     .catch(halt)
 }
 
 { /* test.run(): state, failing test */
-  let counts = []
+  let actuals = []
   const test = new Test('one', function () {
-    counts.push(test.state)
+    actuals.push(test.state)
     throw new Error('broken')
   })
-  counts.push(test.state)
+  actuals.push(test.state)
   test.run()
     .then(result => {
-      counts.push(test.state)
+      actuals.push(test.state)
     })
     .catch(err => {
-      counts.push(test.state)
-      a.deepStrictEqual(counts, [ 'pending', 'in-progress', 'fail' ])
+      actuals.push(test.state)
+      a.deepStrictEqual(actuals, [ 'pending', 'in-progress', 'fail' ])
       a.strictEqual(test.ended, true)
     })
     .catch(halt)
 }
 
 { /* test.run(): state, no test */
-  let counts = []
+  let actuals = []
   const test = new Test('one')
-  counts.push(test.state)
+  actuals.push(test.state)
   test.run()
     .then(result => {
-      counts.push(test.state)
-      a.deepStrictEqual(counts, [ 'pending', 'ignored' ])
+      actuals.push(test.state)
+      a.deepStrictEqual(actuals, [ 'pending', 'ignored' ])
     })
     .catch(halt)
 }

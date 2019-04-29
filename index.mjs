@@ -2,6 +2,7 @@ import raceTimeout from './node_modules/race-timeout-anywhere/index.mjs'
 import mixin from './node_modules/create-mixin/index.mjs'
 import CompositeClass from './node_modules/composite-class/index.mjs'
 import StateMachine from './node_modules/fsm-base/dist/index.mjs'
+import TestContext from './lib/test-context.mjs'
 
 /**
  * @module test-object-model
@@ -30,7 +31,7 @@ class Test extends mixin(CompositeClass)(StateMachine) {
       testFn = undefined
       name = ''
     }
-    options = options || {}
+    options = Object.assign({ timeout: 10000 }, options)
     name = name || 'tom'
     super ([
       { from: undefined, to: 'pending' },
@@ -60,22 +61,40 @@ class Test extends mixin(CompositeClass)(StateMachine) {
 
     /**
      * Position of this test within its parents children
+     * @type {number}
      */
     this.index = 1
 
     /**
      * Test state: pending, start, skip, pass or fail.
+     * @type {string}
      */
     this.state = 'pending'
+
+    /**
+     * Timeout in ms
+     * @type {number}
+     */
+    this.timeout = options.timeout
+
+    /**
+     * True if the test has ended
+     * @type {boolean}
+     */
+    this.ended = false
+
+    /**
+     * The max concurrency that asynchronous child jobs can run.
+     * @type {number}
+     * @default 10
+     */
+    this.maxConcurrency = options.maxConcurrency || 10
+
     this._markSkip = options._markSkip
     this._skip = null
     this._only = options.only
-    this.options = Object.assign({ timeout: 10000 }, options)
 
-    /**
-     * True if ended
-     */
-    this.ended = false
+    this.options = options
   }
 
   toString () {
@@ -84,6 +103,7 @@ class Test extends mixin(CompositeClass)(StateMachine) {
 
   /**
    * Add a test.
+   * @return {module:test-object-model}
    */
   test (name, testFn, options) {
     for (const child of this) {
@@ -100,6 +120,7 @@ class Test extends mixin(CompositeClass)(StateMachine) {
 
   /**
    * Add a skipped test
+   * @return {module:test-object-model}
    */
   skip (name, testFn, options) {
     options = options || {}
@@ -110,6 +131,7 @@ class Test extends mixin(CompositeClass)(StateMachine) {
 
   /**
    * Add an only test
+   * @return {module:test-object-model}
    */
   only (name, testFn, options) {
     options = options || {}
@@ -151,6 +173,7 @@ class Test extends mixin(CompositeClass)(StateMachine) {
   /**
    * Execute the stored test function.
    * @returns {Promise}
+   * @fulfil {*}
    */
   run () {
     if (this.testFn) {
@@ -186,7 +209,7 @@ class Test extends mixin(CompositeClass)(StateMachine) {
             reject(err)
           }
         })
-        return Promise.race([ testFnResult, raceTimeout(this.options.timeout) ])
+        return Promise.race([ testFnResult, raceTimeout(this.timeout) ])
       }
     } else {
       this.setState('ignored', this)
@@ -229,16 +252,6 @@ class Test extends mixin(CompositeClass)(StateMachine) {
     }
     test._skipLogic()
     return test
-  }
-}
-
-/**
- * The test context, available as `this` within each test function.
- */
-class TestContext {
-  constructor (context) {
-    this.name = context.name
-    this.index = context.index
   }
 }
 
