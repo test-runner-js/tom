@@ -507,10 +507,13 @@ class TestContext {
  */
 
 /**
- * @param {string} [name]
- * @param {function} [testFn]
+ * @param {string} [name] - The test name.
+ * @param {function} [testFn] - A function which will either complete successfully, reject or throw.
  * @param {object} [options]
- * @param {number} [options.timeout]
+ * @param {number} [options.timeout] - A time limit for the test in ms.
+ * @param {number} [options.maxConcurrency] - The max concurrency that asynchronous child jobs can run.
+ * @param {boolean} [options.skip] - Skip this test.
+ * @param {boolean} [options.only] - Only run this test.
  * @alias module:test-object-model
  */
 class Tom extends createMixin(Composite)(StateMachine) {
@@ -534,7 +537,7 @@ class Tom extends createMixin(Composite)(StateMachine) {
     super ([
       { from: undefined, to: 'pending' },
       { from: 'pending', to: 'in-progress' },
-      { from: 'pending', to: 'skip' },
+      { from: 'pending', to: 'skipped' },
       { from: 'pending', to: 'ignored' },
       { from: 'in-progress', to: 'pass' },
       { from: 'in-progress', to: 'fail' },
@@ -542,7 +545,7 @@ class Tom extends createMixin(Composite)(StateMachine) {
       { from: 'in-progress', to: 'pending' },
       { from: 'pass', to: 'pending' },
       { from: 'fail', to: 'pending' },
-      { from: 'skip', to: 'pending' },
+      { from: 'skipped', to: 'pending' },
       { from: 'ignored', to: 'pending' },
     ]);
     /**
@@ -552,7 +555,7 @@ class Tom extends createMixin(Composite)(StateMachine) {
     this.name = name;
 
     /**
-     * Tree function
+     * A function which will either complete successfully, reject or throw.
      * @type {function}
      */
     this.testFn = testFn;
@@ -570,13 +573,13 @@ class Tom extends createMixin(Composite)(StateMachine) {
     this.state = 'pending';
 
     /**
-     * Timeout in ms
+     * A time limit for the test in ms.
      * @type {number}
      */
     this.timeout = options.timeout;
 
     /**
-     * True if the test has ended
+     * True if the test has ended.
      * @type {boolean}
      */
     this.ended = false;
@@ -588,9 +591,8 @@ class Tom extends createMixin(Composite)(StateMachine) {
      */
     this.maxConcurrency = options.maxConcurrency || 10;
 
-    this._markSkip = options._markSkip;
-    this._skip = null;
-    this._only = options.only;
+    this.markedSkip = options.skip || false;
+    this.markedOnly = options.only || false;
 
     this.options = options;
   }
@@ -604,6 +606,7 @@ class Tom extends createMixin(Composite)(StateMachine) {
    * @return {module:test-object-model}
    */
   test (name, testFn, options) {
+    /* validation */
     for (const child of this) {
       if (child.name === name) {
         throw new Error('Duplicate name: ' + name)
@@ -622,7 +625,7 @@ class Tom extends createMixin(Composite)(StateMachine) {
    */
   skip (name, testFn, options) {
     options = options || {};
-    options._markSkip = true;
+    options.skip = true;
     const test = this.test(name, testFn, options);
     return test
   }
@@ -639,21 +642,13 @@ class Tom extends createMixin(Composite)(StateMachine) {
   }
 
   _onlyExists () {
-    return Array.from(this.root()).some(t => t._only)
+    return Array.from(this.root()).some(t => t.markedOnly)
   }
 
   _skipLogic () {
     if (this._onlyExists()) {
       for (const test of this.root()) {
-        if (test._markSkip) {
-          test._skip = true;
-        } else {
-          test._skip = !test._only;
-        }
-      }
-    } else {
-      for (const test of this.root()) {
-        test._skip = test._markSkip;
+        test.markedSkip = !test.markedOnly;
       }
     }
   }
@@ -675,8 +670,8 @@ class Tom extends createMixin(Composite)(StateMachine) {
    */
   run () {
     if (this.testFn) {
-      if (this._skip) {
-        this.setState('skip', this);
+      if (this.markedSkip) {
+        this.setState('skipped', this);
         return Promise.resolve()
       } else {
         this.setState('in-progress', this);
@@ -726,8 +721,8 @@ class Tom extends createMixin(Composite)(StateMachine) {
     } else {
       this.index = 1;
       this.state = 'pending';
-      this._skip = null;
-      this._only = null;
+      this.markedSkip = this.options.skip || false;
+      this.markedOnly = this.options.only || false;
     }
   }
 
@@ -755,6 +750,11 @@ class Tom extends createMixin(Composite)(StateMachine) {
 
 function isPlainObject (input) {
   return input !== null && typeof input === 'object' && input.constructor === Object
+}
+
+function halt (err) {
+  console.error(err);
+  process.exitCode = 1;
 }
 
 { /* new Test(): default name, default options */
@@ -805,12 +805,78 @@ function isPlainObject (input) {
   a.strictEqual(test.timeout, 1);
 }
 
-function halt (err) {
-  console.error(err);
-  process.exitCode = 1;
+{ /* new Test ({ only: true }) */
+  const actuals = [];
+  const one = new Tom(() => { actuals.push('one' ); }, { only: true });
+  a.strictEqual(one.markedOnly, true);
+  one.run()
+    .then(() => {
+      a.deepStrictEqual(actuals, [ 'one' ]);
+    })
+    .catch(halt);
 }
 
-{ /* test.skip(): event args */
+{ /* .only() */
+  const tom = new Tom('tom');
+  const one = tom.test('one', () => 1);
+  const two = tom.test('two', () => 2);
+  a.strictEqual(one.markedSkip, false);
+  a.strictEqual(two.markedSkip, false);
+  a.strictEqual(one.markedOnly, false);
+  a.strictEqual(two.markedOnly, false);
+  const three = tom.only('three', () => 3);
+  a.strictEqual(one.markedSkip, true);
+  a.strictEqual(one.markedOnly, false);
+  a.strictEqual(two.markedSkip, true);
+  a.strictEqual(two.markedOnly, false);
+  a.strictEqual(three.markedSkip, false);
+  a.strictEqual(three.markedOnly, true);
+  const four = tom.only('four', () => 4);
+  a.strictEqual(one.markedSkip, true);
+  a.strictEqual(one.markedOnly, false);
+  a.strictEqual(two.markedSkip, true);
+  a.strictEqual(two.markedOnly, false);
+  a.strictEqual(three.markedSkip, false);
+  a.strictEqual(three.markedOnly, true);
+  a.strictEqual(four.markedSkip, false);
+  a.strictEqual(four.markedOnly, true);
+}
+
+{ /* .only() first */
+  const tom = new Tom('tom');
+  const one = tom.only('one', () => 1);
+  const two = tom.test('two', () => 2);
+  a.strictEqual(one.markedSkip, false);
+  a.strictEqual(one.markedOnly, true);
+  a.strictEqual(two.markedSkip, true);
+  a.strictEqual(two.markedOnly, false);
+}
+
+{ /* deep only with skip */
+  const tom = new Tom();
+  const one = tom.only('one', () => 1);
+  const two = one.test('two', () => 2);
+  const three = two.skip('three', () => 3);
+  a.strictEqual(one.markedSkip, false);
+  a.strictEqual(one.markedOnly, true);
+  a.strictEqual(two.markedSkip, true);
+  a.strictEqual(two.markedOnly, false);
+  a.strictEqual(three.markedSkip, true);
+  a.strictEqual(three.markedOnly, false);
+}
+
+{ /* new Test ({ skip: true }) */
+  const actuals = [];
+  const skippedTest = new Tom(() => { actuals.push('one' ); }, { skip: true });
+  a.strictEqual(skippedTest.markedSkip, true);
+  skippedTest.run()
+    .then(() => {
+      a.deepStrictEqual(actuals, []);
+    })
+    .catch(halt);
+}
+
+{ /* tom.skip(): event args */
   const tom = new Tom();
   const skippedTest = tom.skip('one', () => 1);
   skippedTest.on('skip', (test, result) => {
@@ -821,20 +887,19 @@ function halt (err) {
     .catch(halt);
 }
 
-{ /* skippedTest.skip(): don't emit "start", emit "skip" */
+{ /* tom.skip(): only emit "skipped" */
   const actuals = [];
   const tom = new Tom();
   const skippedTest = tom.skip('one', () => 1);
-  tom.on('start', () => actuals.push('start'));
-  tom.on('skip', () => actuals.push('skip'));
+  tom.on(function (eventName) { actuals.push(eventName); });
   skippedTest.run()
     .then(() => {
-      a.deepStrictEqual(actuals, [ 'skip' ]);
+      a.deepStrictEqual(actuals, [ 'state', 'skipped' ]);
     })
     .catch(halt);
 }
 
-{ /* child.skip(): testFn is not run */
+{ /* tom.skip(): testFn is not run */
   const actuals = [];
   const tom = new Tom();
   const skippedTest = tom.skip('one', () => { actuals.push('one' ); });
@@ -846,18 +911,35 @@ function halt (err) {
     .catch(halt);
 }
 
-{ /* child.skip(): multiple */
+{ /* tom.skip(): multiple */
   const actuals = [];
   const tom = new Tom();
   const one = tom.skip('one', () => 1);
   const two = tom.skip('two', () => 2);
-  tom.on('start', () => actuals.push('start'));
-  tom.on('skip', () => actuals.push('skip'));
+  tom.on(function (eventName) { actuals.push(eventName); });
   Promise
     .all([ tom.run(), one.run(), two.run() ])
-    .then(results => {
-      a.deepStrictEqual(actuals, [ 'skip', 'skip' ]);
+    .then(() => {
+      a.deepStrictEqual(actuals, [
+        'state',
+        'ignored',
+        'state',
+        'skipped',
+        'state',
+        'skipped'
+      ]);
     })
+    .catch(halt);
+}
+
+{ /* skippedTest.run(): skip event args */
+  const tom = new Tom();
+  const test = tom.skip('one', () => 1);
+  test.on('skip', (t, result) => {
+    a.strictEqual(t, test);
+    a.strictEqual(result, undefined);
+  });
+  test.run()
     .catch(halt);
 }
 
@@ -923,17 +1005,6 @@ function halt (err) {
   test.on('pass', (t, result) => {
     a.strictEqual(t, test);
     a.strictEqual(result, 1);
-  });
-  test.run()
-    .catch(halt);
-}
-
-{ /* test.run(): skip event args */
-  const tom = new Tom();
-  const test = tom.skip('one', () => 1);
-  test.on('skip', (t, result) => {
-    a.strictEqual(t, test);
-    a.strictEqual(result, undefined);
   });
   test.run()
     .catch(halt);
@@ -1185,55 +1256,6 @@ function halt (err) {
     () => child.test('one', () => 1),
     /duplicate/i
   );
-}
-
-{ /* .only() */
-  const tom = new Tom('tom');
-  const one = tom.test('one', () => 1);
-  const two = tom.test('two', () => 2);
-  a.ok(!one._skip);
-  a.ok(!two._skip);
-  a.ok(!one._only);
-  a.ok(!two._only);
-  const three = tom.only('three', () => 3);
-  a.ok(one._skip);
-  a.ok(!one._only);
-  a.ok(two._skip);
-  a.ok(!two._only);
-  a.ok(!three._skip);
-  a.ok(three._only);
-  const four = tom.only('four', () => 4);
-  a.ok(one._skip);
-  a.ok(!one._only);
-  a.ok(two._skip);
-  a.ok(!two._only);
-  a.ok(!three._skip);
-  a.ok(three._only);
-  a.ok(!four._skip);
-  a.ok(four._only);
-}
-
-{ /* .only() first */
-  const tom = new Tom('tom');
-  const one = tom.only('one', () => 1);
-  const two = tom.test('two', () => 2);
-  a.ok(!one._skip);
-  a.ok(one._only);
-  a.ok(two._skip);
-  a.ok(!two._only);
-}
-
-{ /* deep only with skip */
-  const tom = new Tom();
-  const one = tom.only('one', () => 1);
-  const two = one.test('two', () => 2);
-  const three = two.skip('three', () => 3);
-  a.ok(!one._skip);
-  a.ok(one._only);
-  a.ok(two._skip);
-  a.ok(!two._only);
-  a.ok(three._skip);
-  a.ok(!three._only);
 }
 
 { /* .test() not chainable */

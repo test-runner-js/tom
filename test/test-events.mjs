@@ -70,18 +70,6 @@ import { halt } from './lib/util.mjs'
     .catch(halt)
 }
 
-{ /* test.run(): skip event args */
-  let actuals = []
-  const tom = new Test()
-  const test = tom.skip('one', () => 1)
-  test.on('skip', (t, result) => {
-    a.strictEqual(t, test)
-    a.strictEqual(result, undefined)
-  })
-  test.run()
-    .catch(halt)
-}
-
 { /* test.run(): fail event args */
   let actuals = []
   const test = new Test('one', () => {

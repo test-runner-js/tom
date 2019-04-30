@@ -60,7 +60,7 @@ tom.only('name', function () {
 Ignore a test.
 
 ```js
-tom.skip('name')
+tom.test('name')
 ```
 
 Test context.

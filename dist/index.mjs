@@ -505,10 +505,13 @@ class TestContext {
  */
 
 /**
- * @param {string} [name]
- * @param {function} [testFn]
+ * @param {string} [name] - The test name.
+ * @param {function} [testFn] - A function which will either complete successfully, reject or throw.
  * @param {object} [options]
- * @param {number} [options.timeout]
+ * @param {number} [options.timeout] - A time limit for the test in ms.
+ * @param {number} [options.maxConcurrency] - The max concurrency that asynchronous child jobs can run.
+ * @param {boolean} [options.skip] - Skip this test.
+ * @param {boolean} [options.only] - Only run this test.
  * @alias module:test-object-model
  */
 class Tom extends createMixin(Composite)(StateMachine) {
@@ -532,7 +535,7 @@ class Tom extends createMixin(Composite)(StateMachine) {
     super ([
       { from: undefined, to: 'pending' },
       { from: 'pending', to: 'in-progress' },
-      { from: 'pending', to: 'skip' },
+      { from: 'pending', to: 'skipped' },
       { from: 'pending', to: 'ignored' },
       { from: 'in-progress', to: 'pass' },
       { from: 'in-progress', to: 'fail' },
@@ -540,7 +543,7 @@ class Tom extends createMixin(Composite)(StateMachine) {
       { from: 'in-progress', to: 'pending' },
       { from: 'pass', to: 'pending' },
       { from: 'fail', to: 'pending' },
-      { from: 'skip', to: 'pending' },
+      { from: 'skipped', to: 'pending' },
       { from: 'ignored', to: 'pending' },
     ]);
     /**
@@ -550,7 +553,7 @@ class Tom extends createMixin(Composite)(StateMachine) {
     this.name = name;
 
     /**
-     * Tree function
+     * A function which will either complete successfully, reject or throw.
      * @type {function}
      */
     this.testFn = testFn;
@@ -568,13 +571,13 @@ class Tom extends createMixin(Composite)(StateMachine) {
     this.state = 'pending';
 
     /**
-     * Timeout in ms
+     * A time limit for the test in ms.
      * @type {number}
      */
     this.timeout = options.timeout;
 
     /**
-     * True if the test has ended
+     * True if the test has ended.
      * @type {boolean}
      */
     this.ended = false;
@@ -586,9 +589,8 @@ class Tom extends createMixin(Composite)(StateMachine) {
      */
     this.maxConcurrency = options.maxConcurrency || 10;
 
-    this._markSkip = options._markSkip;
-    this._skip = null;
-    this._only = options.only;
+    this.markedSkip = options.skip || false;
+    this.markedOnly = options.only || false;
 
     this.options = options;
   }
@@ -602,6 +604,7 @@ class Tom extends createMixin(Composite)(StateMachine) {
    * @return {module:test-object-model}
    */
   test (name, testFn, options) {
+    /* validation */
     for (const child of this) {
       if (child.name === name) {
         throw new Error('Duplicate name: ' + name)
@@ -620,7 +623,7 @@ class Tom extends createMixin(Composite)(StateMachine) {
    */
   skip (name, testFn, options) {
     options = options || {};
-    options._markSkip = true;
+    options.skip = true;
     const test = this.test(name, testFn, options);
     return test
   }
@@ -637,21 +640,13 @@ class Tom extends createMixin(Composite)(StateMachine) {
   }
 
   _onlyExists () {
-    return Array.from(this.root()).some(t => t._only)
+    return Array.from(this.root()).some(t => t.markedOnly)
   }
 
   _skipLogic () {
     if (this._onlyExists()) {
       for (const test of this.root()) {
-        if (test._markSkip) {
-          test._skip = true;
-        } else {
-          test._skip = !test._only;
-        }
-      }
-    } else {
-      for (const test of this.root()) {
-        test._skip = test._markSkip;
+        test.markedSkip = !test.markedOnly;
       }
     }
   }
@@ -673,8 +668,8 @@ class Tom extends createMixin(Composite)(StateMachine) {
    */
   run () {
     if (this.testFn) {
-      if (this._skip) {
-        this.setState('skip', this);
+      if (this.markedSkip) {
+        this.setState('skipped', this);
         return Promise.resolve()
       } else {
         this.setState('in-progress', this);
@@ -724,8 +719,8 @@ class Tom extends createMixin(Composite)(StateMachine) {
     } else {
       this.index = 1;
       this.state = 'pending';
-      this._skip = null;
-      this._only = null;
+      this.markedSkip = this.options.skip || false;
+      this.markedOnly = this.options.only || false;
     }
   }
 

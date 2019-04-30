@@ -1,5 +1,6 @@
 import Test from '../index.mjs'
 import a from 'assert'
+import { halt } from './lib/util.mjs'
 
 { /* new Test(): default name, default options */
   const test = new Test()

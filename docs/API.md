@@ -44,12 +44,15 @@
 
 #### new Tom([name], [testFn], [options])
 
-| Param | Type |
-| --- | --- |
-| [name] | <code>string</code> | 
-| [testFn] | <code>function</code> | 
-| [options] | <code>object</code> | 
-| [options.timeout] | <code>number</code> | 
+| Param | Type | Description |
+| --- | --- | --- |
+| [name] | <code>string</code> | The test name. |
+| [testFn] | <code>function</code> | A function which will either complete successfully, reject or throw. |
+| [options] | <code>object</code> |  |
+| [options.timeout] | <code>number</code> | A time limit for the test in ms. |
+| [options.maxConcurrency] | <code>number</code> | The max concurrency that asynchronous child jobs can run. |
+| [options.skip] | <code>boolean</code> | Skip this test. |
+| [options.only] | <code>boolean</code> | Only run this test. |
 
 <a name="module_test-object-model--Tom+name"></a>
 
@@ -60,7 +63,7 @@ Test name
 <a name="module_test-object-model--Tom+testFn"></a>
 
 #### tom.testFn : <code>function</code>
-Tree function
+A function which will either complete successfully, reject or throw.
 
 **Kind**: instance property of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
 <a name="module_test-object-model--Tom+index"></a>
@@ -78,13 +81,13 @@ Test state: pending, start, skip, pass or fail.
 <a name="module_test-object-model--Tom+timeout"></a>
 
 #### tom.timeout : <code>number</code>
-Timeout in ms
+A time limit for the test in ms.
 
 **Kind**: instance property of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
 <a name="module_test-object-model--Tom+ended"></a>
 
 #### tom.ended : <code>boolean</code>
-True if the test has ended
+True if the test has ended.
 
 **Kind**: instance property of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
 <a name="module_test-object-model--Tom+maxConcurrency"></a>
