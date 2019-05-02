@@ -26,17 +26,15 @@ import { halt } from './lib/util.mjs'
 }
 
 { /* passing async test */
-  const test = new Test('tom', function () {
-    return Promise.resolve(true)
-  })
+  const test = new Test('tom', async () => true)
   test.run().then(result => {
     a.strictEqual(result, true)
   })
 }
 
 { /* failing async test: rejected */
-  const test = new Test('tom', function () {
-    return Promise.reject(new Error('failed'))
+  const test = new Test('tom', async function () {
+    throw new Error('failed')
   })
   test.run()
     .then(() => {
@@ -44,41 +42,6 @@ import { halt } from './lib/util.mjs'
     })
     .catch(err => {
       a.ok(/failed/.test(err.message))
-    })
-    .catch(halt)
-}
-
-{ /* failing async test: timeout */
-  const test = new Test(
-    'tom',
-    function () {
-      return new Promise((resolve, reject) => {
-        setTimeout(resolve, 300)
-      })
-    },
-    { timeout: 150 }
-  )
-  test.run()
-    .then(() => a.ok(false, 'should not reach here'))
-    .catch(err => {
-      a.ok(/Timeout expired/.test(err.message))
-    })
-    .catch(halt)
-}
-
-{ /* passing async test: timeout 2 */
-  const test = new Test(
-    'tom',
-    function () {
-      return new Promise((resolve, reject) => {
-        setTimeout(() => resolve('ok'), 300)
-      })
-    },
-    { timeout: 350 }
-  )
-  test.run()
-    .then(result => {
-      a.ok(result === 'ok')
     })
     .catch(halt)
 }

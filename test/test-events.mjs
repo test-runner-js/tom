@@ -4,18 +4,12 @@ import { halt } from './lib/util.mjs'
 
 { /* test.run(): event order, passing test */
   let actuals = []
-  const test = new Test('one', function () {
-    actuals.push('body')
-    return true
-  })
+  const test = new Test('one', () => actuals.push('body'))
   test.on('start', test => actuals.push('start'))
   test.on('pass', test => actuals.push('pass'))
   test.on('end', test => actuals.push('end'))
   test.run()
-    .then(result => {
-      a.strictEqual(result, true)
-      a.deepStrictEqual(actuals, [ 'start', 'body', 'pass', 'end' ])
-    })
+    .then(() => a.deepStrictEqual(actuals, [ 'start', 'body', 'pass', 'end' ]))
     .catch(halt)
 }
 
@@ -119,8 +113,7 @@ import { halt } from './lib/util.mjs'
     }
   })
   one.run()
-    .then(() => {
-      two.run()
-    })
+    .then(() => two.run())
     .then(() => a.deepStrictEqual(actuals, [ 1, 2 ]))
+    .catch(halt)
 }

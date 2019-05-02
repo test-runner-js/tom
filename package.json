@@ -11,10 +11,10 @@
     "node": ">=8"
   },
   "scripts": {
-    "test": "npm run test:js && npm run test:mjs && npm run test:esm",
-    "test:js": "rollup -c build/tests.config.js && node dist/tests.js",
-    "test:mjs": "node --experimental-modules test/tests.mjs",
-    "test:esm": "rollup -c build/tests-esm.config.js && node --experimental-modules dist/tests.mjs",
+    "test": "npm run test:js && npm run test:esm && npm run test:esm-dist",
+    "test:js": "rollup -c build/tests.config.js && node tmp/test/tests.js",
+    "test:esm": "node --experimental-modules test/tests.mjs",
+    "test:esm-dist": "rollup -c build/tests-esm.config.js && node --experimental-modules tmp/test/tests.mjs",
     "dist": "rollup -c build/index.config.js && rollup -c build/index-esm.config.js",
     "docs": "jsdoc2md -c build/jsdoc.conf index.mjs lib/*.mjs > docs/API.md"
   },
@@ -22,11 +22,13 @@
     "composite-class": "^0.3.0",
     "create-mixin": "^1.1.1",
     "fsm-base": "^0.4.4",
-    "race-timeout-anywhere": "^0.1.1"
+    "race-timeout-anywhere": "^0.1.1",
+    "typical": "^5.0.0"
   },
   "devDependencies": {
     "rollup": "^1.10.1",
-    "test-runner": "^0.6.0-14"
+    "sleep-anywhere": "^1.1.2",
+    "test-runner": "^0.6.0-15"
   },
   "standard": {
     "ignore": [

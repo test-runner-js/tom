@@ -3,6 +3,7 @@ import mixin from './node_modules/create-mixin/index.mjs'
 import CompositeClass from './node_modules/composite-class/index.mjs'
 import StateMachine from './node_modules/fsm-base/dist/index.mjs'
 import TestContext from './lib/test-context.mjs'
+import { isPromise } from './node_modules/typical/index.mjs'
 
 /**
  * @module test-object-model
@@ -170,45 +171,35 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
    * @returns {Promise}
    * @fulfil {*}
    */
-  run () {
+  async run () {
     if (this.testFn) {
       if (this.markedSkip) {
         this.setState('skipped', this)
-        return Promise.resolve()
       } else {
         this.setState('in-progress', this)
         this.emit('start')
-        const testFnResult = new Promise((resolve, reject) => {
-          try {
-            const result = this.testFn.call(new TestContext({
-              name: this.name,
-              index: this.index
-            }))
 
-            if (result && result.then) {
-              result
-                .then(testResult => {
-                  this.setState('pass', this, testResult)
-                  resolve(testResult)
-                })
-                .catch(err => {
-                  this.setState('fail', this, err)
-                  reject(err)
-                })
-            } else {
-              this.setState('pass', this, result)
-              resolve(result)
-            }
-          } catch (err) {
-            this.setState('fail', this, err)
-            reject(err)
-          }
-        })
-        return Promise.race([ testFnResult, raceTimeout(this.timeout) ])
+        try {
+          const testResult = this.testFn.call(new TestContext({
+            name: this.name,
+            index: this.index
+          }))
+          return Promise.race([ testResult, raceTimeout(this.timeout) ])
+            .then(result => {
+              this.setState('pass', this, testResult)
+              return result
+            })
+            .catch(err => {
+              this.setState('fail', this, err)
+              throw err
+            })
+        } catch (err) {
+          this.setState('fail', this, err)
+          throw(err)
+        }
       }
     } else {
       this.setState('ignored', this)
-      return Promise.resolve()
     }
   }
 
