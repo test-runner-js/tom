@@ -6,7 +6,8 @@ import { halt } from './lib/util.mjs'
   const test = new Test('tom', () => true)
   test.run()
     .then(result => {
-      a.ok(result === true)
+      a.strictEqual(result, true)
+      a.strictEqual(test.result, result)
     })
     .catch(halt)
 }
@@ -21,15 +22,19 @@ import { halt } from './lib/util.mjs'
     })
     .catch(err => {
       a.ok(/failed/.test(err.message))
+      a.strictEqual(test.result, undefined)
     })
     .catch(halt)
 }
 
 { /* passing async test */
   const test = new Test('tom', async () => true)
-  test.run().then(result => {
-    a.strictEqual(result, true)
-  })
+  test.run()
+    .then(result => {
+      a.strictEqual(result, true)
+      a.strictEqual(test.result, result)
+    })
+    .catch(halt)
 }
 
 { /* failing async test: rejected */
@@ -53,6 +58,7 @@ import { halt } from './lib/util.mjs'
       a.strictEqual(result, undefined)
       a.strictEqual(test.ended, false)
       a.strictEqual(test.state, 'ignored')
+      a.strictEqual(test.result, result)
     })
     .catch(halt)
 }

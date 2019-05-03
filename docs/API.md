@@ -27,6 +27,7 @@
             * [.state](#module_test-object-model--Tom+state) : <code>string</code>
             * [.timeout](#module_test-object-model--Tom+timeout) : <code>number</code>
             * [.ended](#module_test-object-model--Tom+ended) : <code>boolean</code>
+            * [.result](#module_test-object-model--Tom+result) : <code>\*</code>
             * [.maxConcurrency](#module_test-object-model--Tom+maxConcurrency) : <code>number</code>
             * [.test()](#module_test-object-model--Tom+test) ⇒ [<code>Tom</code>](#exp_module_test-object-model--Tom)
             * [.skip()](#module_test-object-model--Tom+skip) ⇒ [<code>Tom</code>](#exp_module_test-object-model--Tom)
@@ -88,6 +89,12 @@ A time limit for the test in ms.
 
 #### tom.ended : <code>boolean</code>
 True if the test has ended.
+
+**Kind**: instance property of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
+<a name="module_test-object-model--Tom+result"></a>
+
+#### tom.result : <code>\*</code>
+The value returned by the test function, if it ended successfully.
 
 **Kind**: instance property of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
 <a name="module_test-object-model--Tom+maxConcurrency"></a>

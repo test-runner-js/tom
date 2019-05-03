@@ -88,6 +88,12 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
     this.ended = false
 
     /**
+     * The value returned by the test function, if it ended successfully.
+     * @type {*}
+     */
+    this.result = undefined
+
+    /**
      * The max concurrency that asynchronous child jobs can run.
      * @type {number}
      * @default 10
@@ -186,6 +192,7 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
           }))
           return Promise.race([ testResult, raceTimeout(this.timeout) ])
             .then(result => {
+              this.result = result
               this.setState('pass', this, testResult)
               return result
             })
