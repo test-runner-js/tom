@@ -190,16 +190,22 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
             name: this.name,
             index: this.index
           }))
-          return Promise.race([ testResult, raceTimeout(this.timeout) ])
-            .then(result => {
-              this.result = result
-              this.setState('pass', this, testResult)
-              return result
-            })
-            .catch(err => {
-              this.setState('fail', this, err)
-              throw err
-            })
+          if (isPromise(testResult)) {
+            return Promise.race([ testResult, raceTimeout(this.timeout) ])
+              .then(result => {
+                this.result = result
+                this.setState('pass', this, testResult)
+                return result
+              })
+              .catch(err => {
+                this.setState('fail', this, err)
+                throw err
+              })
+          } else {
+            this.result = testResult
+            this.setState('pass', this, testResult)
+            return testResult
+          }
         } catch (err) {
           this.setState('fail', this, err)
           throw(err)

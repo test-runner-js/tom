@@ -515,6 +515,32 @@
    */
 
   /**
+   * Returns true if the input value is defined.
+   * @param {*} - the input to test
+   * @returns {boolean}
+   * @static
+   */
+  function isDefined (input) {
+    return typeof input !== 'undefined'
+  }
+
+  /**
+   * Returns true if the input is a Promise.
+   * @param {*} - the input to test
+   * @returns {boolean}
+   * @static
+   */
+  function isPromise (input) {
+    if (input) {
+      const isPromise = isDefined(Promise) && input instanceof Promise;
+      const isThenable = input.then && typeof input.then === 'function';
+      return !!(isPromise || isThenable)
+    } else {
+      return false
+    }
+  }
+
+  /**
    * @module test-object-model
    */
 
@@ -595,6 +621,12 @@
        * @type {boolean}
        */
       this.ended = false;
+
+      /**
+       * The value returned by the test function, if it ended successfully.
+       * @type {*}
+       */
+      this.result = undefined;
 
       /**
        * The max concurrency that asynchronous child jobs can run.
@@ -693,16 +725,22 @@
               name: this.name,
               index: this.index
             }));
-            return Promise.race([ testResult, raceTimeout(this.timeout) ])
-              .then(result => {
-                this.result = result;
-                this.setState('pass', this, testResult);
-                return result
-              })
-              .catch(err => {
-                this.setState('fail', this, err);
-                throw err
-              })
+            if (isPromise(testResult)) {
+              return Promise.race([ testResult, raceTimeout(this.timeout) ])
+                .then(result => {
+                  this.result = result;
+                  this.setState('pass', this, testResult);
+                  return result
+                })
+                .catch(err => {
+                  this.setState('fail', this, err);
+                  throw err
+                })
+            } else {
+              this.result = testResult;
+              this.setState('pass', this, testResult);
+              return testResult
+            }
           } catch (err) {
             this.setState('fail', this, err);
             throw(err)

@@ -1,3 +1,4 @@
+import './multiple.mjs'
 import './new-test.mjs'
 import './only.mjs'
 import './skip.mjs'
