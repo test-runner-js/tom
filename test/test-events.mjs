@@ -53,9 +53,20 @@ import { halt } from './lib/util.mjs'
     .catch(halt)
 }
 
-{ /* test.run(): pass event args */
+{ /* test.run(): pass event args, sync */
   let actuals = []
   const test = new Test('one', () => 1)
+  test.on('pass', (t, result) => {
+    a.strictEqual(t, test)
+    a.strictEqual(result, 1)
+  })
+  test.run()
+    .catch(halt)
+}
+
+{ /* test.run(): pass event args, async */
+  let actuals = []
+  const test = new Test('one', async () => 1)
   test.on('pass', (t, result) => {
     a.strictEqual(t, test)
     a.strictEqual(result, 1)

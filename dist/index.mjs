@@ -723,7 +723,7 @@ class Tom extends createMixin(Composite)(StateMachine) {
             return Promise.race([ testResult, raceTimeout(this.timeout) ])
               .then(result => {
                 this.result = result;
-                this.setState('pass', this, testResult);
+                this.setState('pass', this, result);
                 return result
               })
               .catch(err => {
