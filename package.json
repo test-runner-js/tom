@@ -20,16 +20,16 @@
   },
   "dependencies": {
     "composite-class": "^0.3.0",
-    "create-mixin": "^1.1.1",
+    "create-mixin": "^2.0.1",
     "fsm-base": "^0.4.4",
-    "race-timeout-anywhere": "^0.1.1",
-    "typical": "^5.0.0"
+    "race-timeout-anywhere": "^1.0.0",
+    "typical": "^5.2.0"
   },
   "devDependencies": {
-    "jsdoc-to-markdown": "^4.0.1",
-    "rollup": "^1.11.3",
+    "jsdoc-to-markdown": "^5.0.2",
+    "rollup": "^1.26.3",
     "sleep-anywhere": "^1.1.2",
-    "test-runner": "^0.6.0"
+    "test-runner": "^0.6.1"
   },
   "standard": {
     "ignore": [
