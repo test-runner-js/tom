@@ -2,7 +2,7 @@
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
   typeof define === 'function' && define.amd ? define(factory) :
   (global = global || self, global.Tom = factory());
-}(this, function () { 'use strict';
+}(this, (function () { 'use strict';
 
   function raceTimeout (ms, msg) {
     return new Promise((resolve, reject) => {
@@ -507,11 +507,12 @@
   }
 
   /**
-   * For type-checking Javascript values.
+   * Isomorphic, functional type-checking for Javascript.
    * @module typical
    * @typicalname t
    * @example
    * const t = require('typical')
+   * const allDefined = array.every(t.isDefined)
    */
 
   /**
@@ -778,14 +779,25 @@
       if (tests.length > 1) {
         test = new this(name);
         for (const subTom of tests) {
+          this.validate(subTom);
           test.add(subTom);
         }
 
       } else {
         test = tests[0];
+        this.validate(test);
       }
       test._skipLogic();
       return test
+    }
+
+    static validate (tom) {
+      const valid = ['name', 'testFn', 'index', 'ended'].every(prop => Object.keys(tom).includes(prop));
+      if (!valid) {
+        const err = new Error('Valid TOM required');
+        err.invalidTom = tom;
+        throw err
+      }
     }
   }
 
@@ -795,4 +807,4 @@
 
   return Tom;
 
-}));
+})));

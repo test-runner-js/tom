@@ -243,14 +243,25 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
     if (tests.length > 1) {
       test = new this(name)
       for (const subTom of tests) {
+        this.validate(subTom)
         test.add(subTom)
       }
 
     } else {
       test = tests[0]
+      this.validate(test)
     }
     test._skipLogic()
     return test
+  }
+
+  static validate (tom) {
+    const valid = ['name', 'testFn', 'index', 'ended'].every(prop => Object.keys(tom).includes(prop))
+    if (!valid) {
+      const err = new Error('Valid TOM required')
+      err.invalidTom = tom
+      throw err
+    }
   }
 }
 
