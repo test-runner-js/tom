@@ -785,7 +785,7 @@ class Tom extends createMixin(Composite)(StateMachine) {
     return test
   }
 
-  static validate (tom) {
+  static validate (tom = {}) {
     const valid = ['name', 'testFn', 'index', 'ended'].every(prop => Object.keys(tom).includes(prop));
     if (!valid) {
       const err = new Error('Valid TOM required');

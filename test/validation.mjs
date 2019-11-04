@@ -12,6 +12,14 @@ import { halt } from './lib/util.mjs'
 { /* invalid test */
   const tom = {}
   a.throws(
-    () => Test.validate(tom)
+    () => Test.validate(tom),
+    /valid tom required/i
+  )
+}
+
+{ /* invalid test 2 */
+  a.throws(
+    () => Test.validate(),
+    /valid tom required/i
   )
 }
