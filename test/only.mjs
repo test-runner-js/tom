@@ -4,11 +4,11 @@ import { halt } from './lib/util.mjs'
 
 { /* new Test ({ only: true }) */
   const actuals = []
-  const one = new Test(() => { actuals.push('one' ) }, { only: true })
+  const one = new Test(() => { actuals.push('one') }, { only: true })
   a.strictEqual(one.markedOnly, true)
   one.run()
     .then(() => {
-      a.deepStrictEqual(actuals, [ 'one' ])
+      a.deepStrictEqual(actuals, ['one'])
     })
     .catch(halt)
 }

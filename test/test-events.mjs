@@ -3,18 +3,18 @@ import a from 'assert'
 import { halt } from './lib/util.mjs'
 
 { /* test.run(): event order, passing test */
-  let actuals = []
+  const actuals = []
   const test = new Test('one', () => actuals.push('body'))
   test.on('start', test => actuals.push('start'))
   test.on('pass', test => actuals.push('pass'))
   test.on('end', test => actuals.push('end'))
   test.run()
-    .then(() => a.deepStrictEqual(actuals, [ 'start', 'body', 'pass', 'end' ]))
+    .then(() => a.deepStrictEqual(actuals, ['start', 'body', 'pass', 'end']))
     .catch(halt)
 }
 
 { /* test.run(): event order, failing test */
-  let actuals = []
+  const actuals = []
   const test = new Test('one', function () {
     actuals.push('body')
     throw new Error('broken')
@@ -28,13 +28,13 @@ import { halt } from './lib/util.mjs'
     })
     .catch(err => {
       a.strictEqual(err.message, 'broken')
-      a.deepStrictEqual(actuals, [ 'start', 'body', 'fail', 'end' ])
+      a.deepStrictEqual(actuals, ['start', 'body', 'fail', 'end'])
     })
     .catch(halt)
 }
 
 { /* test.run(): event order, failing test, rejected */
-  let actuals = []
+  const actuals = []
   const test = new Test('one', function () {
     actuals.push('body')
     return Promise.reject(new Error('broken'))
@@ -48,13 +48,13 @@ import { halt } from './lib/util.mjs'
     })
     .catch(err => {
       a.strictEqual(err.message, 'broken')
-      a.deepStrictEqual(actuals, [ 'start', 'body', 'fail', 'end' ])
+      a.deepStrictEqual(actuals, ['start', 'body', 'fail', 'end'])
     })
     .catch(halt)
 }
 
 { /* test.run(): pass event args, sync */
-  let actuals = []
+  const actuals = []
   const test = new Test('one', () => 1)
   test.on('pass', (t, result) => {
     a.strictEqual(t, test)
@@ -65,7 +65,7 @@ import { halt } from './lib/util.mjs'
 }
 
 { /* test.run(): pass event args, async */
-  let actuals = []
+  const actuals = []
   const test = new Test('one', async () => 1)
   test.on('pass', (t, result) => {
     a.strictEqual(t, test)
@@ -76,7 +76,7 @@ import { halt } from './lib/util.mjs'
 }
 
 { /* test.run(): fail event args */
-  let actuals = []
+  const actuals = []
   const test = new Test('one', () => {
     throw new Error('broken')
   })
@@ -92,7 +92,7 @@ import { halt } from './lib/util.mjs'
 }
 
 { /* no test function: ignore, don't start, skip, pass or fail event */
-  let actuals = []
+  const actuals = []
   const test = new Test('one')
   test.on('start', test => actuals.push('start'))
   test.on('skip', test => actuals.push('skip'))
@@ -125,6 +125,6 @@ import { halt } from './lib/util.mjs'
   })
   one.run()
     .then(() => two.run())
-    .then(() => a.deepStrictEqual(actuals, [ 1, 2 ]))
+    .then(() => a.deepStrictEqual(actuals, [1, 2]))
     .catch(halt)
 }

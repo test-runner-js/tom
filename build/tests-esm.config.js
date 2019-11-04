@@ -4,5 +4,5 @@ export default {
     file: 'tmp/test/tests.mjs',
     format: 'esm'
   },
-  external: [ 'assert', 'fsm-base' ]
+  external: ['assert', 'fsm-base']
 }

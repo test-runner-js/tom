@@ -37,19 +37,12 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
     }
     options = Object.assign({ timeout: 10000 }, options)
     name = name || 'tom'
-    super ([
-      { from: undefined, to: 'pending' },
+    super('pending', [
       { from: 'pending', to: 'in-progress' },
       { from: 'pending', to: 'skipped' },
       { from: 'pending', to: 'ignored' },
       { from: 'in-progress', to: 'pass' },
-      { from: 'in-progress', to: 'fail' },
-      /* reset */
-      { from: 'in-progress', to: 'pending' },
-      { from: 'pass', to: 'pending' },
-      { from: 'fail', to: 'pending' },
-      { from: 'skipped', to: 'pending' },
-      { from: 'ignored', to: 'pending' },
+      { from: 'in-progress', to: 'fail' }
     ])
     /**
      * Test name
@@ -71,9 +64,8 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
 
     /**
      * Test state: pending, start, skip, pass or fail.
-     * @type {string}
+     * @member {string} module:test-object-model#state
      */
-    this.state = 'pending'
 
     /**
      * A time limit for the test in ms.
@@ -191,7 +183,7 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
             index: this.index
           }))
           if (isPromise(testResult)) {
-            return Promise.race([ testResult, raceTimeout(this.timeout) ])
+            return Promise.race([testResult, raceTimeout(this.timeout)])
               .then(result => {
                 this.result = result
                 this.setState('pass', this, result)
@@ -208,13 +200,18 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
           }
         } catch (err) {
           this.setState('fail', this, err)
-          throw(err)
+          throw (err)
         }
       }
     } else {
       this.setState('ignored', this)
     }
   }
+
+  /**
+   * Run test plus all child tests.
+   */
+  async runAll () {}
 
   /**
    * Reset state
@@ -226,14 +223,14 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
       }
     } else {
       this.index = 1
-      this.state = 'pending'
+      this.resetState()
       this.markedSkip = this.options.skip || false
       this.markedOnly = this.options.only || false
     }
   }
 
   /**
-   * Combine several TOM instances into a common root
+   * If more than one TOM instances are supplied, combine them into a common root.
    * @param {Array.<Tom>} tests
    * @param {string} [name]
    * @return {Tom}
@@ -241,12 +238,12 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
   static combine (tests, name) {
     let test
     if (tests.length > 1) {
-      test = new this(name)
+      /* run new root sequentially to be on the safe side */
+      test = new this(name, { maxConcurrency: 1 })
       for (const subTom of tests) {
         this.validate(subTom)
         test.add(subTom)
       }
-
     } else {
       test = tests[0]
       this.validate(test)

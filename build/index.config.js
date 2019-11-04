@@ -5,5 +5,5 @@ export default {
     format: 'umd',
     name: 'Tom'
   },
-  external: [ 'assert', 'events', 'fsm-base' ]
+  external: ['assert', 'events', 'fsm-base']
 }

@@ -33,6 +33,7 @@
             * [.skip()](#module_test-object-model--Tom+skip) ⇒ [<code>Tom</code>](#exp_module_test-object-model--Tom)
             * [.only()](#module_test-object-model--Tom+only) ⇒ [<code>Tom</code>](#exp_module_test-object-model--Tom)
             * [.run()](#module_test-object-model--Tom+run) ⇒ <code>Promise</code>
+            * [.runAll()](#module_test-object-model--Tom+runAll)
             * [.reset()](#module_test-object-model--Tom+reset)
         * _static_
             * [.combine(tests, [name])](#module_test-object-model--Tom.combine) ⇒ <code>Tom</code>
@@ -129,6 +130,12 @@ Execute the stored test function.
 
 **Kind**: instance method of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
 **Fulfil**: <code>\*</code>  
+<a name="module_test-object-model--Tom+runAll"></a>
+
+#### tom.runAll()
+Run test plus all child tests.
+
+**Kind**: instance method of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
 <a name="module_test-object-model--Tom+reset"></a>
 
 #### tom.reset()
@@ -138,7 +145,7 @@ Reset state
 <a name="module_test-object-model--Tom.combine"></a>
 
 #### Tom.combine(tests, [name]) ⇒ <code>Tom</code>
-Combine several TOM instances into a common root
+If more than one TOM instances are supplied, combine them into a common root.
 
 **Kind**: static method of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
 

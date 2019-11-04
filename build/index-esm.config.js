@@ -4,5 +4,5 @@ export default {
     file: 'dist/index.mjs',
     format: 'esm'
   },
-  external: [ 'assert', 'events', 'fsm-base' ]
+  external: ['assert', 'events', 'fsm-base']
 }

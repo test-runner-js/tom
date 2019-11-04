@@ -5,6 +5,7 @@
   "description": "test-object-model",
   "repository": "https://github.com/test-runner-js/test-object-model",
   "main": "dist/index.js",
+  "module": "dist/index.mjs",
   "keywords": [],
   "license": "MIT",
   "engines": {
@@ -19,9 +20,9 @@
     "docs": "jsdoc2md -c build/jsdoc.conf index.mjs lib/*.mjs > docs/API.md"
   },
   "dependencies": {
-    "composite-class": "^0.3.0",
+    "composite-class": "^1.0.0",
     "create-mixin": "^2.0.1",
-    "fsm-base": "^0.4.4",
+    "fsm-base": "^0.5.0",
     "race-timeout-anywhere": "^1.0.0",
     "typical": "^5.2.0"
   },
@@ -29,7 +30,7 @@
     "jsdoc-to-markdown": "^5.0.2",
     "rollup": "^1.26.3",
     "sleep-anywhere": "^1.1.2",
-    "test-runner": "^0.6.1"
+    "test-runner": "^0.6.2"
   },
   "standard": {
     "ignore": [

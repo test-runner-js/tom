@@ -3,7 +3,7 @@ import a from 'assert'
 import { halt } from './lib/util.mjs'
 
 { /* test.run(): state, passing test */
-  let actuals = []
+  const actuals = []
   const test = new Test('one', function () {
     actuals.push(test.state)
   })
@@ -12,14 +12,14 @@ import { halt } from './lib/util.mjs'
   test.run()
     .then(result => {
       actuals.push(test.state)
-      a.deepStrictEqual(actuals, [ 'pending', 'in-progress', 'pass' ])
+      a.deepStrictEqual(actuals, ['pending', 'in-progress', 'pass'])
       a.strictEqual(test.ended, true)
     })
     .catch(halt)
 }
 
 { /* test.run(): state, failing test */
-  let actuals = []
+  const actuals = []
   const test = new Test('one', function () {
     actuals.push(test.state)
     throw new Error('broken')
@@ -31,20 +31,20 @@ import { halt } from './lib/util.mjs'
     })
     .catch(err => {
       actuals.push(test.state)
-      a.deepStrictEqual(actuals, [ 'pending', 'in-progress', 'fail' ])
+      a.deepStrictEqual(actuals, ['pending', 'in-progress', 'fail'])
       a.strictEqual(test.ended, true)
     })
     .catch(halt)
 }
 
 { /* test.run(): state, no test */
-  let actuals = []
+  const actuals = []
   const test = new Test('one')
   actuals.push(test.state)
   test.run()
     .then(result => {
       actuals.push(test.state)
-      a.deepStrictEqual(actuals, [ 'pending', 'ignored' ])
+      a.deepStrictEqual(actuals, ['pending', 'ignored'])
     })
     .catch(halt)
 }
