@@ -15,7 +15,8 @@
     "test": "npm run dist && npm run test:esm",
     "test:esm": "esm-runner test/*.mjs",
     "dist": "rollup -c",
-    "docs": "jsdoc2md -c jsdoc.conf index.mjs lib/*.mjs > docs/API.md"
+    "docs": "jsdoc2md -c jsdoc.conf index.mjs lib/*.mjs > docs/API.md",
+    "c8": "c8 --reporter=html npm test"
   },
   "dependencies": {
     "composite-class": "^1.0.0",
@@ -25,6 +26,7 @@
     "typical": "^5.2.0"
   },
   "devDependencies": {
+    "c8": "^6.0.1",
     "esm-runner": "^0.1.5",
     "jsdoc-to-markdown": "^5.0.2",
     "rollup": "^1.26.3",

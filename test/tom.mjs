@@ -29,4 +29,24 @@ tom.test('.test() not chainable', async function () {
   a.notStrictEqual(result, tom)
 })
 
+tom.test('bug in test function', async function () {
+  const test = new Test('one', function () {
+    asdf()
+  })
+
+  try {
+    await test.run()
+    throw new Error('should not reach here')
+  } catch (err) {
+    a.strictEqual(test.state, 'fail')
+    a.ok(/asdf is not defined/.test(err.message))
+  }
+})
+
+tom.test('tom.toString()', async function () {
+  const tom = new Test('test name')
+  const result = `toString: ${tom}`
+  a.equal(result, 'toString: test name')
+})
+
 export default tom

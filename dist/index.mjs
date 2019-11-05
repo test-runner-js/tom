@@ -749,16 +749,15 @@ class Tom extends createMixin(Composite)(StateMachine) {
             index: this.index
           }));
           if (isPromise(testResult)) {
-            return Promise.race([testResult, raceTimeout(this.timeout)])
-              .then(result => {
-                this.result = result;
-                this.setState('pass', this, result);
-                return result
-              })
-              .catch(err => {
-                this.setState('fail', this, err);
-                throw err
-              })
+            try {
+              const result = await Promise.race([testResult, raceTimeout(this.timeout)]);
+              this.result = result;
+              this.setState('pass', this, result);
+              return result
+            } catch (err) {
+              this.setState('fail', this, err);
+              return Promise.reject(err)
+            }
           } else {
             this.result = testResult;
             this.setState('pass', this, testResult);
