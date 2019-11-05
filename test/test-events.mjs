@@ -1,19 +1,21 @@
 import Test from '../index.mjs'
-import a from 'assert'
-import { halt } from './lib/util.mjs'
+import Tom from '../node_modules/test-object-model/dist/index.mjs'
+import assert from 'assert'
+const a = assert.strict
 
-{ /* test.run(): event order, passing test */
+const tom = new Tom()
+
+tom.test('test.run(): event order, passing test', async function () {
   const actuals = []
   const test = new Test('one', () => actuals.push('body'))
   test.on('start', test => actuals.push('start'))
   test.on('pass', test => actuals.push('pass'))
   test.on('end', test => actuals.push('end'))
-  test.run()
-    .then(() => a.deepStrictEqual(actuals, ['start', 'body', 'pass', 'end']))
-    .catch(halt)
-}
+  await test.run()
+  a.deepEqual(actuals, ['start', 'body', 'pass', 'end'])
+})
 
-{ /* test.run(): event order, failing test */
+tom.test('test.run(): event order, failing test', async function () {
   const actuals = []
   const test = new Test('one', function () {
     actuals.push('body')
@@ -22,18 +24,16 @@ import { halt } from './lib/util.mjs'
   test.on('start', test => actuals.push('start'))
   test.on('fail', test => actuals.push('fail'))
   test.on('end', test => actuals.push('end'))
-  test.run()
-    .then(() => {
-      throw new Error('should not reach here')
-    })
-    .catch(err => {
-      a.strictEqual(err.message, 'broken')
-      a.deepStrictEqual(actuals, ['start', 'body', 'fail', 'end'])
-    })
-    .catch(halt)
-}
+  try {
+    await test.run()
+  } catch (err) {
+    a.equal(err.message, 'broken')
+  } finally {
+    a.deepEqual(actuals, ['start', 'body', 'fail', 'end'])
+  }
+})
 
-{ /* test.run(): event order, failing test, rejected */
+tom.test('test.run(): event order, failing test, rejected', async function () {
   const actuals = []
   const test = new Test('one', function () {
     actuals.push('body')
@@ -42,56 +42,59 @@ import { halt } from './lib/util.mjs'
   test.on('start', test => actuals.push('start'))
   test.on('fail', test => actuals.push('fail'))
   test.on('end', test => actuals.push('end'))
-  test.run()
-    .then(() => {
-      throw new Error('should not reach here')
-    })
-    .catch(err => {
-      a.strictEqual(err.message, 'broken')
-      a.deepStrictEqual(actuals, ['start', 'body', 'fail', 'end'])
-    })
-    .catch(halt)
-}
+  try {
+    await test.run()
+  } catch (err) {
+    a.equal(err.message, 'broken')
+  } finally {
+    a.deepEqual(actuals, ['start', 'body', 'fail', 'end'])
+  }
+})
 
-{ /* test.run(): pass event args, sync */
+tom.test('test.run(): pass event args, sync', async function () {
   const actuals = []
   const test = new Test('one', () => 1)
   test.on('pass', (t, result) => {
-    a.strictEqual(t, test)
-    a.strictEqual(result, 1)
+    a.equal(t, test)
+    a.equal(result, 1)
+    actuals.push('pass')
   })
-  test.run()
-    .catch(halt)
-}
+  await test.run()
+  a.deepEqual(actuals, ['pass'])
+})
 
-{ /* test.run(): pass event args, async */
+tom.test('test.run(): pass event args, async', async function () {
   const actuals = []
   const test = new Test('one', async () => 1)
   test.on('pass', (t, result) => {
-    a.strictEqual(t, test)
-    a.strictEqual(result, 1)
+    a.equal(t, test)
+    a.equal(result, 1)
+    actuals.push('pass')
   })
-  test.run()
-    .catch(halt)
-}
+  await test.run()
+  a.deepEqual(actuals, ['pass'])
+})
 
-{ /* test.run(): fail event args */
+tom.test('test.run(): fail event args', async function () {
   const actuals = []
-  const test = new Test('one', () => {
+  const test = new Test('one', function () {
     throw new Error('broken')
   })
   test.on('fail', (t, err) => {
-    a.strictEqual(t, test)
-    a.strictEqual(err.message, 'broken')
+    a.equal(t, test)
+    a.equal(err.message, 'broken')
+    actuals.push('fail')
   })
-  test.run()
-    .catch(err => {
-      if (err.message !== 'broken') throw err
-    })
-    .catch(halt)
-}
+  try {
+    await test.run()
+  } catch (err) {
+    a.equal(err.message, 'broken')
+  } finally {
+    a.deepEqual(actuals, ['fail'])
+  }
+})
 
-{ /* no test function: ignore, don't start, skip, pass or fail event */
+tom.test("no test function: ignore, don't start, skip, pass or fail event", async function () {
   const actuals = []
   const test = new Test('one')
   test.on('start', test => actuals.push('start'))
@@ -99,32 +102,30 @@ import { halt } from './lib/util.mjs'
   test.on('pass', test => actuals.push('pass'))
   test.on('fail', test => actuals.push('fail'))
   test.on('end', test => actuals.push('end'))
-  test.run()
-    .then(result => {
-      a.strictEqual(result, undefined)
-      a.deepStrictEqual(actuals, [])
-    })
-    .catch(halt)
-}
+  const result = await test.run()
+  a.equal(result, undefined)
+  a.deepEqual(actuals, [])
+})
 
-{ /* nested events: root should receive child events */
+tom.test('nested events: root should receive child events', async function () {
   const actuals = []
   const tom = new Test()
   const one = tom.test('one', () => 1)
   const two = one.test('two', () => 2)
   tom.on('pass', (test, result) => {
     if (actuals.length === 0) {
-      a.strictEqual(test.name, 'one')
-      a.strictEqual(result, 1)
+      a.equal(test.name, 'one')
+      a.equal(result, 1)
       actuals.push(1)
     } else {
-      a.strictEqual(test.name, 'two')
-      a.strictEqual(result, 2)
+      a.equal(test.name, 'two')
+      a.equal(result, 2)
       actuals.push(2)
     }
   })
-  one.run()
-    .then(() => two.run())
-    .then(() => a.deepStrictEqual(actuals, [1, 2]))
-    .catch(halt)
-}
+  await one.run()
+  await two.run()
+  a.deepEqual(actuals, [1, 2])
+})
+
+export default tom

@@ -3,7 +3,7 @@ import mixin from './node_modules/create-mixin/index.mjs'
 import CompositeClass from './node_modules/composite-class/index.mjs'
 import StateMachine from './node_modules/fsm-base/dist/index.mjs'
 import TestContext from './lib/test-context.mjs'
-import { isPromise } from './node_modules/typical/index.mjs'
+import { isPromise } from './node_modules/typical/index.mjs';
 
 /**
  * @module test-object-model

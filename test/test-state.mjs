@@ -1,72 +1,70 @@
 import Test from '../index.mjs'
-import a from 'assert'
-import { halt } from './lib/util.mjs'
+import Tom from '../node_modules/test-object-model/dist/index.mjs'
+import assert from 'assert'
+const a = assert.strict
 
-{ /* test.run(): state, passing test */
+const tom = new Tom()
+
+tom.test('test.run(): state, passing test', async function () {
   const actuals = []
   const test = new Test('one', function () {
     actuals.push(test.state)
   })
   actuals.push(test.state)
   a.strictEqual(test.ended, false)
-  test.run()
-    .then(result => {
-      actuals.push(test.state)
-      a.deepStrictEqual(actuals, ['pending', 'in-progress', 'pass'])
-      a.strictEqual(test.ended, true)
-    })
-    .catch(halt)
-}
+  await test.run()
+  actuals.push(test.state)
+  a.deepStrictEqual(actuals, ['pending', 'in-progress', 'pass'])
+  a.strictEqual(test.ended, true)
+})
 
-{ /* test.run(): state, failing test */
+tom.test('test.run(): state, failing test', async function () {
   const actuals = []
   const test = new Test('one', function () {
     actuals.push(test.state)
     throw new Error('broken')
   })
   actuals.push(test.state)
-  test.run()
-    .then(result => {
-      actuals.push(test.state)
-    })
-    .catch(err => {
-      actuals.push(test.state)
-      a.deepStrictEqual(actuals, ['pending', 'in-progress', 'fail'])
-      a.strictEqual(test.ended, true)
-    })
-    .catch(halt)
-}
+  try {
+    await test.run()
+    actuals.push(test.state)
+  } catch (err) {
+    actuals.push(test.state)
+  } finally {
+    a.deepStrictEqual(actuals, ['pending', 'in-progress', 'fail'])
+    a.strictEqual(test.ended, true)
+  }
+})
 
-{ /* test.run(): state, no test */
+tom.test('test.run(): state, no test', async function () {
   const actuals = []
   const test = new Test('one')
   actuals.push(test.state)
-  test.run()
-    .then(result => {
-      actuals.push(test.state)
-      a.deepStrictEqual(actuals, ['pending', 'ignored'])
-    })
-    .catch(halt)
-}
+  await test.run()
+  actuals.push(test.state)
+  a.deepStrictEqual(actuals, ['pending', 'ignored'])
+})
 
-{ /* test.run(): ended, passing test */
+tom.test('test.run(): ended, passing test', async function () {
   const test = new Test('one', function () {})
   a.strictEqual(test.ended, false)
-  test.run()
-    .then(result => {
-      a.strictEqual(test.ended, true)
-    })
-    .catch(halt)
-}
+  await test.run()
+  a.strictEqual(test.ended, true)
+})
 
-{ /* test.run(): ended, failing test */
+tom.test('test.run(): ended, failing test', async function () {
   const test = new Test('one', function () {
     throw new Error('broken')
   })
   a.strictEqual(test.ended, false)
-  test.run()
-    .catch(err => {
-      a.strictEqual(test.ended, true)
-    })
-    .catch(halt)
-}
+  try {
+    await test.run()
+    throw new Error('should not reach here')
+  } catch (err) {
+    a.ok(/broken/.test(err.message))
+  } finally {
+    a.strictEqual(test.ended, true)
+  }
+})
+
+export default tom

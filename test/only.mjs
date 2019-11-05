@@ -1,20 +1,19 @@
 import Test from '../index.mjs'
-import a from 'assert'
-import { halt } from './lib/util.mjs'
+import Tom from '../node_modules/test-object-model/dist/index.mjs'
+import assert from 'assert'
+const a = assert.strict
 
-{ /* new Test ({ only: true }) */
+const tom = new Tom()
+
+tom.test('new Test ({ only: true })', async function () {
   const actuals = []
   const one = new Test(() => { actuals.push('one') }, { only: true })
   a.strictEqual(one.markedOnly, true)
-  one.run()
-    .then(() => {
-      a.deepStrictEqual(actuals, ['one'])
-    })
-    .catch(halt)
-}
+  await one.run()
+  a.deepStrictEqual(actuals, ['one'])
+})
 
-{ /* .only() */
-  const actuals = []
+tom.test('.only()', async function () {
   const tom = new Test('tom')
   const one = tom.test('one', () => 1)
   const two = tom.test('two', () => 2)
@@ -38,10 +37,9 @@ import { halt } from './lib/util.mjs'
   a.strictEqual(three.markedOnly, true)
   a.strictEqual(four.markedSkip, false)
   a.strictEqual(four.markedOnly, true)
-}
+})
 
-{ /* .only() first */
-  const actuals = []
+tom.test('.only() first', async function () {
   const tom = new Test('tom')
   const one = tom.only('one', () => 1)
   const two = tom.test('two', () => 2)
@@ -49,9 +47,9 @@ import { halt } from './lib/util.mjs'
   a.strictEqual(one.markedOnly, true)
   a.strictEqual(two.markedSkip, true)
   a.strictEqual(two.markedOnly, false)
-}
+})
 
-{ /* deep only with skip */
+tom.test('deep only with skip', async function () {
   const tom = new Test()
   const one = tom.only('one', () => 1)
   const two = one.test('two', () => 2)
@@ -62,4 +60,6 @@ import { halt } from './lib/util.mjs'
   a.strictEqual(two.markedOnly, false)
   a.strictEqual(three.markedSkip, true)
   a.strictEqual(three.markedOnly, false)
-}
+})
+
+export default tom

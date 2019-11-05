@@ -1,8 +1,11 @@
 import Test from '../index.mjs'
-import a from 'assert'
-import { halt } from './lib/util.mjs'
+import Tom from '../node_modules/test-object-model/dist/index.mjs'
+import assert from 'assert'
+const a = assert.strict
 
-{ /* both sync: one pass one fail */
+const tom = new Tom()
+
+tom.test('both sync: one pass one fail', async function () {
   const actuals = []
   const one = new Test('one', () => true)
   const two = new Test('two', () => { throw new Error('broken') })
@@ -10,18 +13,16 @@ import { halt } from './lib/util.mjs'
   one.on('fail', () => actuals.push('one-fail'))
   two.on('pass', () => actuals.push('two-pass'))
   two.on('fail', () => actuals.push('two-fail'))
-  Promise.all([one.run(), two.run()])
-    .then(() => {
-      throw new Error('should not reach here')
-    })
-    .catch(err => {
-      a.ok(/broken/.test(err.message))
-      a.deepStrictEqual(actuals, ['one-pass', 'two-fail'])
-    })
-    .catch(halt)
-}
+  try {
+    await Promise.all([one.run(), two.run()])
+  } catch (err) {
+    a.ok(/broken/.test(err.message))
+  } finally {
+    a.deepEqual(actuals, ['one-pass', 'two-fail'])
+  }
+})
 
-{ /* both async: one pass one fail */
+tom.test('both async: one pass one fail', async function () {
   const actuals = []
   const one = new Test('one', async () => true)
   const two = new Test('two', async () => { throw new Error('broken') })
@@ -29,18 +30,16 @@ import { halt } from './lib/util.mjs'
   one.on('fail', () => actuals.push('one-fail'))
   two.on('pass', () => actuals.push('two-pass'))
   two.on('fail', () => actuals.push('two-fail'))
-  Promise.all([one.run(), two.run()])
-    .then(() => {
-      throw new Error('should not reach here')
-    })
-    .catch(err => {
-      a.ok(/broken/.test(err.message))
-      a.deepStrictEqual(actuals, ['one-pass', 'two-fail'])
-    })
-    .catch(halt)
-}
+  try {
+    await Promise.all([one.run(), two.run()])
+  } catch (err) {
+    a.ok(/broken/.test(err.message))
+  } finally {
+    a.deepEqual(actuals, ['one-pass', 'two-fail'])
+  }
+})
 
-{ /* mixed sync/async: one pass one rejected */
+tom.test('mixed sync/async: one pass one rejected', async function () {
   const actuals = []
   const one = new Test('one', () => true)
   const two = new Test('two', async () => { throw new Error('broken') })
@@ -48,18 +47,16 @@ import { halt } from './lib/util.mjs'
   one.on('fail', () => actuals.push('one-fail'))
   two.on('pass', () => actuals.push('two-pass'))
   two.on('fail', () => actuals.push('two-fail'))
-  Promise.all([one.run(), two.run()])
-    .then(() => {
-      throw new Error('should not reach here')
-    })
-    .catch(err => {
-      a.ok(/broken/.test(err.message))
-      a.deepStrictEqual(actuals, ['one-pass', 'two-fail'])
-    })
-    .catch(halt)
-}
+  try {
+    await Promise.all([one.run(), two.run()])
+  } catch (err) {
+    a.ok(/broken/.test(err.message))
+  } finally {
+    a.deepEqual(actuals, ['one-pass', 'two-fail'])
+  }
+})
 
-{ /* mixed sync/async: one fulfilled one fail */
+tom.test('mixed sync/async: one fulfilled one fail', async function () {
   const actuals = []
   const one = new Test('one', async () => true)
   const two = new Test('two', () => { throw new Error('broken') })
@@ -67,13 +64,13 @@ import { halt } from './lib/util.mjs'
   one.on('fail', () => actuals.push('one-fail'))
   two.on('pass', () => actuals.push('two-pass'))
   two.on('fail', () => actuals.push('two-fail'))
-  Promise.all([one.run(), two.run()])
-    .then(() => {
-      throw new Error('should not reach here')
-    })
-    .catch(err => {
-      a.ok(/broken/.test(err.message))
-      a.deepStrictEqual(actuals, ['two-fail', 'one-pass'])
-    })
-    .catch(halt)
-}
+  try {
+    await Promise.all([one.run(), two.run()])
+  } catch (err) {
+    a.ok(/broken/.test(err.message))
+  } finally {
+    a.deepEqual(actuals, ['two-fail', 'one-pass'])
+  }
+})
+
+export default tom

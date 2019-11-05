@@ -12,12 +12,10 @@
     "node": ">=8"
   },
   "scripts": {
-    "test": "npm run dist && npm run test:js && npm run test:esm && npm run test:esm-dist",
-    "test:js": "rollup -c build/tests.config.js && node tmp/test/tests.js",
-    "test:esm": "node --experimental-modules test/tests.mjs",
-    "test:esm-dist": "rollup -c build/tests-esm.config.js && node --experimental-modules tmp/test/tests.mjs",
-    "dist": "rollup -c build/index.config.js && rollup -c build/index-esm.config.js",
-    "docs": "jsdoc2md -c build/jsdoc.conf index.mjs lib/*.mjs > docs/API.md"
+    "test": "npm run dist && npm run test:esm",
+    "test:esm": "esm-runner test/*.mjs",
+    "dist": "rollup -c",
+    "docs": "jsdoc2md -c jsdoc.conf index.mjs lib/*.mjs > docs/API.md"
   },
   "dependencies": {
     "composite-class": "^1.0.0",
@@ -27,10 +25,11 @@
     "typical": "^5.2.0"
   },
   "devDependencies": {
+    "esm-runner": "^0.1.5",
     "jsdoc-to-markdown": "^5.0.2",
     "rollup": "^1.26.3",
     "sleep-anywhere": "^1.1.2",
-    "test-runner": "^0.6.2"
+    "test-runner": "^0.6.3"
   },
   "standard": {
     "ignore": [

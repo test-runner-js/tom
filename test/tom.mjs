@@ -1,26 +1,32 @@
 import Test from '../index.mjs'
-import a from 'assert'
-import { halt } from './lib/util.mjs'
+import Tom from '../node_modules/test-object-model/dist/index.mjs'
+import assert from 'assert'
+const a = assert.strict
 
-{ /* duplicate test name */
+const tom = new Tom()
+
+tom.test('duplicate test name', async function () {
   const tom = new Test()
   tom.test('one', () => 1)
   a.throws(
-    () => test.test('one', () => 1)
+    () => tom.test('one', () => 1),
+    /Duplicate name/
   )
-}
+})
 
-{ /* deep duplicate test name */
+tom.test('deep duplicate test name', async function () {
   const tom = new Test('tom')
   const child = tom.test('one', () => 1)
   a.throws(
     () => child.test('one', () => 1),
     /duplicate/i
   )
-}
+})
 
-{ /* .test() not chainable */
+tom.test('.test() not chainable', async function () {
   const tom = new Test()
   const result = tom.test('one', () => 1)
   a.notStrictEqual(result, tom)
-}
+})
+
+export default tom

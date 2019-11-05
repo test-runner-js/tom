@@ -1,19 +1,22 @@
 import Test from '../index.mjs'
-import a from 'assert'
-import { halt } from './lib/util.mjs'
+import Tom from '../node_modules/test-object-model/dist/index.mjs'
+import assert from 'assert'
+const a = assert.strict
 
-{ /* bug in test function */
+const tom = new Tom()
+
+tom.test('bug in test function', async function () {
   const test = new Test('one', function () {
     asdf()
   })
 
-  test.run()
-    .then(() => {
-      throw new Error('should not reach here')
-    })
-    .catch(err => {
-      a.strictEqual(test.state, 'fail')
-      a.ok(/asdf is not defined/.test(err.message))
-    })
-    .catch(halt)
-}
+  try {
+    await test.run()
+    throw new Error('should not reach here')
+  } catch (err) {
+    a.strictEqual(test.state, 'fail')
+    a.ok(/asdf is not defined/.test(err.message))
+  }
+})
+
+export default tom

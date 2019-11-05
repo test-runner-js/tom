@@ -1,64 +1,57 @@
 import Test from '../index.mjs'
-import a from 'assert'
-import { halt } from './lib/util.mjs'
+import Tom from '../node_modules/test-object-model/dist/index.mjs'
+import assert from 'assert'
+const a = assert.strict
 
-{ /* passing sync test */
+const tom = new Tom()
+
+tom.test('passing sync test', async function () {
   const test = new Test('tom', () => true)
-  test.run()
-    .then(result => {
-      a.strictEqual(result, true)
-      a.strictEqual(test.result, result)
-    })
-    .catch(halt)
-}
+  const result = await test.run()
+  a.strictEqual(result, true)
+  a.strictEqual(test.result, result)
+})
 
-{ /* failing sync test */
+tom.test('failing sync test', async function () {
   const test = new Test('tom', function () {
     throw new Error('failed')
   })
-  test.run()
-    .then(() => {
-      a.ok(false, "shouldn't reach here")
-    })
-    .catch(err => {
-      a.ok(/failed/.test(err.message))
-      a.strictEqual(test.result, undefined)
-    })
-    .catch(halt)
-}
+  try {
+    await test.run()
+    throw new Error('should not reach here')
+  } catch (err) {
+    a.ok(/failed/.test(err.message))
+  } finally {
+    a.strictEqual(test.result, undefined)
+  }
+})
 
-{ /* passing async test */
+tom.test('passing async test', async function () {
   const test = new Test('tom', async () => true)
-  test.run()
-    .then(result => {
-      a.strictEqual(result, true)
-      a.strictEqual(test.result, result)
-    })
-    .catch(halt)
-}
+  const result = await test.run()
+  a.strictEqual(result, true)
+  a.strictEqual(test.result, result)
+})
 
-{ /* failing async test: rejected */
+tom.test('failing async test: rejected', async function () {
   const test = new Test('tom', async function () {
     throw new Error('failed')
   })
-  test.run()
-    .then(() => {
-      a.ok(false, "shouldn't reach here")
-    })
-    .catch(err => {
-      a.ok(/failed/.test(err.message))
-    })
-    .catch(halt)
-}
+  try {
+    await test.run()
+    throw new Error('should not reach here')
+  } catch (err) {
+    a.ok(/failed/.test(err.message))
+  }
+})
 
-{ /* no test function: ignore, don't start, skip, pass or fail event */
+tom.test("no test function: ignore, don't start, skip, pass or fail event", async function () {
   const test = new Test('one')
-  test.run()
-    .then(result => {
-      a.strictEqual(result, undefined)
-      a.strictEqual(test.ended, false)
-      a.strictEqual(test.state, 'ignored')
-      a.strictEqual(test.result, result)
-    })
-    .catch(halt)
-}
+  const result = await test.run()
+  a.strictEqual(result, undefined)
+  a.strictEqual(test.ended, false)
+  a.strictEqual(test.state, 'ignored')
+  a.strictEqual(test.result, result)
+})
+
+export default tom

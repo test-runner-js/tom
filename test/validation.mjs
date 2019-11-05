@@ -1,25 +1,30 @@
 import Test from '../index.mjs'
-import a from 'assert'
-import { halt } from './lib/util.mjs'
+import Tom from '../node_modules/test-object-model/dist/index.mjs'
+import assert from 'assert'
+const a = assert.strict
 
-{ /* valid test */
+const tom = new Tom()
+
+tom.test('valid test', async function () {
   const tom = new Test('one', () => 1)
   a.doesNotThrow(
     () => Test.validate(tom)
   )
-}
+})
 
-{ /* invalid test */
+tom.test('invalid test', async function () {
   const tom = {}
   a.throws(
     () => Test.validate(tom),
     /valid tom required/i
   )
-}
+})
 
-{ /* invalid test 2 */
+tom.test('invalid test 2', async function () {
   a.throws(
     () => Test.validate(),
     /valid tom required/i
   )
-}
+})
+
+export default tom

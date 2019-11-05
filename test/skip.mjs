@@ -1,83 +1,76 @@
 import Test from '../index.mjs'
-import a from 'assert'
-import { halt } from './lib/util.mjs'
+import Tom from '../node_modules/test-object-model/dist/index.mjs'
+import assert from 'assert'
+const a = assert.strict
 
-{ /* new Test ({ skip: true }) */
+const tom = new Tom()
+
+tom.test('new Test ({ skip: true })', async function () {
   const actuals = []
   const skippedTest = new Test(() => { actuals.push('one') }, { skip: true })
-  a.strictEqual(skippedTest.markedSkip, true)
-  skippedTest.run()
-    .then(() => {
-      a.deepStrictEqual(actuals, [])
-    })
-    .catch(halt)
-}
+  a.equal(skippedTest.markedSkip, true)
+  await skippedTest.run()
+  a.deepEqual(actuals, [])
+})
 
-{ /* tom.skip(): event args */
+tom.test('tom.skip(): event args', async function () {
   const actuals = []
   const tom = new Test()
   const skippedTest = tom.skip('one', () => 1)
-  skippedTest.on('skip', (test, result) => {
-    a.strictEqual(test, skippedTest)
-    a.strictEqual(result, undefined)
+  skippedTest.on('skipped', (test, result) => {
+    a.equal(test, skippedTest)
+    a.equal(result, undefined)
+    actuals.push('skipped')
   })
-  skippedTest.run()
-    .catch(halt)
-}
+  await skippedTest.run()
+  a.deepEqual(actuals, ['skipped'])
+})
 
-{ /* tom.skip(): only emit "skipped" */
+tom.test('tom.skip(): only emit "skipped"', async function () {
   const actuals = []
   const tom = new Test()
   const skippedTest = tom.skip('one', () => 1)
   tom.on(function (eventName) { actuals.push(eventName) })
-  skippedTest.run()
-    .then(() => {
-      a.deepStrictEqual(actuals, ['state', 'skipped'])
-    })
-    .catch(halt)
-}
+  await skippedTest.run()
+  a.deepEqual(actuals, ['state', 'skipped'])
+})
 
-{ /* tom.skip(): testFn is not run */
+tom.test('tom.skip(): testFn is not run', async function () {
   const actuals = []
   const tom = new Test()
   const skippedTest = tom.skip('one', () => { actuals.push('one') })
-  Promise
-    .all([tom.run(), skippedTest.run()])
-    .then(() => {
-      a.deepStrictEqual(actuals, [])
-    })
-    .catch(halt)
-}
+  await Promise.all([tom.run(), skippedTest.run()])
+  a.deepEqual(actuals, [])
+})
 
-{ /* tom.skip(): multiple */
+tom.test('tom.skip(): multiple', async function () {
   const actuals = []
   const tom = new Test()
   const one = tom.skip('one', () => 1)
   const two = tom.skip('two', () => 2)
   tom.on(function (eventName) { actuals.push(eventName) })
-  Promise
-    .all([tom.run(), one.run(), two.run()])
-    .then(() => {
-      a.deepStrictEqual(actuals, [
-        'state',
-        'ignored',
-        'state',
-        'skipped',
-        'state',
-        'skipped'
-      ])
-    })
-    .catch(halt)
-}
+  await Promise.all([tom.run(), one.run(), two.run()])
+  a.deepEqual(actuals, [
+    'state',
+    'ignored',
+    'state',
+    'skipped',
+    'state',
+    'skipped'
+  ])
+})
 
-{ /* skippedTest.run(): skip event args */
+tom.test('skippedTest.run(): skip event args', async function () {
   const actuals = []
   const tom = new Test()
   const test = tom.skip('one', () => 1)
-  test.on('skip', (t, result) => {
-    a.strictEqual(t, test)
-    a.strictEqual(result, undefined)
+  test.on('skipped', (t, result) => {
+    a.equal(t, test)
+    a.equal(result, undefined)
+    actuals.push('skipped')
   })
-  test.run()
-    .catch(halt)
-}
+  await test.run()
+  a.deepEqual(actuals, ['skipped'])
+})
+
+export default tom
