@@ -208,11 +208,6 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
   }
 
   /**
-   * Run test plus all child tests.
-   */
-  async runAll () {}
-
-  /**
    * Reset state
    */
   reset (deep) {
