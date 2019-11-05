@@ -99,7 +99,7 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
   }
 
   toString () {
-    return `${this.name}`
+    return this.name
   }
 
   /**
@@ -234,11 +234,10 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
    * @param {string} [name]
    * @return {Tom}
    */
-  static combine (tests, name) {
+  static combine (tests, name, options) {
     let test
     if (tests.length > 1) {
-      /* run new root sequentially to be on the safe side */
-      test = new this(name, { maxConcurrency: 1 })
+      test = new this(name, options)
       for (const subTom of tests) {
         this.validate(subTom)
         test.add(subTom)
