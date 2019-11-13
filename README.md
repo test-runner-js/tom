@@ -4,9 +4,11 @@
 [![Dependency Status](https://badgen.net/david/dep/test-runner-js/test-object-model)](https://david-dm.org/test-runner-js/test-object-model)
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](https://github.com/feross/standard)
 
+***This documentation is a work in progress***.
+
 # test-object-model
 
-A test tree - used as input to one of several runners:
+A TestObjectModel (TOM) instance is a tree structure containing a suite of tests. It is supplied as input to one of several runners:
 
 * [test-runner](https://github.com/test-runner-js/cli)
 * [web-runner](https://github.com/test-runner-js/web-runner)
@@ -15,23 +17,52 @@ A test tree - used as input to one of several runners:
 
 ## Synopsis
 
-Create a module which exports one or more tests.
+Create a TOM instance and add a simple test. For the sake of simplicity, the follow example defines a trivial `assert` function but you can use any assertion library you like.
 
 ```js
-const Tom = require('test-object-model')
-const assert = require('assert')
+import Tom from 'test-object-model'
 
-const tom = new Tom()
+const tom = new Tom('Synopsis')
+
+function assert(ok) {
+  if (!ok) {
+    throw new Error('Assertion error')
+  }
+}
 
 tom.test('Quick maths', function () {
   const result = 2 + 2 - 1
-  assert.strictEqual(result, 3)
+  assert(result === 3)
 })
 
-module.exports = tom
+export default tom
 ```
 
-## Usage 
+Save the above to file named `test.mjs`. You can now supply this as input to `esm-runner`.
+
+```
+$ esm-runner tmp/synopsis.mjs
+
+Start: 1 tests loaded
+
+ ✓ Synopsis Quick maths
+
+Completed in 6ms. Pass: 1, fail: 0, skip: 0.
+```
+
+You can test the same code in a headless browser instance (Chromium) using `web-runner`.
+
+```
+$ web-runner tmp/synopsis.mjs
+
+Start: 1 tests loaded
+
+ ✓ Synopsis Quick maths
+
+Completed in 16ms. Pass: 1, fail: 0, skip: 0.
+```
+
+## Usage
 
 Create a simple test.
 
