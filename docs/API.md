@@ -48,10 +48,10 @@
 | Param | Type | Description |
 | --- | --- | --- |
 | [name] | <code>string</code> | The test name. |
-| [testFn] | <code>function</code> | A function which will either complete successfully, reject or throw. |
-| [options] | <code>object</code> |  |
+| [testFn] | <code>function</code> | A function which will either succeed, reject or throw. |
+| [options] | <code>object</code> | Test config. |
 | [options.timeout] | <code>number</code> | A time limit for the test in ms. |
-| [options.maxConcurrency] | <code>number</code> | The max concurrency that asynchronous child jobs can run. |
+| [options.maxConcurrency] | <code>number</code> | The max concurrency that child tests will be able to run. For example, specifying `2` will allow child tests to run two at a time. Defaults to `10`. |
 | [options.skip] | <code>boolean</code> | Skip this test. |
 | [options.only] | <code>boolean</code> | Only run this test. |
 
@@ -64,7 +64,7 @@ Test name
 <a name="module_test-object-model--Tom+testFn"></a>
 
 #### tom.testFn : <code>function</code>
-A function which will either complete successfully, reject or throw.
+A function which will either succeed, reject or throw.
 
 **Kind**: instance property of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
 <a name="module_test-object-model--Tom+index"></a>
@@ -76,7 +76,7 @@ Position of this test within its parents children
 <a name="module_test-object-model--Tom+state"></a>
 
 #### tom.state : <code>string</code>
-Test state: pending, start, skip, pass or fail.
+Test state. Can be one of `pending`, `start`, `skip`, `pass` or `fail`.
 
 **Kind**: instance property of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
 <a name="module_test-object-model--Tom+timeout"></a>
@@ -100,7 +100,7 @@ The value returned by the test function, if it ended successfully.
 <a name="module_test-object-model--Tom+maxConcurrency"></a>
 
 #### tom.maxConcurrency : <code>number</code>
-The max concurrency that asynchronous child jobs can run.
+The max concurrency that child tests will be able to run. For example, specifying `2` will allow child tests to run two at a time.
 
 **Kind**: instance property of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
 **Default**: <code>10</code>  
