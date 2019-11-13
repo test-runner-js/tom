@@ -21,7 +21,6 @@ Create a TOM instance and add a simple test. For the sake of simplicity, the fol
 
 ```js
 import Tom from 'test-object-model'
-
 const tom = new Tom('Synopsis')
 
 function assert(ok) {
@@ -50,7 +49,7 @@ Start: 1 tests loaded
 Completed in 6ms. Pass: 1, fail: 0, skip: 0.
 ```
 
-You can test the same code in a headless browser instance (Chromium) using `web-runner`.
+To confirm the code is isomorphic, you can test the same TOM in a headless browser instance (Chromium) using `web-runner`.
 
 ```
 $ web-runner tmp/synopsis.mjs
@@ -62,9 +61,9 @@ Start: 1 tests loaded
 Completed in 16ms. Pass: 1, fail: 0, skip: 0.
 ```
 
-## Usage
+## Usage basics
 
-Create a simple test.
+Supply a name and test function to `tom.test`. If the function throws or rejects the test is considered a fail.
 
 ```js
 tom.test('name', function () {
@@ -80,7 +79,7 @@ tom.skip('name', function () {
 })
 ```
 
-Skip all but this test.
+Skip all but this and any other tests marked as `only`.
 
 ```js
 tom.only('name', function () {
@@ -93,17 +92,6 @@ Ignore a test.
 ```js
 tom.test('name')
 ```
-
-Test context.
-
-```js
-tom.test('name', function () {
-  const testName = this.name
-  const testNumber = this.index
-})
-```
-
-Pass the TOM as input into a test-runner.
 
 ## Documentation
 
