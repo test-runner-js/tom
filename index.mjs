@@ -98,6 +98,10 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
     this.options = options
   }
 
+  /**
+   * Returns the test name.
+   * @returns {string}
+   */
   toString () {
     return this.name
   }
@@ -245,6 +249,11 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
     return test
   }
 
+  /**
+   * Returns true if the input is a valid test.
+   * @param {module:test-object-model} tom - Input to test.
+   * @returns {boolean}
+   */
   static validate (tom = {}) {
     const valid = ['name', 'testFn', 'index', 'ended'].every(prop => Object.keys(tom).includes(prop))
     if (!valid) {

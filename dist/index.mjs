@@ -577,10 +577,10 @@ function isPromise (input) {
 
 /**
  * @param {string} [name] - The test name.
- * @param {function} [testFn] - A function which will either complete successfully, reject or throw.
- * @param {object} [options]
+ * @param {function} [testFn] - A function which will either succeed, reject or throw.
+ * @param {object} [options] - Test config.
  * @param {number} [options.timeout] - A time limit for the test in ms.
- * @param {number} [options.maxConcurrency] - The max concurrency that asynchronous child jobs can run.
+ * @param {number} [options.maxConcurrency] - The max concurrency that child tests will be able to run. For example, specifying `2` will allow child tests to run two at a time. Defaults to `10`.
  * @param {boolean} [options.skip] - Skip this test.
  * @param {boolean} [options.only] - Only run this test.
  * @alias module:test-object-model
@@ -617,7 +617,7 @@ class Tom extends createMixin(Composite)(StateMachine) {
     this.name = name;
 
     /**
-     * A function which will either complete successfully, reject or throw.
+     * A function which will either succeed, reject or throw.
      * @type {function}
      */
     this.testFn = testFn;
@@ -629,7 +629,7 @@ class Tom extends createMixin(Composite)(StateMachine) {
     this.index = 1;
 
     /**
-     * Test state: pending, start, skip, pass or fail.
+     * Test state. Can be one of `pending`, `start`, `skip`, `pass` or `fail`.
      * @member {string} module:test-object-model#state
      */
 
@@ -652,7 +652,7 @@ class Tom extends createMixin(Composite)(StateMachine) {
     this.result = undefined;
 
     /**
-     * The max concurrency that asynchronous child jobs can run.
+     * The max concurrency that child tests will be able to run. For example, specifying `2` will allow child tests to run two at a time.
      * @type {number}
      * @default 10
      */
@@ -664,6 +664,10 @@ class Tom extends createMixin(Composite)(StateMachine) {
     this.options = options;
   }
 
+  /**
+   * Returns the test name.
+   * @returns {string}
+   */
   toString () {
     return this.name
   }
@@ -811,6 +815,11 @@ class Tom extends createMixin(Composite)(StateMachine) {
     return test
   }
 
+  /**
+   * Returns true if the input is a valid test.
+   * @param {module:test-object-model} tom - Input to test.
+   * @returns {boolean}
+   */
   static validate (tom = {}) {
     const valid = ['name', 'testFn', 'index', 'ended'].every(prop => Object.keys(tom).includes(prop));
     if (!valid) {

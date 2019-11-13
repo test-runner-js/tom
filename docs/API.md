@@ -29,6 +29,7 @@
             * [.ended](#module_test-object-model--Tom+ended) : <code>boolean</code>
             * [.result](#module_test-object-model--Tom+result) : <code>\*</code>
             * [.maxConcurrency](#module_test-object-model--Tom+maxConcurrency) : <code>number</code>
+            * [.toString()](#module_test-object-model--Tom+toString) ⇒ <code>string</code>
             * [.test()](#module_test-object-model--Tom+test) ⇒ [<code>Tom</code>](#exp_module_test-object-model--Tom)
             * [.skip()](#module_test-object-model--Tom+skip) ⇒ [<code>Tom</code>](#exp_module_test-object-model--Tom)
             * [.only()](#module_test-object-model--Tom+only) ⇒ [<code>Tom</code>](#exp_module_test-object-model--Tom)
@@ -36,6 +37,7 @@
             * [.reset()](#module_test-object-model--Tom+reset)
         * _static_
             * [.combine(tests, [name])](#module_test-object-model--Tom.combine) ⇒ <code>Tom</code>
+            * [.validate(tom)](#module_test-object-model--Tom.validate) ⇒ <code>boolean</code>
 
 <a name="exp_module_test-object-model--Tom"></a>
 
@@ -104,6 +106,12 @@ The max concurrency that child tests will be able to run. For example, specifyin
 
 **Kind**: instance property of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
 **Default**: <code>10</code>  
+<a name="module_test-object-model--Tom+toString"></a>
+
+#### tom.toString() ⇒ <code>string</code>
+Returns the test name.
+
+**Kind**: instance method of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
 <a name="module_test-object-model--Tom+test"></a>
 
 #### tom.test() ⇒ [<code>Tom</code>](#exp_module_test-object-model--Tom)
@@ -146,6 +154,17 @@ If more than one TOM instances are supplied, combine them into a common root.
 | --- | --- |
 | tests | <code>Array.&lt;Tom&gt;</code> | 
 | [name] | <code>string</code> | 
+
+<a name="module_test-object-model--Tom.validate"></a>
+
+#### Tom.validate(tom) ⇒ <code>boolean</code>
+Returns true if the input is a valid test.
+
+**Kind**: static method of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| tom | [<code>test-object-model</code>](#module_test-object-model) | Input to test. |
 
 <a name="TestContext"></a>
 
