@@ -21,7 +21,7 @@
   "dependencies": {
     "composite-class": "^1.0.0",
     "create-mixin": "^2.0.1",
-    "fsm-base": "^0.5.0",
+    "fsm-base": "^0.5.1",
     "race-timeout-anywhere": "^1.0.0",
     "typical": "^5.2.0"
   },

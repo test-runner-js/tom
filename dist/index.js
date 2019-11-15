@@ -404,7 +404,7 @@
       return Array.from(input)
     }
 
-    return [ input ]
+    return [input]
   }
 
   /**
