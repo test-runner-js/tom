@@ -546,6 +546,36 @@ class TestContext {
  */
 
 /**
+ * A plain object is a simple object literal, it is not an instance of a class. Returns true if the input `typeof` is `object` and directly decends from `Object`.
+ *
+ * @param {*} - the input to test
+ * @returns {boolean}
+ * @static
+ * @example
+ * > t.isPlainObject({ something: 'one' })
+ * true
+ * > t.isPlainObject(new Date())
+ * false
+ * > t.isPlainObject([ 0, 1 ])
+ * false
+ * > t.isPlainObject(/test/)
+ * false
+ * > t.isPlainObject(1)
+ * false
+ * > t.isPlainObject('one')
+ * false
+ * > t.isPlainObject(null)
+ * false
+ * > t.isPlainObject((function * () {})())
+ * false
+ * > t.isPlainObject(function * () {})
+ * false
+ */
+function isPlainObject (input) {
+  return input !== null && typeof input === 'object' && input.constructor === Object
+}
+
+/**
  * Returns true if the input value is defined.
  * @param {*} - the input to test
  * @returns {boolean}
@@ -745,6 +775,11 @@ class Tom extends createMixin(Composite)(StateMachine) {
         this.setState('skipped', this);
       } else {
         this.setState('in-progress', this);
+        /**
+         * Test start.
+         * @event module:test-object-model#start
+         * @param test {TestObjectModel} - The test node.
+         */
         this.emit('start', this);
 
         try {
@@ -756,9 +791,21 @@ class Tom extends createMixin(Composite)(StateMachine) {
             try {
               const result = await Promise.race([testResult, raceTimeout(this.timeout)]);
               this.result = result;
+              /**
+               * Test pass.
+               * @event module:test-object-model#pass
+               * @param test {TestObjectModel} - The test node.
+               * @param result {*} - The value returned by the test.
+               */
               this.setState('pass', this, result);
               return result
             } catch (err) {
+              /**
+               * Test fail.
+               * @event module:test-object-model#fail
+               * @param test {TestObjectModel} - The test node.
+               * @param err {Error} - The exception thrown.
+               */
               this.setState('fail', this, err);
               return Promise.reject(err)
             }
@@ -773,6 +820,11 @@ class Tom extends createMixin(Composite)(StateMachine) {
         }
       }
     } else {
+      /**
+       * Test ignored.
+       * @event module:test-object-model#ignored
+       * @param test {TestObjectModel} - The test node.
+       */
       this.setState('ignored', this);
     }
   }
@@ -828,10 +880,6 @@ class Tom extends createMixin(Composite)(StateMachine) {
       throw err
     }
   }
-}
-
-function isPlainObject (input) {
-  return input !== null && typeof input === 'object' && input.constructor === Object
 }
 
 export default Tom;

@@ -1,3 +1,5 @@
+const resolve = require('rollup-plugin-node-resolve')
+
 module.exports = [
   {
     input: 'index.mjs',
@@ -6,7 +8,8 @@ module.exports = [
       format: 'umd',
       name: 'Tom'
     },
-    external: ['assert', 'events', 'fsm-base']
+    external: ['assert', 'events'],
+    plugins: [resolve()]
   },
   {
     input: 'index.mjs',
@@ -14,6 +17,7 @@ module.exports = [
       file: 'dist/index.mjs',
       format: 'esm'
     },
-    external: ['assert', 'events', 'fsm-base']
+    external: ['assert', 'events'],
+    plugins: [resolve()]
   }
 ]

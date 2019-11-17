@@ -1,9 +1,9 @@
-import raceTimeout from './node_modules/race-timeout-anywhere/index.mjs'
-import mixin from './node_modules/create-mixin/index.mjs'
-import CompositeClass from './node_modules/composite-class/index.mjs'
-import StateMachine from './node_modules/fsm-base/dist/index.mjs'
+import raceTimeout from 'race-timeout-anywhere'
+import mixin from 'create-mixin'
+import CompositeClass from 'composite-class'
+import StateMachine from 'fsm-base'
 import TestContext from './lib/test-context.mjs'
-import { isPromise } from './node_modules/typical/index.mjs';
+import { isPromise, isPlainObject } from 'typical/index.mjs';
 
 /**
  * @module test-object-model
@@ -179,6 +179,11 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
         this.setState('skipped', this)
       } else {
         this.setState('in-progress', this)
+        /**
+         * Test start.
+         * @event module:test-object-model#start
+         * @param test {TestObjectModel} - The test node.
+         */
         this.emit('start', this)
 
         try {
@@ -190,9 +195,21 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
             try {
               const result = await Promise.race([testResult, raceTimeout(this.timeout)])
               this.result = result
+              /**
+               * Test pass.
+               * @event module:test-object-model#pass
+               * @param test {TestObjectModel} - The test node.
+               * @param result {*} - The value returned by the test.
+               */
               this.setState('pass', this, result)
               return result
             } catch (err) {
+              /**
+               * Test fail.
+               * @event module:test-object-model#fail
+               * @param test {TestObjectModel} - The test node.
+               * @param err {Error} - The exception thrown.
+               */
               this.setState('fail', this, err)
               return Promise.reject(err)
             }
@@ -207,6 +224,11 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
         }
       }
     } else {
+      /**
+       * Test ignored.
+       * @event module:test-object-model#ignored
+       * @param test {TestObjectModel} - The test node.
+       */
       this.setState('ignored', this)
     }
   }
@@ -262,10 +284,6 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
       throw err
     }
   }
-}
-
-function isPlainObject (input) {
-  return input !== null && typeof input === 'object' && input.constructor === Object
 }
 
 export default Tom

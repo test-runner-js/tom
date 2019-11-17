@@ -35,6 +35,10 @@
             * [.only()](#module_test-object-model--Tom+only) ⇒ [<code>Tom</code>](#exp_module_test-object-model--Tom)
             * [.run()](#module_test-object-model--Tom+run) ⇒ <code>Promise</code>
             * [.reset()](#module_test-object-model--Tom+reset)
+            * ["start" (test)](#module_test-object-model--Tom+event_start)
+            * ["pass" (test, result)](#module_test-object-model--Tom+event_pass)
+            * ["fail" (test, err)](#module_test-object-model--Tom+event_fail)
+            * ["ignored" (test)](#module_test-object-model--Tom+event_ignored)
         * _static_
             * [.combine(tests, [name])](#module_test-object-model--Tom.combine) ⇒ <code>Tom</code>
             * [.validate(tom)](#module_test-object-model--Tom.validate) ⇒ <code>boolean</code>
@@ -143,6 +147,52 @@ Execute the stored test function.
 Reset state
 
 **Kind**: instance method of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
+<a name="module_test-object-model--Tom+event_start"></a>
+
+#### "start" (test)
+Test start.
+
+**Kind**: event emitted by [<code>Tom</code>](#exp_module_test-object-model--Tom)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| test | <code>TestObjectModel</code> | The test node. |
+
+<a name="module_test-object-model--Tom+event_pass"></a>
+
+#### "pass" (test, result)
+Test pass.
+
+**Kind**: event emitted by [<code>Tom</code>](#exp_module_test-object-model--Tom)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| test | <code>TestObjectModel</code> | The test node. |
+| result | <code>\*</code> | The value returned by the test. |
+
+<a name="module_test-object-model--Tom+event_fail"></a>
+
+#### "fail" (test, err)
+Test fail.
+
+**Kind**: event emitted by [<code>Tom</code>](#exp_module_test-object-model--Tom)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| test | <code>TestObjectModel</code> | The test node. |
+| err | <code>Error</code> | The exception thrown. |
+
+<a name="module_test-object-model--Tom+event_ignored"></a>
+
+#### "ignored" (test)
+Test ignored.
+
+**Kind**: event emitted by [<code>Tom</code>](#exp_module_test-object-model--Tom)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| test | <code>TestObjectModel</code> | The test node. |
+
 <a name="module_test-object-model--Tom.combine"></a>
 
 #### Tom.combine(tests, [name]) ⇒ <code>Tom</code>
