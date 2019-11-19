@@ -13,8 +13,9 @@ tom.test('passing sync test', async function () {
 })
 
 tom.test('failing sync test', async function () {
+  const err = new Error('failed')
   const test = new Test('tom', function () {
-    throw new Error('failed')
+    throw err
   })
   try {
     await test.run()
@@ -22,7 +23,7 @@ tom.test('failing sync test', async function () {
   } catch (err) {
     a.ok(/failed/.test(err.message))
   } finally {
-    a.strictEqual(test.result, undefined)
+    a.strictEqual(test.result, err)
   }
 })
 
@@ -34,14 +35,16 @@ tom.test('passing async test', async function () {
 })
 
 tom.test('failing async test: rejected', async function () {
+  const err = new Error('failed')
   const test = new Test('tom', async function () {
-    throw new Error('failed')
+    throw err
   })
   try {
     await test.run()
     throw new Error('should not reach here')
   } catch (err) {
     a.ok(/failed/.test(err.message))
+    a.ok(test.result === err)
   }
 })
 
