@@ -8,60 +8,66 @@
 
 # test-object-model
 
-A TestObjectModel (TOM) instance is a tree structure containing a suite of tests. It is supplied as input to one of several runners:
-
-* [test-runner](https://github.com/test-runner-js/cli)
-* [web-runner](https://github.com/test-runner-js/web-runner)
-* [esm-runner](https://github.com/test-runner-js/esm-runner)
-* [mc-runner](https://github.com/test-runner-js/mc-runner)
+Exports a composite class used for modelling a test suite and its associated metadata. The model describes your test functions, how they are grouped, the order in which they should run plus metadata such as timeout constraints, concurrency settings etc. It is supplied as input to one of several runners: [test-runner](https://github.com/test-runner-js/cli), [web-runner](https://github.com/test-runner-js/web-runner), [esm-runner](https://github.com/test-runner-js/esm-runner), [mc-runner](https://github.com/test-runner-js/mc-runner).
 
 ## Synopsis
 
-Create a TOM instance and add a simple test. For the sake of simplicity, the follow example defines a trivial `assert` function but you can use any assertion library you like.
+Trivial example creating a TOM containing two tests - one pass and one fail. Create a test by supplying a name and test function to `tom.test`. If the function throws or rejects the test is considered a fail.
 
 ```js
 import Tom from 'test-object-model'
-const tom = new Tom('Synopsis')
+const tom = new Tom()
 
-function assert(ok) {
-  if (!ok) {
-    throw new Error('Assertion error')
-  }
-}
+tom.test('A successful test', function () {
+  return 'This passed'
+})
 
-tom.test('Quick maths', function () {
-  const result = 2 + 2 - 1
-  assert(result === 3)
+tom.test('A failing test', function () {
+  throw new Error('This failed')
 })
 
 export default tom
 ```
 
-Save the above to file named `test.mjs`. You can now supply this as input to `esm-runner`.
+Save the above to file named `test.mjs`, you can now run this test suite in several ways. For example, you can run it in Node.js by supplying it as input to `esm-runner`.
 
 ```
 $ esm-runner tmp/synopsis.mjs
 
-Start: 1 tests loaded
+Start: 2 tests loaded
 
- ✓ Synopsis Quick maths
+✓ synopsis A successful test [This passed]
+⨯ synopsis A failing test
 
-Completed in 6ms. Pass: 1, fail: 0, skip: 0.
+   Error: This failed
+       at TestContext.<anonymous> (file:///Users/lloyd/Documents/test-runner-js/test-object-model/tmp/synopsis.mjs:10:9)
+       ...
+       at processTimers (internal/timers.js:475:7)
+
+
+Completed in 10ms. Pass: 1, fail: 1, skip: 0.
 ```
 
-To confirm the code is isomorphic, you can test the same TOM in a headless browser instance (Chromium) using `web-runner`.
+To confirm the test suite and the code under test is isomorphic you can run the same TOM in the browser (Chromium) using `web-runner`.
 
 ```
 $ web-runner tmp/synopsis.mjs
 
-Start: 1 tests loaded
+Start: 2 tests loaded
 
- ✓ Synopsis Quick maths
+✓ tom A successful test [This passed]
+⨯ tom A failing test
 
-Completed in 16ms. Pass: 1, fail: 0, skip: 0.
+   Error: This failed
+       at TestContext.<anonymous> (http://localhost:7357/output.mjs:894:9)
+       ...
+       at http://localhost:7357/output.mjs:2016:21
+
+
+Completed in 8ms. Pass: 1, fail: 1, skip: 0.
 ```
 
-## Usage basics
+## API summary
 
 Supply a name and test function to `tom.test`. If the function throws or rejects the test is considered a fail.
 
@@ -87,7 +93,7 @@ tom.only('name', function () {
 })
 ```
 
-Ignore a test.
+Group.
 
 ```js
 tom.test('name')
