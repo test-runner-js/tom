@@ -9,7 +9,7 @@ module.exports = [
       name: 'Tom'
     },
     external: ['assert', 'events'],
-    plugins: [resolve()]
+    plugins: [resolve({ preferBuiltins: true })]
   },
   {
     input: 'index.mjs',
@@ -18,6 +18,6 @@ module.exports = [
       format: 'esm'
     },
     external: ['assert', 'events'],
-    plugins: [resolve()]
+    plugins: [resolve({ preferBuiltins: true })]
   }
 ]

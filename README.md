@@ -4,7 +4,7 @@
 [![Dependency Status](https://badgen.net/david/dep/test-runner-js/test-object-model)](https://david-dm.org/test-runner-js/test-object-model)
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](https://github.com/feross/standard)
 
-***This documentation is a work in progress***.
+***This project and documentation are a work in progress***.
 
 # test-object-model
 

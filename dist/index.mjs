@@ -1,3 +1,5 @@
+import { performance } from 'perf_hooks';
+
 function raceTimeout (ms, msg) {
   return new Promise((resolve, reject) => {
     const interval = setTimeout(() => {
@@ -676,7 +678,7 @@ class Tom extends createMixin(Composite)(StateMachine) {
     this.ended = false;
 
     /**
-     * The value returned by the test function, if it ended successfully.
+     * If the test passed, the value returned by the test function. If it failed, the exception thrown or rejection reason.
      * @type {*}
      */
     this.result = undefined;
@@ -692,6 +694,12 @@ class Tom extends createMixin(Composite)(StateMachine) {
     this.markedOnly = options.only || false;
 
     this.options = options;
+
+    this.stats = {
+      start: 0,
+      end: 0,
+      duration: 0
+    };
   }
 
   /**
@@ -700,6 +708,13 @@ class Tom extends createMixin(Composite)(StateMachine) {
    */
   toString () {
     return this.name
+  }
+
+  /**
+   * Add a test group.
+   */
+  group (name, options) {
+    return this.test(name, options)
   }
 
   /**
@@ -782,6 +797,8 @@ class Tom extends createMixin(Composite)(StateMachine) {
          */
         this.emit('start', this);
 
+        this.stats.start = performance.now();
+
         try {
           const testResult = this.testFn.call(new TestContext({
             name: this.name,
@@ -791,6 +808,9 @@ class Tom extends createMixin(Composite)(StateMachine) {
             try {
               const result = await Promise.race([testResult, raceTimeout(this.timeout)]);
               this.result = result;
+              this.stats.end = performance.now();
+              this.stats.duration = this.stats.end - this.stats.start;
+
               /**
                * Test pass.
                * @event module:test-object-model#pass
@@ -801,6 +821,9 @@ class Tom extends createMixin(Composite)(StateMachine) {
               return result
             } catch (err) {
               this.result = err;
+              this.stats.end = performance.now();
+              this.stats.duration = this.stats.end - this.stats.start;
+
               /**
                * Test fail.
                * @event module:test-object-model#fail
@@ -811,12 +834,16 @@ class Tom extends createMixin(Composite)(StateMachine) {
               return Promise.reject(err)
             }
           } else {
+            this.stats.end = performance.now();
+            this.stats.duration = this.stats.end - this.stats.start;
             this.result = testResult;
             this.setState('pass', this, testResult);
             return testResult
           }
         } catch (err) {
           this.result = err;
+          this.stats.end = performance.now();
+          this.stats.duration = this.stats.end - this.stats.start;
           this.setState('fail', this, err);
           throw (err)
         }

@@ -1,8 +1,8 @@
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-  typeof define === 'function' && define.amd ? define(factory) :
-  (global = global || self, global.Tom = factory());
-}(this, (function () { 'use strict';
+  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('perf_hooks')) :
+  typeof define === 'function' && define.amd ? define(['perf_hooks'], factory) :
+  (global = global || self, global.Tom = factory(global.perf_hooks));
+}(this, (function (perf_hooks) { 'use strict';
 
   function raceTimeout (ms, msg) {
     return new Promise((resolve, reject) => {
@@ -682,7 +682,7 @@
       this.ended = false;
 
       /**
-       * The value returned by the test function, if it ended successfully.
+       * If the test passed, the value returned by the test function. If it failed, the exception thrown or rejection reason.
        * @type {*}
        */
       this.result = undefined;
@@ -698,6 +698,12 @@
       this.markedOnly = options.only || false;
 
       this.options = options;
+
+      this.stats = {
+        start: 0,
+        end: 0,
+        duration: 0
+      };
     }
 
     /**
@@ -706,6 +712,13 @@
      */
     toString () {
       return this.name
+    }
+
+    /**
+     * Add a test group.
+     */
+    group (name, options) {
+      return this.test(name, options)
     }
 
     /**
@@ -788,6 +801,8 @@
            */
           this.emit('start', this);
 
+          this.stats.start = perf_hooks.performance.now();
+
           try {
             const testResult = this.testFn.call(new TestContext({
               name: this.name,
@@ -797,6 +812,9 @@
               try {
                 const result = await Promise.race([testResult, raceTimeout(this.timeout)]);
                 this.result = result;
+                this.stats.end = perf_hooks.performance.now();
+                this.stats.duration = this.stats.end - this.stats.start;
+
                 /**
                  * Test pass.
                  * @event module:test-object-model#pass
@@ -807,6 +825,9 @@
                 return result
               } catch (err) {
                 this.result = err;
+                this.stats.end = perf_hooks.performance.now();
+                this.stats.duration = this.stats.end - this.stats.start;
+
                 /**
                  * Test fail.
                  * @event module:test-object-model#fail
@@ -817,12 +838,16 @@
                 return Promise.reject(err)
               }
             } else {
+              this.stats.end = perf_hooks.performance.now();
+              this.stats.duration = this.stats.end - this.stats.start;
               this.result = testResult;
               this.setState('pass', this, testResult);
               return testResult
             }
           } catch (err) {
             this.result = err;
+            this.stats.end = perf_hooks.performance.now();
+            this.stats.duration = this.stats.end - this.stats.start;
             this.setState('fail', this, err);
             throw (err)
           }

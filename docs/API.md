@@ -100,7 +100,7 @@ True if the test has ended.
 <a name="module_test-object-model--Tom+result"></a>
 
 #### tom.result : <code>\*</code>
-The value returned by the test function, if it ended successfully.
+If the test passed, the value returned by the test function. If it failed, the exception thrown or rejection reason.
 
 **Kind**: instance property of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
 <a name="module_test-object-model--Tom+maxConcurrency"></a>
