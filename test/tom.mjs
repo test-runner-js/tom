@@ -73,7 +73,7 @@ tom.test('tom.stats: async fail', async function () {
   } finally {
     a.ok(tom.stats.start > 0)
     a.ok(tom.stats.end > tom.stats.start)
-    a.ok(tom.stats.duration > 50)
+    a.ok(tom.stats.duration > 40)
   }
 })
 

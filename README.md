@@ -8,7 +8,9 @@
 
 # test-object-model
 
-Exports a composite class used for modelling a test suite and its associated metadata. The model describes your test functions, how they are grouped, the order in which they should run plus metadata such as timeout constraints, concurrency settings etc. It is supplied as input to one of several runners: [test-runner](https://github.com/test-runner-js/cli), [web-runner](https://github.com/test-runner-js/web-runner), [esm-runner](https://github.com/test-runner-js/esm-runner), [mc-runner](https://github.com/test-runner-js/mc-runner).
+Used for defining a test suite for use as input in a compatible runner. The model describes your test functions, how they are grouped, the order in which they should run, config for each (timeout, max concurrency etc.)
+
+It is supplied as input to one of several runners: [test-runner](https://github.com/test-runner-js/cli), [web-runner](https://github.com/test-runner-js/web-runner), [esm-runner](https://github.com/test-runner-js/esm-runner), [mc-runner](https://github.com/test-runner-js/mc-runner).
 
 ## Synopsis
 
