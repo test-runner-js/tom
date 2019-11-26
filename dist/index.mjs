@@ -1,5 +1,3 @@
-import { performance } from 'perf_hooks';
-
 function raceTimeout (ms, msg) {
   return new Promise((resolve, reject) => {
     const interval = setTimeout(() => {
@@ -815,6 +813,7 @@ class Tom extends createMixin(Composite)(StateMachine) {
       if (this.markedSkip) {
         this.setState('skipped', this);
       } else {
+        const performance = await this._getPerformance();
         this.setState('in-progress', this);
         /**
          * Test start.
@@ -898,6 +897,15 @@ class Tom extends createMixin(Composite)(StateMachine) {
       this.resetState();
       this.markedSkip = this.options.skip || false;
       this.markedOnly = this.options.only || false;
+    }
+  }
+
+  async _getPerformance () {
+    if (typeof window === 'undefined') {
+      const { performance } = await import('perf_hooks');
+      return performance
+    } else {
+      return performance
     }
   }
 

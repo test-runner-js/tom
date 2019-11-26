@@ -1,8 +1,8 @@
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('perf_hooks')) :
-  typeof define === 'function' && define.amd ? define(['perf_hooks'], factory) :
-  (global = global || self, global.Tom = factory(global.perf_hooks));
-}(this, (function (perf_hooks) { 'use strict';
+  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+  typeof define === 'function' && define.amd ? define(factory) :
+  (global = global || self, global.Tom = factory());
+}(this, (function () { 'use strict';
 
   function raceTimeout (ms, msg) {
     return new Promise((resolve, reject) => {
@@ -819,6 +819,7 @@
         if (this.markedSkip) {
           this.setState('skipped', this);
         } else {
+          const performance = await this._getPerformance();
           this.setState('in-progress', this);
           /**
            * Test start.
@@ -827,7 +828,7 @@
            */
           this.emit('start', this);
 
-          this.stats.start = perf_hooks.performance.now();
+          this.stats.start = performance.now();
 
           try {
             this.context = new TestContext({
@@ -839,7 +840,7 @@
               try {
                 const result = await Promise.race([testResult, raceTimeout(this.timeout)]);
                 this.result = result;
-                this.stats.end = perf_hooks.performance.now();
+                this.stats.end = performance.now();
                 this.stats.duration = this.stats.end - this.stats.start;
 
                 /**
@@ -852,7 +853,7 @@
                 return result
               } catch (err) {
                 this.result = err;
-                this.stats.end = perf_hooks.performance.now();
+                this.stats.end = performance.now();
                 this.stats.duration = this.stats.end - this.stats.start;
 
                 /**
@@ -865,7 +866,7 @@
                 return Promise.reject(err)
               }
             } else {
-              this.stats.end = perf_hooks.performance.now();
+              this.stats.end = performance.now();
               this.stats.duration = this.stats.end - this.stats.start;
               this.result = testResult;
               this.setState('pass', this, testResult);
@@ -873,7 +874,7 @@
             }
           } catch (err) {
             this.result = err;
-            this.stats.end = perf_hooks.performance.now();
+            this.stats.end = performance.now();
             this.stats.duration = this.stats.end - this.stats.start;
             this.setState('fail', this, err);
             throw (err)
@@ -902,6 +903,15 @@
         this.resetState();
         this.markedSkip = this.options.skip || false;
         this.markedOnly = this.options.only || false;
+      }
+    }
+
+    async _getPerformance () {
+      if (typeof window === 'undefined') {
+        const { performance } = await import('perf_hooks');
+        return performance
+      } else {
+        return performance
       }
     }
 

@@ -3,8 +3,7 @@ import mixin from 'create-mixin'
 import CompositeClass from 'composite-class'
 import StateMachine from 'fsm-base'
 import TestContext from './lib/test-context.mjs'
-import { isPromise, isPlainObject } from 'typical/index.mjs'
-import { performance } from 'perf_hooks';
+import { isPromise, isPlainObject } from 'typical/index.mjs';
 
 /**
  * @module test-object-model
@@ -214,6 +213,7 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
       if (this.markedSkip) {
         this.setState('skipped', this)
       } else {
+        const performance = await this._getPerformance()
         this.setState('in-progress', this)
         /**
          * Test start.
@@ -297,6 +297,15 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
       this.resetState()
       this.markedSkip = this.options.skip || false
       this.markedOnly = this.options.only || false
+    }
+  }
+
+  async _getPerformance () {
+    if (typeof window === 'undefined') {
+      const { performance } = await import('perf_hooks')
+      return performance
+    } else {
+      return performance
     }
   }
 
