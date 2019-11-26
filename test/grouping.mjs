@@ -1,9 +1,9 @@
 import Test from '../index.mjs'
-import Tom from 'test-object-model'
+import EsmRunner from 'esm-runner'
 import assert from 'assert'
 const a = assert.strict
 
-const tom = new Tom()
+const tom = new EsmRunner.Tom()
 
 tom.test('grouping', async function () {
   const root = new Test('root')

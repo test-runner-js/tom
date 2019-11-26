@@ -1,957 +1,970 @@
-(function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-  typeof define === 'function' && define.amd ? define(factory) :
-  (global = global || self, global.Tom = factory());
-}(this, (function () { 'use strict';
+'use strict';
 
-  function raceTimeout (ms, msg) {
-    return new Promise((resolve, reject) => {
-      const interval = setTimeout(() => {
-        const err = new Error(msg || `Timeout expired [${ms}]`);
-        reject(err);
-      }, ms);
-      if (interval.unref) interval.unref();
-    })
-  }
-
-  /**
-   * Creates a mixin for use in a class extends expression.
-   * @module create-mixin
-   */
-
-  /**
-   * @alias module:create-mixin
-   * @param {class} Src - The class containing the behaviour you wish to mix into another class.
-   * @returns {function}
-   */
-  function createMixin (Src) {
-    return function (Base) {
-      class Mixed extends Base {}
-      for (const propName of Object.getOwnPropertyNames(Src.prototype)) {
-        if (propName === 'constructor') continue
-        Object.defineProperty(Mixed.prototype, propName, Object.getOwnPropertyDescriptor(Src.prototype, propName));
-      }
-      if (Src.prototype[Symbol.iterator]) {
-        Object.defineProperty(Mixed.prototype, Symbol.iterator, Object.getOwnPropertyDescriptor(Src.prototype, Symbol.iterator));
-      }
-      return Mixed
-    }
-  }
-
-  /**
-   * An isomorphic, load-anywhere JavaScript class for building [composite structures](https://en.wikipedia.org/wiki/Composite_pattern). Suitable for use as a super class or mixin.
-   * @module composite-class
-   * @example
-   * const Composite = require('composite-class')
-   */
-
-  const _children = new WeakMap();
-  const _parent = new WeakMap();
-
-  /**
-   * @alias module:composite-class
-   */
-  class Composite {
-    /**
-     * Children
-     * @type {Array}
-     */
-    get children () {
-      if (_children.has(this)) {
-        return _children.get(this)
-      } else {
-        _children.set(this, []);
-        return _children.get(this)
-      }
-    }
-
-    set children (val) {
-      _children.set(this, val);
-    }
-
-    /**
-     * Parent
-     * @type {Composite}
-     */
-    get parent () {
-      return _parent.get(this)
-    }
-
-    set parent (val) {
-      _parent.set(this, val);
-    }
-
-    /**
-     * Add a child
-     * @returns {Composite}
-     */
-    add (child) {
-      if (!(isComposite(child))) throw new Error('can only add a Composite instance')
-      child.parent = this;
-      this.children.push(child);
-      return child
-    }
-
-    /**
-     * @param {Composite} child - the child node to append
-     * @returns {Composite}
-     */
-    append (child) {
-      if (!(child instanceof Composite)) throw new Error('can only add a Composite instance')
-      child.parent = this;
-      this.children.push(child);
-      return child
-    }
-
-    /**
-     * @param {Composite} child - the child node to prepend
-     * @returns {Composite}
-     */
-    prepend (child) {
-      if (!(child instanceof Composite)) throw new Error('can only add a Composite instance')
-      child.parent = this;
-      this.children.unshift(child);
-      return child
-    }
-
-    /**
-     * @param {Composite} child - the child node to remove
-     * @returns {Composite}
-     */
-    remove (child) {
-      return this.children.splice(this.children.indexOf(child), 1)
-    }
-
-    /**
-     * depth level in the tree, 0 being root.
-     * @returns {number}
-     */
-    level () {
-      let count = 0;
-      function countParent (composite) {
-        if (composite.parent) {
-          count++;
-          countParent(composite.parent);
-        }
-      }
-      countParent(this);
-      return count
-    }
-
-    /**
-     * @returns {number}
-     */
-    getDescendentCount () {
-      return Array.from(this).length
-    }
-
-    /**
-     * prints a tree using the .toString() representation of each node in the tree
-     * @returns {string}
-     */
-    tree () {
-      return Array.from(this).reduce((prev, curr) => {
-        return (prev += `${'  '.repeat(curr.level())}- ${curr}\n`)
-      }, '')
-    }
-
-    /**
-     * Returns the root instance of this tree.
-     * @returns {Composite}
-     */
-    root () {
-      function getRoot (composite) {
-        return composite.parent ? getRoot(composite.parent) : composite
-      }
-      return getRoot(this)
-    }
-
-    /**
-     * default iteration strategy
-     */
-    * [Symbol.iterator] () {
-      yield this;
-      for (const child of this.children) {
-        yield * child;
-      }
-    }
-
-    /**
-     * Used by node's `util.inspect`.
-     */
-    inspect (depth) {
-      const clone = Object.assign({}, this);
-      delete clone.parent;
-      return clone
-    }
-
-    /**
-     * Returns an array of ancestors
-     * @return {Composite[]}
-     */
-    parents () {
-      const output = [];
-      function addParent (node) {
-        if (node.parent) {
-          output.push(node.parent);
-          addParent(node.parent);
-        }
-      }
-      addParent(this);
-      return output
-    }
-  }
-
-  function isComposite (item) {
-    return item && item.children && item.add && item.level && item.root
-  }
-
-  /**
-   * @module obso
-   */
-
-  /**
-   * @alias module:obso
-   */
-  class Emitter {
-    /**
-     * Emit an event.
-     * @param {string} eventName - the event name to emit.
-     * @param ...args {*} - args to pass to the event handler
-     */
-    emit (eventName, ...args) {
-      if (this._listeners && this._listeners.length > 0) {
-        const toRemove = [];
-
-        /* invoke each relevant listener */
-        for (const listener of this._listeners) {
-          const handlerArgs = args.slice();
-          if (listener.eventName === '__ALL__') {
-            handlerArgs.unshift(eventName);
+function _interopNamespace(e) {
+  if (e && e.__esModule) { return e; } else {
+    var n = {};
+    if (e) {
+      Object.keys(e).forEach(function (k) {
+        var d = Object.getOwnPropertyDescriptor(e, k);
+        Object.defineProperty(n, k, d.get ? d : {
+          enumerable: true,
+          get: function () {
+            return e[k];
           }
-
-          if (listener.eventName === '__ALL__' || listener.eventName === eventName) {
-            listener.handler.call(this, ...handlerArgs);
-
-            /* remove once handler */
-            if (listener.once) toRemove.push(listener);
-          }
-        }
-
-        toRemove.forEach(listener => {
-          this._listeners.splice(this._listeners.indexOf(listener), 1);
         });
-      }
-
-      /* bubble event up */
-      if (this.parent) this.parent._emitTarget(eventName, this, ...args);
-    }
-
-    _emitTarget (eventName, target, ...args) {
-      if (this._listeners && this._listeners.length > 0) {
-        const toRemove = [];
-
-        /* invoke each relevant listener */
-        for (const listener of this._listeners) {
-          const handlerArgs = args.slice();
-          if (listener.eventName === '__ALL__') {
-            handlerArgs.unshift(eventName);
-          }
-
-          if (listener.eventName === '__ALL__' || listener.eventName === eventName) {
-            listener.handler.call(target, ...handlerArgs);
-
-            /* remove once handler */
-            if (listener.once) toRemove.push(listener);
-          }
-        }
-
-        toRemove.forEach(listener => {
-          this._listeners.splice(this._listeners.indexOf(listener), 1);
-        });
-      }
-
-      /* bubble event up */
-      if (this.parent) this.parent._emitTarget(eventName, target || this, ...args);
-    }
-
-     /**
-      * Register an event listener.
-      * @param {string} [eventName] - The event name to watch. Omitting the name will catch all events.
-      * @param {function} handler - The function to be called when `eventName` is emitted. Invocated with `this` set to `emitter`.
-      * @param {object} [options]
-      * @param {boolean} [options.once] - If `true`, the handler will be invoked once then removed.
-      */
-    on (eventName, handler, options) {
-      createListenersArray(this);
-      options = options || {};
-      if (arguments.length === 1 && typeof eventName === 'function') {
-        handler = eventName;
-        eventName = '__ALL__';
-      }
-      if (!handler) {
-        throw new Error('handler function required')
-      } else if (handler && typeof handler !== 'function') {
-        throw new Error('handler arg must be a function')
-      } else {
-        this._listeners.push({ eventName, handler: handler, once: options.once });
-      }
-    }
-
-    /**
-     * Remove an event listener.
-     * @param eventName {string} - the event name
-     * @param handler {function} - the event handler
-     */
-    removeEventListener (eventName, handler) {
-      if (!this._listeners || this._listeners.length === 0) return
-      const index = this._listeners.findIndex(function (listener) {
-        return listener.eventName === eventName && listener.handler === handler
       });
-      if (index > -1) this._listeners.splice(index, 1);
     }
+    n['default'] = e;
+    return n;
+  }
+}
 
-    /**
-     * Once.
-     * @param {string} eventName - the event name to watch
-     * @param {function} handler - the event handler
-     */
-    once (eventName, handler) {
-      /* TODO: the once option is browser-only */
-      this.on(eventName, handler, { once: true });
+function raceTimeout (ms, msg) {
+  return new Promise((resolve, reject) => {
+    const interval = setTimeout(() => {
+      const err = new Error(msg || `Timeout expired [${ms}]`);
+      reject(err);
+    }, ms);
+    if (interval.unref) interval.unref();
+  })
+}
+
+/**
+ * Creates a mixin for use in a class extends expression.
+ * @module create-mixin
+ */
+
+/**
+ * @alias module:create-mixin
+ * @param {class} Src - The class containing the behaviour you wish to mix into another class.
+ * @returns {function}
+ */
+function createMixin (Src) {
+  return function (Base) {
+    class Mixed extends Base {}
+    for (const propName of Object.getOwnPropertyNames(Src.prototype)) {
+      if (propName === 'constructor') continue
+      Object.defineProperty(Mixed.prototype, propName, Object.getOwnPropertyDescriptor(Src.prototype, propName));
     }
+    if (Src.prototype[Symbol.iterator]) {
+      Object.defineProperty(Mixed.prototype, Symbol.iterator, Object.getOwnPropertyDescriptor(Src.prototype, Symbol.iterator));
+    }
+    return Mixed
+  }
+}
 
-    /**
-     * Propagate events from the supplied emitter to this emitter.
-     * @param {string} eventName - the event name to propagate
-     * @param {object} from - the emitter to propagate from
-     */
-    propagate (eventName, from) {
-      from.on(eventName, (...args) => this.emit(eventName, ...args));
+/**
+ * An isomorphic, load-anywhere JavaScript class for building [composite structures](https://en.wikipedia.org/wiki/Composite_pattern). Suitable for use as a super class or mixin.
+ * @module composite-class
+ * @example
+ * const Composite = require('composite-class')
+ */
+
+const _children = new WeakMap();
+const _parent = new WeakMap();
+
+/**
+ * @alias module:composite-class
+ */
+class Composite {
+  /**
+   * Children
+   * @type {Array}
+   */
+  get children () {
+    if (_children.has(this)) {
+      return _children.get(this)
+    } else {
+      _children.set(this, []);
+      return _children.get(this)
+    }
+  }
+
+  set children (val) {
+    _children.set(this, val);
+  }
+
+  /**
+   * Parent
+   * @type {Composite}
+   */
+  get parent () {
+    return _parent.get(this)
+  }
+
+  set parent (val) {
+    _parent.set(this, val);
+  }
+
+  /**
+   * Add a child
+   * @returns {Composite}
+   */
+  add (child) {
+    if (!(isComposite(child))) throw new Error('can only add a Composite instance')
+    child.parent = this;
+    this.children.push(child);
+    return child
+  }
+
+  /**
+   * @param {Composite} child - the child node to append
+   * @returns {Composite}
+   */
+  append (child) {
+    if (!(child instanceof Composite)) throw new Error('can only add a Composite instance')
+    child.parent = this;
+    this.children.push(child);
+    return child
+  }
+
+  /**
+   * @param {Composite} child - the child node to prepend
+   * @returns {Composite}
+   */
+  prepend (child) {
+    if (!(child instanceof Composite)) throw new Error('can only add a Composite instance')
+    child.parent = this;
+    this.children.unshift(child);
+    return child
+  }
+
+  /**
+   * @param {Composite} child - the child node to remove
+   * @returns {Composite}
+   */
+  remove (child) {
+    return this.children.splice(this.children.indexOf(child), 1)
+  }
+
+  /**
+   * depth level in the tree, 0 being root.
+   * @returns {number}
+   */
+  level () {
+    let count = 0;
+    function countParent (composite) {
+      if (composite.parent) {
+        count++;
+        countParent(composite.parent);
+      }
+    }
+    countParent(this);
+    return count
+  }
+
+  /**
+   * @returns {number}
+   */
+  getDescendentCount () {
+    return Array.from(this).length
+  }
+
+  /**
+   * prints a tree using the .toString() representation of each node in the tree
+   * @returns {string}
+   */
+  tree () {
+    return Array.from(this).reduce((prev, curr) => {
+      return (prev += `${'  '.repeat(curr.level())}- ${curr}\n`)
+    }, '')
+  }
+
+  /**
+   * Returns the root instance of this tree.
+   * @returns {Composite}
+   */
+  root () {
+    function getRoot (composite) {
+      return composite.parent ? getRoot(composite.parent) : composite
+    }
+    return getRoot(this)
+  }
+
+  /**
+   * default iteration strategy
+   */
+  * [Symbol.iterator] () {
+    yield this;
+    for (const child of this.children) {
+      yield * child;
     }
   }
 
   /**
-   * Alias for `on`.
+   * Used by node's `util.inspect`.
    */
-  Emitter.prototype.addEventListener = Emitter.prototype.on;
+  inspect (depth) {
+    const clone = Object.assign({}, this);
+    delete clone.parent;
+    return clone
+  }
 
-  function createListenersArray (target) {
-    if (target._listeners) return
-    Object.defineProperty(target, '_listeners', {
-      enumerable: false,
-      configurable: false,
-      writable: false,
-      value: []
+  /**
+   * Returns an array of ancestors
+   * @return {Composite[]}
+   */
+  parents () {
+    const output = [];
+    function addParent (node) {
+      if (node.parent) {
+        output.push(node.parent);
+        addParent(node.parent);
+      }
+    }
+    addParent(this);
+    return output
+  }
+}
+
+function isComposite (item) {
+  return item && item.children && item.add && item.level && item.root
+}
+
+/**
+ * @module obso
+ */
+
+/**
+ * @alias module:obso
+ */
+class Emitter {
+  /**
+   * Emit an event.
+   * @param {string} eventName - the event name to emit.
+   * @param ...args {*} - args to pass to the event handler
+   */
+  emit (eventName, ...args) {
+    if (this._listeners && this._listeners.length > 0) {
+      const toRemove = [];
+
+      /* invoke each relevant listener */
+      for (const listener of this._listeners) {
+        const handlerArgs = args.slice();
+        if (listener.eventName === '__ALL__') {
+          handlerArgs.unshift(eventName);
+        }
+
+        if (listener.eventName === '__ALL__' || listener.eventName === eventName) {
+          listener.handler.call(this, ...handlerArgs);
+
+          /* remove once handler */
+          if (listener.once) toRemove.push(listener);
+        }
+      }
+
+      toRemove.forEach(listener => {
+        this._listeners.splice(this._listeners.indexOf(listener), 1);
+      });
+    }
+
+    /* bubble event up */
+    if (this.parent) this.parent._emitTarget(eventName, this, ...args);
+  }
+
+  _emitTarget (eventName, target, ...args) {
+    if (this._listeners && this._listeners.length > 0) {
+      const toRemove = [];
+
+      /* invoke each relevant listener */
+      for (const listener of this._listeners) {
+        const handlerArgs = args.slice();
+        if (listener.eventName === '__ALL__') {
+          handlerArgs.unshift(eventName);
+        }
+
+        if (listener.eventName === '__ALL__' || listener.eventName === eventName) {
+          listener.handler.call(target, ...handlerArgs);
+
+          /* remove once handler */
+          if (listener.once) toRemove.push(listener);
+        }
+      }
+
+      toRemove.forEach(listener => {
+        this._listeners.splice(this._listeners.indexOf(listener), 1);
+      });
+    }
+
+    /* bubble event up */
+    if (this.parent) this.parent._emitTarget(eventName, target || this, ...args);
+  }
+
+   /**
+    * Register an event listener.
+    * @param {string} [eventName] - The event name to watch. Omitting the name will catch all events.
+    * @param {function} handler - The function to be called when `eventName` is emitted. Invocated with `this` set to `emitter`.
+    * @param {object} [options]
+    * @param {boolean} [options.once] - If `true`, the handler will be invoked once then removed.
+    */
+  on (eventName, handler, options) {
+    createListenersArray(this);
+    options = options || {};
+    if (arguments.length === 1 && typeof eventName === 'function') {
+      handler = eventName;
+      eventName = '__ALL__';
+    }
+    if (!handler) {
+      throw new Error('handler function required')
+    } else if (handler && typeof handler !== 'function') {
+      throw new Error('handler arg must be a function')
+    } else {
+      this._listeners.push({ eventName, handler: handler, once: options.once });
+    }
+  }
+
+  /**
+   * Remove an event listener.
+   * @param eventName {string} - the event name
+   * @param handler {function} - the event handler
+   */
+  removeEventListener (eventName, handler) {
+    if (!this._listeners || this._listeners.length === 0) return
+    const index = this._listeners.findIndex(function (listener) {
+      return listener.eventName === eventName && listener.handler === handler
     });
+    if (index > -1) this._listeners.splice(index, 1);
   }
 
   /**
-   * Takes any input and guarantees an array back.
-   *
-   * - Converts array-like objects (e.g. `arguments`, `Set`) to a real array.
-   * - Converts `undefined` to an empty array.
-   * - Converts any another other, singular value (including `null`, objects and iterables other than `Set`) into an array containing that value.
-   * - Ignores input which is already an array.
-   *
-   * @module array-back
-   * @example
-   * > const arrayify = require('array-back')
-   *
-   * > arrayify(undefined)
-   * []
-   *
-   * > arrayify(null)
-   * [ null ]
-   *
-   * > arrayify(0)
-   * [ 0 ]
-   *
-   * > arrayify([ 1, 2 ])
-   * [ 1, 2 ]
-   *
-   * > arrayify(new Set([ 1, 2 ]))
-   * [ 1, 2 ]
-   *
-   * > function f(){ return arrayify(arguments); }
-   * > f(1,2,3)
-   * [ 1, 2, 3 ]
+   * Once.
+   * @param {string} eventName - the event name to watch
+   * @param {function} handler - the event handler
    */
-
-  function isObject (input) {
-    return typeof input === 'object' && input !== null
-  }
-
-  function isArrayLike (input) {
-    return isObject(input) && typeof input.length === 'number'
+  once (eventName, handler) {
+    /* TODO: the once option is browser-only */
+    this.on(eventName, handler, { once: true });
   }
 
   /**
-   * @param {*} - The input value to convert to an array
-   * @returns {Array}
-   * @alias module:array-back
+   * Propagate events from the supplied emitter to this emitter.
+   * @param {string} eventName - the event name to propagate
+   * @param {object} from - the emitter to propagate from
    */
-  function arrayify (input) {
-    if (Array.isArray(input)) {
-      return input
-    }
+  propagate (eventName, from) {
+    from.on(eventName, (...args) => this.emit(eventName, ...args));
+  }
+}
 
-    if (input === undefined) {
-      return []
-    }
+/**
+ * Alias for `on`.
+ */
+Emitter.prototype.addEventListener = Emitter.prototype.on;
 
-    if (isArrayLike(input) || input instanceof Set) {
-      return Array.from(input)
-    }
+function createListenersArray (target) {
+  if (target._listeners) return
+  Object.defineProperty(target, '_listeners', {
+    enumerable: false,
+    configurable: false,
+    writable: false,
+    value: []
+  });
+}
 
-    return [input]
+/**
+ * Takes any input and guarantees an array back.
+ *
+ * - Converts array-like objects (e.g. `arguments`, `Set`) to a real array.
+ * - Converts `undefined` to an empty array.
+ * - Converts any another other, singular value (including `null`, objects and iterables other than `Set`) into an array containing that value.
+ * - Ignores input which is already an array.
+ *
+ * @module array-back
+ * @example
+ * > const arrayify = require('array-back')
+ *
+ * > arrayify(undefined)
+ * []
+ *
+ * > arrayify(null)
+ * [ null ]
+ *
+ * > arrayify(0)
+ * [ 0 ]
+ *
+ * > arrayify([ 1, 2 ])
+ * [ 1, 2 ]
+ *
+ * > arrayify(new Set([ 1, 2 ]))
+ * [ 1, 2 ]
+ *
+ * > function f(){ return arrayify(arguments); }
+ * > f(1,2,3)
+ * [ 1, 2, 3 ]
+ */
+
+function isObject (input) {
+  return typeof input === 'object' && input !== null
+}
+
+function isArrayLike (input) {
+  return isObject(input) && typeof input.length === 'number'
+}
+
+/**
+ * @param {*} - The input value to convert to an array
+ * @returns {Array}
+ * @alias module:array-back
+ */
+function arrayify (input) {
+  if (Array.isArray(input)) {
+    return input
+  }
+
+  if (input === undefined) {
+    return []
+  }
+
+  if (isArrayLike(input) || input instanceof Set) {
+    return Array.from(input)
+  }
+
+  return [input]
+}
+
+/**
+ * Isomorphic map-reduce function to flatten an array into the supplied array.
+ *
+ * @module reduce-flatten
+ * @example
+ * const flatten = require('reduce-flatten')
+ */
+
+/**
+ * @alias module:reduce-flatten
+ * @example
+ * > numbers = [ 1, 2, [ 3, 4 ], 5 ]
+ * > numbers.reduce(flatten, [])
+ * [ 1, 2, 3, 4, 5 ]
+ */
+function flatten (arr, curr) {
+  if (Array.isArray(curr)) {
+    arr.push(...curr);
+  } else {
+    arr.push(curr);
+  }
+  return arr
+}
+
+/**
+ * @module fsm-base
+ * @typicalname stateMachine
+ */
+
+const _initialState = new WeakMap();
+const _state = new WeakMap();
+const _validMoves = new WeakMap();
+
+/**
+ * @alias module:fsm-base
+ * @extends {Emitter}
+ */
+class StateMachine extends Emitter {
+  constructor (initialState, validMoves) {
+    super();
+    _validMoves.set(this, arrayify(validMoves).map(move => {
+      move.from = arrayify(move.from);
+      move.to = arrayify(move.to);
+      return move
+    }));
+    _state.set(this, initialState);
+    _initialState.set(this, initialState);
   }
 
   /**
-   * Isomorphic map-reduce function to flatten an array into the supplied array.
-   *
-   * @module reduce-flatten
-   * @example
-   * const flatten = require('reduce-flatten')
+   * The current state
+   * @type {string} state
+   * @throws `INVALID_MOVE` if an invalid move made
    */
+  get state () {
+    return _state.get(this)
+  }
 
-  /**
-   * @alias module:reduce-flatten
-   * @example
-   * > numbers = [ 1, 2, [ 3, 4 ], 5 ]
-   * > numbers.reduce(flatten, [])
-   * [ 1, 2, 3, 4, 5 ]
-   */
-  function flatten (arr, curr) {
-    if (Array.isArray(curr)) {
-      arr.push(...curr);
-    } else {
-      arr.push(curr);
-    }
-    return arr
+  set state (state) {
+    this.setState(state);
   }
 
   /**
-   * @module fsm-base
-   * @typicalname stateMachine
+   * Set the current state. The second arg onward will be sent as event args.
+   * @param {string} state
    */
+  setState (state, ...args) {
+    /* nothing to do */
+    if (this.state === state) return
 
-  const _initialState = new WeakMap();
-  const _state = new WeakMap();
-  const _validMoves = new WeakMap();
-
-  /**
-   * @alias module:fsm-base
-   * @extends {Emitter}
-   */
-  class StateMachine extends Emitter {
-    constructor (initialState, validMoves) {
-      super();
-      _validMoves.set(this, arrayify(validMoves).map(move => {
-        move.from = arrayify(move.from);
-        move.to = arrayify(move.to);
-        return move
-      }));
-      _state.set(this, initialState);
-      _initialState.set(this, initialState);
+    const validTo = _validMoves.get(this).some(move => move.to.indexOf(state) > -1);
+    if (!validTo) {
+      const msg = `Invalid state: ${state}`;
+      const err = new Error(msg);
+      err.name = 'INVALID_MOVE';
+      throw err
     }
 
-    /**
-     * The current state
-     * @type {string} state
-     * @throws `INVALID_MOVE` if an invalid move made
-     */
-    get state () {
-      return _state.get(this)
-    }
+    let moved = false;
+    const prevState = this.state;
+    _validMoves.get(this).forEach(move => {
+      if (move.from.indexOf(this.state) > -1 && move.to.indexOf(state) > -1) {
+        _state.set(this, state);
+        moved = true;
+        /**
+         * fired on every state change
+         * @event module:fsm-base#state
+         * @param state {string} - the new state
+         * @param prev {string} - the previous state
+         */
+        this.emit('state', state, prevState);
 
-    set state (state) {
-      this.setState(state);
-    }
-
-    /**
-     * Set the current state. The second arg onward will be sent as event args.
-     * @param {string} state
-     */
-    setState (state, ...args) {
-      /* nothing to do */
-      if (this.state === state) return
-
-      const validTo = _validMoves.get(this).some(move => move.to.indexOf(state) > -1);
-      if (!validTo) {
-        const msg = `Invalid state: ${state}`;
-        const err = new Error(msg);
-        err.name = 'INVALID_MOVE';
-        throw err
+        /**
+         * fired on every state change
+         * @event module:fsm-base#&lt;state value&gt;
+         */
+        this.emit(state, ...args);
       }
-
-      let moved = false;
-      const prevState = this.state;
-      _validMoves.get(this).forEach(move => {
-        if (move.from.indexOf(this.state) > -1 && move.to.indexOf(state) > -1) {
-          _state.set(this, state);
-          moved = true;
-          /**
-           * fired on every state change
-           * @event module:fsm-base#state
-           * @param state {string} - the new state
-           * @param prev {string} - the previous state
-           */
-          this.emit('state', state, prevState);
-
-          /**
-           * fired on every state change
-           * @event module:fsm-base#&lt;state value&gt;
-           */
-          this.emit(state, ...args);
-        }
-      });
-      if (!moved) {
-        const froms = _validMoves.get(this)
-          .filter(move => move.to.indexOf(state) > -1)
-          .map(move => move.from.map(from => `'${from}'`))
-          .reduce(flatten);
-        const msg = `Can only move to '${state}' from ${froms.join(' or ') || '<unspecified>'} (not '${prevState}')`;
-        const err = new Error(msg);
-        err.name = 'INVALID_MOVE';
-        throw err
-      }
-    }
-
-    resetState () {
-      const prevState = this.state;
-      const initialState = _initialState.get(this);
-      _state.set(this, initialState);
-      this.emit('reset', prevState);
+    });
+    if (!moved) {
+      const froms = _validMoves.get(this)
+        .filter(move => move.to.indexOf(state) > -1)
+        .map(move => move.from.map(from => `'${from}'`))
+        .reduce(flatten);
+      const msg = `Can only move to '${state}' from ${froms.join(' or ') || '<unspecified>'} (not '${prevState}')`;
+      const err = new Error(msg);
+      err.name = 'INVALID_MOVE';
+      throw err
     }
   }
 
-  /**
-   * The test context, available as `this` within each test function.
-   */
-  class TestContext {
-    constructor (context) {
-      /**
-       * The name given to this test.
-       */
-      this.name = context.name;
-      /**
-       * The test index within the current set.
-       */
-      this.index = context.index;
-      /**
-       * Test run data.
-       */
-      this.data = undefined;
-    }
+  resetState () {
+    const prevState = this.state;
+    const initialState = _initialState.get(this);
+    _state.set(this, initialState);
+    this.emit('reset', prevState);
   }
+}
 
-  /**
-   * Isomorphic, functional type-checking for Javascript.
-   * @module typical
-   * @typicalname t
-   * @example
-   * const t = require('typical')
-   * const allDefined = array.every(t.isDefined)
-   */
-
-  /**
-   * A plain object is a simple object literal, it is not an instance of a class. Returns true if the input `typeof` is `object` and directly decends from `Object`.
-   *
-   * @param {*} - the input to test
-   * @returns {boolean}
-   * @static
-   * @example
-   * > t.isPlainObject({ something: 'one' })
-   * true
-   * > t.isPlainObject(new Date())
-   * false
-   * > t.isPlainObject([ 0, 1 ])
-   * false
-   * > t.isPlainObject(/test/)
-   * false
-   * > t.isPlainObject(1)
-   * false
-   * > t.isPlainObject('one')
-   * false
-   * > t.isPlainObject(null)
-   * false
-   * > t.isPlainObject((function * () {})())
-   * false
-   * > t.isPlainObject(function * () {})
-   * false
-   */
-  function isPlainObject (input) {
-    return input !== null && typeof input === 'object' && input.constructor === Object
+/**
+ * The test context, available as `this` within each test function.
+ */
+class TestContext {
+  constructor (context) {
+    /**
+     * The name given to this test.
+     */
+    this.name = context.name;
+    /**
+     * The test index within the current set.
+     */
+    this.index = context.index;
+    /**
+     * Test run data.
+     */
+    this.data = undefined;
   }
+}
 
-  /**
-   * Returns true if the input value is defined.
-   * @param {*} - the input to test
-   * @returns {boolean}
-   * @static
-   */
-  function isDefined (input) {
-    return typeof input !== 'undefined'
+/**
+ * Isomorphic, functional type-checking for Javascript.
+ * @module typical
+ * @typicalname t
+ * @example
+ * const t = require('typical')
+ * const allDefined = array.every(t.isDefined)
+ */
+
+/**
+ * A plain object is a simple object literal, it is not an instance of a class. Returns true if the input `typeof` is `object` and directly decends from `Object`.
+ *
+ * @param {*} - the input to test
+ * @returns {boolean}
+ * @static
+ * @example
+ * > t.isPlainObject({ something: 'one' })
+ * true
+ * > t.isPlainObject(new Date())
+ * false
+ * > t.isPlainObject([ 0, 1 ])
+ * false
+ * > t.isPlainObject(/test/)
+ * false
+ * > t.isPlainObject(1)
+ * false
+ * > t.isPlainObject('one')
+ * false
+ * > t.isPlainObject(null)
+ * false
+ * > t.isPlainObject((function * () {})())
+ * false
+ * > t.isPlainObject(function * () {})
+ * false
+ */
+function isPlainObject (input) {
+  return input !== null && typeof input === 'object' && input.constructor === Object
+}
+
+/**
+ * Returns true if the input value is defined.
+ * @param {*} - the input to test
+ * @returns {boolean}
+ * @static
+ */
+function isDefined (input) {
+  return typeof input !== 'undefined'
+}
+
+/**
+ * Returns true if the input is a Promise.
+ * @param {*} - the input to test
+ * @returns {boolean}
+ * @static
+ */
+function isPromise (input) {
+  if (input) {
+    const isPromise = isDefined(Promise) && input instanceof Promise;
+    const isThenable = input.then && typeof input.then === 'function';
+    return !!(isPromise || isThenable)
+  } else {
+    return false
   }
+}
 
-  /**
-   * Returns true if the input is a Promise.
-   * @param {*} - the input to test
-   * @returns {boolean}
-   * @static
-   */
-  function isPromise (input) {
-    if (input) {
-      const isPromise = isDefined(Promise) && input instanceof Promise;
-      const isThenable = input.then && typeof input.then === 'function';
-      return !!(isPromise || isThenable)
-    } else {
-      return false
-    }
-  }
+/**
+ * @module test-object-model
+ */
 
-  /**
-   * @module test-object-model
-   */
-
-  /**
-   * @param {string} [name] - The test name.
-   * @param {function} [testFn] - A function which will either succeed, reject or throw.
-   * @param {object} [options] - Test config.
-   * @param {number} [options.timeout] - A time limit for the test in ms.
-   * @param {number} [options.maxConcurrency] - The max concurrency that child tests will be able to run. For example, specifying `2` will allow child tests to run two at a time. Defaults to `10`.
-   * @param {boolean} [options.skip] - Skip this test.
-   * @param {boolean} [options.only] - Only run this test.
-   * @alias module:test-object-model
-   */
-  class Tom extends createMixin(Composite)(StateMachine) {
-    constructor (name, testFn, options) {
-      if (typeof name === 'string') {
-        if (isPlainObject(testFn)) {
-          options = testFn;
-          testFn = undefined;
-        }
-      } else if (typeof name === 'function') {
+/**
+ * @param {string} [name] - The test name.
+ * @param {function} [testFn] - A function which will either succeed, reject or throw.
+ * @param {object} [options] - Test config.
+ * @param {number} [options.timeout] - A time limit for the test in ms.
+ * @param {number} [options.maxConcurrency] - The max concurrency that child tests will be able to run. For example, specifying `2` will allow child tests to run two at a time. Defaults to `10`.
+ * @param {boolean} [options.skip] - Skip this test.
+ * @param {boolean} [options.only] - Only run this test.
+ * @alias module:test-object-model
+ */
+class Tom extends createMixin(Composite)(StateMachine) {
+  constructor (name, testFn, options) {
+    if (typeof name === 'string') {
+      if (isPlainObject(testFn)) {
         options = testFn;
-        testFn = name;
-        name = '';
-      } else if (typeof name === 'object') {
-        options = name;
         testFn = undefined;
-        name = '';
       }
-      options = Object.assign({ timeout: 10000 }, options);
-      name = name || 'tom';
-      super('pending', [
-        { from: 'pending', to: 'in-progress' },
-        { from: 'pending', to: 'skipped' },
-        { from: 'pending', to: 'ignored' },
-        { from: 'in-progress', to: 'pass' },
-        { from: 'in-progress', to: 'fail' }
-      ]);
-      /**
-       * Test name
-       * @type {string}
-       */
-      this.name = name;
+    } else if (typeof name === 'function') {
+      options = testFn;
+      testFn = name;
+      name = '';
+    } else if (typeof name === 'object') {
+      options = name;
+      testFn = undefined;
+      name = '';
+    }
+    options = Object.assign({ timeout: 10000 }, options);
+    name = name || 'tom';
+    super('pending', [
+      { from: 'pending', to: 'in-progress' },
+      { from: 'pending', to: 'skipped' },
+      { from: 'pending', to: 'ignored' },
+      { from: 'in-progress', to: 'pass' },
+      { from: 'in-progress', to: 'fail' }
+    ]);
+    /**
+     * Test name
+     * @type {string}
+     */
+    this.name = name;
 
-      /**
-       * A function which will either succeed, reject or throw.
-       * @type {function}
-       */
-      this.testFn = testFn;
+    /**
+     * A function which will either succeed, reject or throw.
+     * @type {function}
+     */
+    this.testFn = testFn;
 
+    /**
+     * Position of this test within its parents children
+     * @type {number}
+     */
+    this.index = 1;
+
+    /**
+     * Test state. Can be one of `pending`, `start`, `skip`, `pass` or `fail`.
+     * @member {string} module:test-object-model#state
+     */
+
+    /**
+     * A time limit for the test in ms.
+     * @type {number}
+     */
+    this.timeout = options.timeout;
+
+    /**
+     * True if the test has ended.
+     * @type {boolean}
+     */
+    this.ended = false;
+
+    /**
+     * If the test passed, the value returned by the test function. If it failed, the exception thrown or rejection reason.
+     * @type {*}
+     */
+    this.result = undefined;
+
+    /**
+     * The max concurrency that child tests will be able to run. For example, specifying `2` will allow child tests to run two at a time.
+     * @type {number}
+     * @default 10
+     */
+    this.maxConcurrency = options.maxConcurrency || 10;
+
+    this.markedSkip = options.skip || false;
+    this.markedOnly = options.only || false;
+
+    this.options = options;
+
+    /**
+     * Test execution stats
+     * @namespace
+     */
+    this.stats = {
       /**
-       * Position of this test within its parents children
+       * Start time.
        * @type {number}
        */
-      this.index = 1;
-
+      start: 0,
       /**
-       * Test state. Can be one of `pending`, `start`, `skip`, `pass` or `fail`.
-       * @member {string} module:test-object-model#state
-       */
-
-      /**
-       * A time limit for the test in ms.
+       * End time.
        * @type {number}
        */
-      this.timeout = options.timeout;
-
+      end: 0,
       /**
-       * True if the test has ended.
-       * @type {boolean}
-       */
-      this.ended = false;
-
-      /**
-       * If the test passed, the value returned by the test function. If it failed, the exception thrown or rejection reason.
-       * @type {*}
-       */
-      this.result = undefined;
-
-      /**
-       * The max concurrency that child tests will be able to run. For example, specifying `2` will allow child tests to run two at a time.
+       * Test execution duration.
        * @type {number}
-       * @default 10
        */
-      this.maxConcurrency = options.maxConcurrency || 10;
-
-      this.markedSkip = options.skip || false;
-      this.markedOnly = options.only || false;
-
-      this.options = options;
-
-      /**
-       * Test execution stats
-       * @namespace
-       */
-      this.stats = {
-        /**
-         * Start time.
-         * @type {number}
-         */
-        start: 0,
-        /**
-         * End time.
-         * @type {number}
-         */
-        end: 0,
-        /**
-         * Test execution duration.
-         * @type {number}
-         */
-        duration: 0
-      };
-
-      /**
-       * The text execution context.
-       * @type {TextContext}
-       */
-      this.context = undefined;
-    }
+      duration: 0
+    };
 
     /**
-     * Returns the test name.
-     * @returns {string}
+     * The text execution context.
+     * @type {TextContext}
      */
-    toString () {
-      return this.name
-    }
+    this.context = undefined;
+  }
 
-    /**
-     * Add a test group.
-     */
-    group (name, options) {
-      return this.test(name, options)
-    }
+  /**
+   * Returns the test name.
+   * @returns {string}
+   */
+  toString () {
+    return this.name
+  }
 
-    /**
-     * Add a test.
-     * @return {module:test-object-model}
-     */
-    test (name, testFn, options) {
-      /* validation */
-      for (const child of this) {
-        if (child.name === name) {
-          throw new Error('Duplicate name: ' + name)
-        }
-      }
-      const test = new this.constructor(name, testFn, options);
-      this.add(test);
-      test.index = this.children.length;
-      this._skipLogic();
-      return test
-    }
+  /**
+   * Add a test group.
+   */
+  group (name, options) {
+    return this.test(name, options)
+  }
 
-    /**
-     * Add a skipped test
-     * @return {module:test-object-model}
-     */
-    skip (name, testFn, options) {
-      options = options || {};
-      options.skip = true;
-      const test = this.test(name, testFn, options);
-      return test
-    }
-
-    /**
-     * Add an only test
-     * @return {module:test-object-model}
-     */
-    only (name, testFn, options) {
-      options = options || {};
-      options.only = true;
-      const test = this.test(name, testFn, options);
-      return test
-    }
-
-    _onlyExists () {
-      return Array.from(this.root()).some(t => t.markedOnly)
-    }
-
-    _skipLogic () {
-      if (this._onlyExists()) {
-        for (const test of this.root()) {
-          test.markedSkip = !test.markedOnly;
-        }
+  /**
+   * Add a test.
+   * @return {module:test-object-model}
+   */
+  test (name, testFn, options) {
+    /* validation */
+    for (const child of this) {
+      if (child.name === name) {
+        throw new Error('Duplicate name: ' + name)
       }
     }
+    const test = new this.constructor(name, testFn, options);
+    this.add(test);
+    test.index = this.children.length;
+    this._skipLogic();
+    return test
+  }
 
-    setState (state, target, data) {
-      if (state === 'pass' || state === 'fail') {
-        this.ended = true;
-      }
-      super.setState(state, target, data);
-      if (state === 'pass' || state === 'fail') {
-        this.emit('end');
+  /**
+   * Add a skipped test
+   * @return {module:test-object-model}
+   */
+  skip (name, testFn, options) {
+    options = options || {};
+    options.skip = true;
+    const test = this.test(name, testFn, options);
+    return test
+  }
+
+  /**
+   * Add an only test
+   * @return {module:test-object-model}
+   */
+  only (name, testFn, options) {
+    options = options || {};
+    options.only = true;
+    const test = this.test(name, testFn, options);
+    return test
+  }
+
+  _onlyExists () {
+    return Array.from(this.root()).some(t => t.markedOnly)
+  }
+
+  _skipLogic () {
+    if (this._onlyExists()) {
+      for (const test of this.root()) {
+        test.markedSkip = !test.markedOnly;
       }
     }
+  }
 
-    /**
-     * Execute the stored test function.
-     * @returns {Promise}
-     * @fulfil {*}
-     */
-    async run () {
-      if (this.testFn) {
-        if (this.markedSkip) {
-          this.setState('skipped', this);
-        } else {
-          const performance = await this._getPerformance();
-          this.setState('in-progress', this);
-          /**
-           * Test start.
-           * @event module:test-object-model#start
-           * @param test {TestObjectModel} - The test node.
-           */
-          this.emit('start', this);
+  setState (state, target, data) {
+    if (state === 'pass' || state === 'fail') {
+      this.ended = true;
+    }
+    super.setState(state, target, data);
+    if (state === 'pass' || state === 'fail') {
+      this.emit('end');
+    }
+  }
 
-          this.stats.start = performance.now();
-
-          try {
-            this.context = new TestContext({
-              name: this.name,
-              index: this.index
-            });
-            const testResult = this.testFn.call(this.context);
-            if (isPromise(testResult)) {
-              try {
-                const result = await Promise.race([testResult, raceTimeout(this.timeout)]);
-                this.result = result;
-                this.stats.end = performance.now();
-                this.stats.duration = this.stats.end - this.stats.start;
-
-                /**
-                 * Test pass.
-                 * @event module:test-object-model#pass
-                 * @param test {TestObjectModel} - The test node.
-                 * @param result {*} - The value returned by the test.
-                 */
-                this.setState('pass', this, result);
-                return result
-              } catch (err) {
-                this.result = err;
-                this.stats.end = performance.now();
-                this.stats.duration = this.stats.end - this.stats.start;
-
-                /**
-                 * Test fail.
-                 * @event module:test-object-model#fail
-                 * @param test {TestObjectModel} - The test node.
-                 * @param err {Error} - The exception thrown.
-                 */
-                this.setState('fail', this, err);
-                return Promise.reject(err)
-              }
-            } else {
-              this.stats.end = performance.now();
-              this.stats.duration = this.stats.end - this.stats.start;
-              this.result = testResult;
-              this.setState('pass', this, testResult);
-              return testResult
-            }
-          } catch (err) {
-            this.result = err;
-            this.stats.end = performance.now();
-            this.stats.duration = this.stats.end - this.stats.start;
-            this.setState('fail', this, err);
-            throw (err)
-          }
-        }
+  /**
+   * Execute the stored test function.
+   * @returns {Promise}
+   * @fulfil {*}
+   */
+  async run () {
+    if (this.testFn) {
+      if (this.markedSkip) {
+        this.setState('skipped', this);
       } else {
+        const performance = await this._getPerformance();
+        this.setState('in-progress', this);
         /**
-         * Test ignored.
-         * @event module:test-object-model#ignored
+         * Test start.
+         * @event module:test-object-model#start
          * @param test {TestObjectModel} - The test node.
          */
-        this.setState('ignored', this);
-      }
-    }
+        this.emit('start', this);
 
-    /**
-     * Reset state
-     */
-    reset (deep) {
-      if (deep) {
-        for (const tom of this) {
-          tom.reset();
+        this.stats.start = performance.now();
+
+        try {
+          this.context = new TestContext({
+            name: this.name,
+            index: this.index
+          });
+          const testResult = this.testFn.call(this.context);
+          if (isPromise(testResult)) {
+            try {
+              const result = await Promise.race([testResult, raceTimeout(this.timeout)]);
+              this.result = result;
+              this.stats.end = performance.now();
+              this.stats.duration = this.stats.end - this.stats.start;
+
+              /**
+               * Test pass.
+               * @event module:test-object-model#pass
+               * @param test {TestObjectModel} - The test node.
+               * @param result {*} - The value returned by the test.
+               */
+              this.setState('pass', this, result);
+              return result
+            } catch (err) {
+              this.result = err;
+              this.stats.end = performance.now();
+              this.stats.duration = this.stats.end - this.stats.start;
+
+              /**
+               * Test fail.
+               * @event module:test-object-model#fail
+               * @param test {TestObjectModel} - The test node.
+               * @param err {Error} - The exception thrown.
+               */
+              this.setState('fail', this, err);
+              return Promise.reject(err)
+            }
+          } else {
+            this.stats.end = performance.now();
+            this.stats.duration = this.stats.end - this.stats.start;
+            this.result = testResult;
+            this.setState('pass', this, testResult);
+            return testResult
+          }
+        } catch (err) {
+          this.result = err;
+          this.stats.end = performance.now();
+          this.stats.duration = this.stats.end - this.stats.start;
+          this.setState('fail', this, err);
+          throw (err)
         }
-      } else {
-        this.index = 1;
-        this.resetState();
-        this.markedSkip = this.options.skip || false;
-        this.markedOnly = this.options.only || false;
       }
-    }
-
-    async _getPerformance () {
-      if (typeof window === 'undefined') {
-        const { performance } = await import('perf_hooks');
-        return performance
-      } else {
-        return performance
-      }
-    }
-
-    /**
-     * If more than one TOM instances are supplied, combine them into a common root.
-     * @param {Array.<Tom>} tests
-     * @param {string} [name]
-     * @return {Tom}
-     */
-    static combine (tests, name, options) {
-      let test;
-      if (tests.length > 1) {
-        test = new this(name, options);
-        for (const subTom of tests) {
-          this.validate(subTom);
-          test.add(subTom);
-        }
-      } else {
-        test = tests[0];
-        this.validate(test);
-      }
-      test._skipLogic();
-      return test
-    }
-
-    /**
-     * Returns true if the input is a valid test.
-     * @param {module:test-object-model} tom - Input to test.
-     * @returns {boolean}
-     */
-    static validate (tom = {}) {
-      const valid = ['name', 'testFn', 'index', 'ended'].every(prop => Object.keys(tom).includes(prop));
-      if (!valid) {
-        const err = new Error('Valid TOM required');
-        err.invalidTom = tom;
-        throw err
-      }
+    } else {
+      /**
+       * Test ignored.
+       * @event module:test-object-model#ignored
+       * @param test {TestObjectModel} - The test node.
+       */
+      this.setState('ignored', this);
     }
   }
 
-  return Tom;
+  /**
+   * Reset state
+   */
+  reset (deep) {
+    if (deep) {
+      for (const tom of this) {
+        tom.reset();
+      }
+    } else {
+      this.index = 1;
+      this.resetState();
+      this.markedSkip = this.options.skip || false;
+      this.markedOnly = this.options.only || false;
+    }
+  }
 
-})));
+  async _getPerformance () {
+    if (typeof window === 'undefined') {
+      const { performance } = await new Promise(function (resolve) { resolve(_interopNamespace(require('perf_hooks'))); });
+      return performance
+    } else {
+      return performance
+    }
+  }
+
+  /**
+   * If more than one TOM instances are supplied, combine them into a common root.
+   * @param {Array.<Tom>} tests
+   * @param {string} [name]
+   * @return {Tom}
+   */
+  static combine (tests, name, options) {
+    let test;
+    if (tests.length > 1) {
+      test = new this(name, options);
+      for (const subTom of tests) {
+        this.validate(subTom);
+        test.add(subTom);
+      }
+    } else {
+      test = tests[0];
+      this.validate(test);
+    }
+    test._skipLogic();
+    return test
+  }
+
+  /**
+   * Returns true if the input is a valid test.
+   * @param {module:test-object-model} tom - Input to test.
+   * @returns {boolean}
+   */
+  static validate (tom = {}) {
+    const valid = ['name', 'testFn', 'index', 'ended'].every(prop => Object.keys(tom).includes(prop));
+    if (!valid) {
+      const err = new Error('Valid TOM required');
+      err.invalidTom = tom;
+      throw err
+    }
+  }
+}
+
+module.exports = Tom;
