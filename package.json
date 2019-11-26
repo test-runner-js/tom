@@ -13,7 +13,7 @@
   },
   "scripts": {
     "test": "npm run dist && npm run test:esm",
-    "test:esm": "esm-runner test/*.mjs",
+    "test:esm": "esm-runner --view.hide-skips test/*.mjs",
     "dist": "rollup -c",
     "docs": "jsdoc2md -c jsdoc.conf index.mjs lib/*.mjs > docs/API.md",
     "c8": "c8 --reporter=html npm test"

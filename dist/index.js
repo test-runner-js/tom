@@ -539,6 +539,10 @@
        * The test index within the current set.
        */
       this.index = context.index;
+      /**
+       * Test run data.
+       */
+      this.data = undefined;
     }
   }
 
@@ -699,11 +703,33 @@
 
       this.options = options;
 
+      /**
+       * Test execution stats
+       * @namespace
+       */
       this.stats = {
+        /**
+         * Start time.
+         * @type {number}
+         */
         start: 0,
+        /**
+         * End time.
+         * @type {number}
+         */
         end: 0,
+        /**
+         * Test execution duration.
+         * @type {number}
+         */
         duration: 0
       };
+
+      /**
+       * The text execution context.
+       * @type {TextContext}
+       */
+      this.context = undefined;
     }
 
     /**
@@ -804,10 +830,11 @@
           this.stats.start = perf_hooks.performance.now();
 
           try {
-            const testResult = this.testFn.call(new TestContext({
+            this.context = new TestContext({
               name: this.name,
               index: this.index
-            }));
+            });
+            const testResult = this.testFn.call(this.context);
             if (isPromise(testResult)) {
               try {
                 const result = await Promise.race([testResult, raceTimeout(this.timeout)]);

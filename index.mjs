@@ -3,8 +3,8 @@ import mixin from 'create-mixin'
 import CompositeClass from 'composite-class'
 import StateMachine from 'fsm-base'
 import TestContext from './lib/test-context.mjs'
-import { isPromise, isPlainObject } from 'typical/index.mjs';
-import { performance } from 'perf_hooks'
+import { isPromise, isPlainObject } from 'typical/index.mjs'
+import { performance } from 'perf_hooks';
 
 /**
  * @module test-object-model
@@ -98,11 +98,33 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
 
     this.options = options
 
+    /**
+     * Test execution stats
+     * @namespace
+     */
     this.stats = {
+      /**
+       * Start time.
+       * @type {number}
+       */
       start: 0,
+      /**
+       * End time.
+       * @type {number}
+       */
       end: 0,
+      /**
+       * Test execution duration.
+       * @type {number}
+       */
       duration: 0
     }
+
+    /**
+     * The text execution context.
+     * @type {TextContext}
+     */
+    this.context = undefined
   }
 
   /**
@@ -203,10 +225,11 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
         this.stats.start = performance.now()
 
         try {
-          const testResult = this.testFn.call(new TestContext({
+          this.context = new TestContext({
             name: this.name,
             index: this.index
-          }))
+          })
+          const testResult = this.testFn.call(this.context)
           if (isPromise(testResult)) {
             try {
               const result = await Promise.race([testResult, raceTimeout(this.timeout)])

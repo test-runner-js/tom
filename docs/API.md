@@ -29,7 +29,13 @@
             * [.ended](#module_test-object-model--Tom+ended) : <code>boolean</code>
             * [.result](#module_test-object-model--Tom+result) : <code>\*</code>
             * [.maxConcurrency](#module_test-object-model--Tom+maxConcurrency) : <code>number</code>
+            * [.context](#module_test-object-model--Tom+context) : <code>TextContext</code>
+            * [.stats](#module_test-object-model--Tom+stats) : <code>object</code>
+                * [.start](#module_test-object-model--Tom+stats.start) : <code>number</code>
+                * [.end](#module_test-object-model--Tom+stats.end) : <code>number</code>
+                * [.duration](#module_test-object-model--Tom+stats.duration) : <code>number</code>
             * [.toString()](#module_test-object-model--Tom+toString) ⇒ <code>string</code>
+            * [.group()](#module_test-object-model--Tom+group)
             * [.test()](#module_test-object-model--Tom+test) ⇒ [<code>Tom</code>](#exp_module_test-object-model--Tom)
             * [.skip()](#module_test-object-model--Tom+skip) ⇒ [<code>Tom</code>](#exp_module_test-object-model--Tom)
             * [.only()](#module_test-object-model--Tom+only) ⇒ [<code>Tom</code>](#exp_module_test-object-model--Tom)
@@ -110,10 +116,52 @@ The max concurrency that child tests will be able to run. For example, specifyin
 
 **Kind**: instance property of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
 **Default**: <code>10</code>  
+<a name="module_test-object-model--Tom+context"></a>
+
+#### tom.context : <code>TextContext</code>
+The text execution context.
+
+**Kind**: instance property of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
+<a name="module_test-object-model--Tom+stats"></a>
+
+#### tom.stats : <code>object</code>
+Test execution stats
+
+**Kind**: instance namespace of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
+
+* [.stats](#module_test-object-model--Tom+stats) : <code>object</code>
+    * [.start](#module_test-object-model--Tom+stats.start) : <code>number</code>
+    * [.end](#module_test-object-model--Tom+stats.end) : <code>number</code>
+    * [.duration](#module_test-object-model--Tom+stats.duration) : <code>number</code>
+
+<a name="module_test-object-model--Tom+stats.start"></a>
+
+##### stats.start : <code>number</code>
+Start time.
+
+**Kind**: static property of [<code>stats</code>](#module_test-object-model--Tom+stats)  
+<a name="module_test-object-model--Tom+stats.end"></a>
+
+##### stats.end : <code>number</code>
+End time.
+
+**Kind**: static property of [<code>stats</code>](#module_test-object-model--Tom+stats)  
+<a name="module_test-object-model--Tom+stats.duration"></a>
+
+##### stats.duration : <code>number</code>
+Test execution duration.
+
+**Kind**: static property of [<code>stats</code>](#module_test-object-model--Tom+stats)  
 <a name="module_test-object-model--Tom+toString"></a>
 
 #### tom.toString() ⇒ <code>string</code>
 Returns the test name.
+
+**Kind**: instance method of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
+<a name="module_test-object-model--Tom+group"></a>
+
+#### tom.group()
+Add a test group.
 
 **Kind**: instance method of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
 <a name="module_test-object-model--Tom+test"></a>
@@ -226,6 +274,7 @@ The test context, available as `this` within each test function.
 * [TestContext](#TestContext)
     * [.name](#TestContext+name)
     * [.index](#TestContext+index)
+    * [.data](#TestContext+data)
 
 <a name="TestContext+name"></a>
 
@@ -237,5 +286,11 @@ The name given to this test.
 
 ### testContext.index
 The test index within the current set.
+
+**Kind**: instance property of [<code>TestContext</code>](#TestContext)  
+<a name="TestContext+data"></a>
+
+### testContext.data
+Test run data.
 
 **Kind**: instance property of [<code>TestContext</code>](#TestContext)  
