@@ -209,11 +209,11 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
    * @fulfil {*}
    */
   async run () {
+    const performance = await this._getPerformance()
     if (this.testFn) {
       if (this.markedSkip) {
         this.setState('skipped', this)
       } else {
-        const performance = await this._getPerformance()
         this.setState('in-progress', this)
         /**
          * Test start.
