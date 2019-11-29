@@ -1,24 +1,28 @@
 import Test from '../index.mjs'
-import EsmRunner from 'esm-runner'
-import assert from 'assert'
-const a = assert.strict
+import Tom from 'test-object-model'
+import getAssert from 'isomorphic-assert'
 
-const tom = new EsmRunner.Tom()
+async function start () {
+  const tom = new Tom()
+  const a = await getAssert()
 
-tom.test('grouping', async function () {
-  const root = new Test('root')
-  const one = root.group('one')
-  one.test('1.1', () => '1.1')
-  const two = root.group('two')
-  two.test('2.1', () => '2.1')
-  const result = Array.from(root).map(t => [t.name, t.state])
-  a.deepEqual(result, [
-    [ 'root', 'pending' ],
-    [ 'one', 'pending' ],
-    [ '1.1', 'pending' ],
-    [ 'two', 'pending' ],
-    [ '2.1', 'pending' ]
-  ])
-})
+  tom.test('grouping', async function () {
+    const root = new Test('root')
+    const one = root.group('one')
+    one.test('1.1', () => '1.1')
+    const two = root.group('two')
+    two.test('2.1', () => '2.1')
+    const result = Array.from(root).map(t => [t.name, t.state])
+    a.deepEqual(result, [
+      [ 'root', 'pending' ],
+      [ 'one', 'pending' ],
+      [ '1.1', 'pending' ],
+      [ 'two', 'pending' ],
+      [ '2.1', 'pending' ]
+    ])
+  })
 
-export default tom
+  return tom
+}
+
+export default start()

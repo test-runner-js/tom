@@ -8,7 +8,7 @@ module.exports = [
       format: 'cjs',
       name: 'Tom'
     },
-    external: ['assert', 'events'],
+    external: ['assert', 'events', 'perf_hooks'],
     plugins: [resolve({ preferBuiltins: true })]
   },
   {
@@ -17,7 +17,7 @@ module.exports = [
       file: 'dist/index.mjs',
       format: 'esm'
     },
-    external: ['assert', 'events'],
+    external: ['assert', 'events', 'perf_hooks'],
     plugins: [resolve({ preferBuiltins: true })]
   }
 ]
