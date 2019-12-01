@@ -6,14 +6,22 @@
   "repository": "https://github.com/test-runner-js/test-object-model",
   "main": "dist/index.js",
   "module": "index.mjs",
-  "keywords": [],
+  "keywords": [
+    "test-runner",
+    "test",
+    "testing",
+    "suite",
+    "runner",
+    "model"
+  ],
   "license": "MIT",
   "engines": {
     "node": ">=10"
   },
   "scripts": {
-    "test": "npm run dist && npm run test:esm",
+    "test": "npm run dist && npm run test:esm && npm run test:web",
     "test:esm": "esm-runner --view.hide-skips test/*.mjs",
+    "test:web": "web-runner test/*.mjs",
     "dist": "rollup -c",
     "docs": "jsdoc2md -c jsdoc.conf index.mjs lib/*.mjs > docs/API.md",
     "c8": "c8 --reporter=html npm test"
@@ -26,12 +34,12 @@
     "typical": "^6.0.0"
   },
   "devDependencies": {
-    "@test-runner/web": "^0.3.0",
+    "@test-runner/web": "^0.3.1",
     "c8": "^6.0.1",
     "esm-runner": "^0.3.2",
     "isomorphic-assert": "^0.1.1",
     "jsdoc-to-markdown": "^5.0.3",
-    "rollup": "^1.27.5",
+    "rollup": "^1.27.6",
     "rollup-plugin-node-resolve": "^5.2.0",
     "sleep-anywhere": "^1.1.3"
   },
