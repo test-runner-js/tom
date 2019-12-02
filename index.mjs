@@ -1,7 +1,7 @@
-import raceTimeout from 'race-timeout-anywhere'
-import mixin from 'create-mixin'
-import CompositeClass from 'composite-class'
-import StateMachine from 'fsm-base'
+import raceTimeout from 'race-timeout-anywhere/index.mjs'
+import mixin from 'create-mixin/index.mjs'
+import CompositeClass from 'composite-class/index.mjs'
+import StateMachine from 'fsm-base/index.mjs'
 import TestContext from './lib/test-context.mjs'
 import { isPromise, isPlainObject } from 'typical/index.mjs';
 
@@ -94,6 +94,8 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
 
     this.markedSkip = options.skip || false
     this.markedOnly = options.only || false
+    this.markedBefore = options.before || false
+    this.markedAfter = options.after || false
 
     this.options = options
 
@@ -143,6 +145,9 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
 
   /**
    * Add a test.
+   * @param {string} - Test name.
+   * @param {function} - Test function.
+   * @param {objects} - Config.
    * @return {module:test-object-model}
    */
   test (name, testFn, options) {
@@ -163,22 +168,36 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
    * Add a skipped test
    * @return {module:test-object-model}
    */
-  skip (name, testFn, options) {
-    options = options || {}
+  skip (name, testFn, options = {}) {
     options.skip = true
-    const test = this.test(name, testFn, options)
-    return test
+    return this.test(name, testFn, options)
   }
 
   /**
    * Add an only test
    * @return {module:test-object-model}
    */
-  only (name, testFn, options) {
-    options = options || {}
+  only (name, testFn, options = {}) {
     options.only = true
-    const test = this.test(name, testFn, options)
-    return test
+    return this.test(name, testFn, options)
+  }
+
+  /**
+   * Add a test which must run and complete before the others.
+   * @return {module:test-object-model}
+   */
+  before (name, testFn, options = {}) {
+    options.before = true
+    return this.test(name, testFn, options)
+  }
+
+  /**
+   * Add a test which must run and complete after the others.
+   * @return {module:test-object-model}
+   */
+  after (name, testFn, options = {}) {
+    options.after = true
+    return this.test(name, testFn, options)
   }
 
   _onlyExists () {

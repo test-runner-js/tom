@@ -36,9 +36,11 @@
                 * [.duration](#module_test-object-model--Tom+stats.duration) : <code>number</code>
             * [.toString()](#module_test-object-model--Tom+toString) ⇒ <code>string</code>
             * [.group()](#module_test-object-model--Tom+group)
-            * [.test()](#module_test-object-model--Tom+test) ⇒ [<code>Tom</code>](#exp_module_test-object-model--Tom)
+            * [.test(name, testFn, options)](#module_test-object-model--Tom+test) ⇒ [<code>Tom</code>](#exp_module_test-object-model--Tom)
             * [.skip()](#module_test-object-model--Tom+skip) ⇒ [<code>Tom</code>](#exp_module_test-object-model--Tom)
             * [.only()](#module_test-object-model--Tom+only) ⇒ [<code>Tom</code>](#exp_module_test-object-model--Tom)
+            * [.before()](#module_test-object-model--Tom+before) ⇒ [<code>Tom</code>](#exp_module_test-object-model--Tom)
+            * [.after()](#module_test-object-model--Tom+after) ⇒ [<code>Tom</code>](#exp_module_test-object-model--Tom)
             * [.run()](#module_test-object-model--Tom+run) ⇒ <code>Promise</code>
             * [.reset()](#module_test-object-model--Tom+reset)
             * ["start" (test)](#module_test-object-model--Tom+event_start)
@@ -166,10 +168,17 @@ Add a test group.
 **Kind**: instance method of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
 <a name="module_test-object-model--Tom+test"></a>
 
-#### tom.test() ⇒ [<code>Tom</code>](#exp_module_test-object-model--Tom)
+#### tom.test(name, testFn, options) ⇒ [<code>Tom</code>](#exp_module_test-object-model--Tom)
 Add a test.
 
 **Kind**: instance method of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| name | <code>string</code> | Test name. |
+| testFn | <code>function</code> | Test function. |
+| options | <code>objects</code> | Config. |
+
 <a name="module_test-object-model--Tom+skip"></a>
 
 #### tom.skip() ⇒ [<code>Tom</code>](#exp_module_test-object-model--Tom)
@@ -180,6 +189,18 @@ Add a skipped test
 
 #### tom.only() ⇒ [<code>Tom</code>](#exp_module_test-object-model--Tom)
 Add an only test
+
+**Kind**: instance method of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
+<a name="module_test-object-model--Tom+before"></a>
+
+#### tom.before() ⇒ [<code>Tom</code>](#exp_module_test-object-model--Tom)
+Add a test which must run and complete before the others.
+
+**Kind**: instance method of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
+<a name="module_test-object-model--Tom+after"></a>
+
+#### tom.after() ⇒ [<code>Tom</code>](#exp_module_test-object-model--Tom)
+Add a test which must run and complete after the others.
 
 **Kind**: instance method of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
 <a name="module_test-object-model--Tom+run"></a>
