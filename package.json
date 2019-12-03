@@ -27,7 +27,7 @@
     "c8": "c8 --reporter=html npm test"
   },
   "dependencies": {
-    "composite-class": "^2.0.0",
+    "composite-class": "^2.0.1",
     "create-mixin": "^3.0.0",
     "fsm-base": "^0.5.2",
     "race-timeout-anywhere": "^1.0.1",
@@ -36,10 +36,10 @@
   "devDependencies": {
     "@test-runner/web": "^0.3.2",
     "c8": "^6.0.1",
-    "esm-runner": "^0.3.2",
+    "esm-runner": "^0.3.3",
     "isomorphic-assert": "^0.1.1",
     "jsdoc-to-markdown": "^5.0.3",
-    "rollup": "^1.27.6",
+    "rollup": "^1.27.8",
     "rollup-plugin-node-resolve": "^5.2.0",
     "sleep-anywhere": "^1.1.3"
   },

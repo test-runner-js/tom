@@ -40,6 +40,7 @@
             * [.skip()](#module_test-object-model--Tom+skip) ⇒ [<code>Tom</code>](#exp_module_test-object-model--Tom)
             * [.only()](#module_test-object-model--Tom+only) ⇒ [<code>Tom</code>](#exp_module_test-object-model--Tom)
             * [.before()](#module_test-object-model--Tom+before) ⇒ [<code>Tom</code>](#exp_module_test-object-model--Tom)
+            * [.todo()](#module_test-object-model--Tom+todo) ⇒ [<code>Tom</code>](#exp_module_test-object-model--Tom)
             * [.after()](#module_test-object-model--Tom+after) ⇒ [<code>Tom</code>](#exp_module_test-object-model--Tom)
             * [.run()](#module_test-object-model--Tom+run) ⇒ <code>Promise</code>
             * [.reset()](#module_test-object-model--Tom+reset)
@@ -195,6 +196,12 @@ Add an only test
 
 #### tom.before() ⇒ [<code>Tom</code>](#exp_module_test-object-model--Tom)
 Add a test which must run and complete before the others.
+
+**Kind**: instance method of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
+<a name="module_test-object-model--Tom+todo"></a>
+
+#### tom.todo() ⇒ [<code>Tom</code>](#exp_module_test-object-model--Tom)
+Add a test but don't run it and mark as incomplete.
 
 **Kind**: instance method of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
 <a name="module_test-object-model--Tom+after"></a>
