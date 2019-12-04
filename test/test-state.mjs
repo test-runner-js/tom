@@ -68,6 +68,15 @@ async function start () {
     }
   })
 
+  tom.test('test.run(): todo', async function () {
+    const actuals = []
+    const test = new Test('one', { todo: true })
+    actuals.push(test.state)
+    await test.run()
+    actuals.push(test.state)
+    a.deepStrictEqual(actuals, ['pending', 'todo'])
+  })
+
   return tom
 }
 

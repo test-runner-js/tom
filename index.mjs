@@ -35,8 +35,6 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
       testFn = undefined
       name = ''
     }
-    options = Object.assign({ timeout: 10000 }, options)
-    name = name || 'tom'
     super('pending', [
       { from: 'pending', to: 'in-progress' },
       { from: 'pending', to: 'skipped' },
@@ -49,7 +47,7 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
      * Test name
      * @type {string}
      */
-    this.name = name
+    this.name = name || 'tom'
 
     /**
      * A function which will either succeed, reject or throw.
@@ -69,12 +67,6 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
      */
 
     /**
-     * A time limit for the test in ms.
-     * @type {number}
-     */
-    this.timeout = options.timeout
-
-    /**
      * True if the test has ended.
      * @type {boolean}
      */
@@ -86,19 +78,20 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
      */
     this.result = undefined
 
+    options = Object.assign({
+      timeout: 10000,
+      maxConcurrency: 10
+    }, options)
+
+    this.markedSkip = options.skip
+    this.markedOnly = options.only
+    this.markedBefore = options.before
+    this.markedAfter = options.after
+    this.markedTodo = options.todo
+
     /**
-     * The max concurrency that child tests will be able to run. For example, specifying `2` will allow child tests to run two at a time.
-     * @type {number}
-     * @default 10
+     * The options set when creating the test.
      */
-    this.maxConcurrency = options.maxConcurrency || 10
-
-    this.markedSkip = options.skip || false
-    this.markedOnly = options.only || false
-    this.markedBefore = options.before || false
-    this.markedAfter = options.after || false
-    this.markedTodo = options.todo || false
-
     this.options = options
 
     /**
@@ -268,7 +261,7 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
           const testResult = this.testFn.call(this.context)
           if (isPromise(testResult)) {
             try {
-              const result = await Promise.race([testResult, raceTimeout(this.timeout)])
+              const result = await Promise.race([testResult, raceTimeout(this.options.timeout)])
               this.result = result
               this.stats.finish(performance.now())
 

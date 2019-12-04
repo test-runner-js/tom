@@ -25,10 +25,9 @@
             * [.testFn](#module_test-object-model--Tom+testFn) : <code>function</code>
             * [.index](#module_test-object-model--Tom+index) : <code>number</code>
             * [.state](#module_test-object-model--Tom+state) : <code>string</code>
-            * [.timeout](#module_test-object-model--Tom+timeout) : <code>number</code>
             * [.ended](#module_test-object-model--Tom+ended) : <code>boolean</code>
             * [.result](#module_test-object-model--Tom+result) : <code>\*</code>
-            * [.maxConcurrency](#module_test-object-model--Tom+maxConcurrency) : <code>number</code>
+            * [.options](#module_test-object-model--Tom+options)
             * [.context](#module_test-object-model--Tom+context) : <code>TextContext</code>
             * [.stats](#module_test-object-model--Tom+stats) : <code>object</code>
                 * [.start](#module_test-object-model--Tom+stats.start) : <code>number</code>
@@ -94,12 +93,6 @@ Position of this test within its parents children
 Test state. Can be one of `pending`, `start`, `skip`, `pass` or `fail`.
 
 **Kind**: instance property of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
-<a name="module_test-object-model--Tom+timeout"></a>
-
-#### tom.timeout : <code>number</code>
-A time limit for the test in ms.
-
-**Kind**: instance property of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
 <a name="module_test-object-model--Tom+ended"></a>
 
 #### tom.ended : <code>boolean</code>
@@ -112,13 +105,12 @@ True if the test has ended.
 If the test passed, the value returned by the test function. If it failed, the exception thrown or rejection reason.
 
 **Kind**: instance property of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
-<a name="module_test-object-model--Tom+maxConcurrency"></a>
+<a name="module_test-object-model--Tom+options"></a>
 
-#### tom.maxConcurrency : <code>number</code>
-The max concurrency that child tests will be able to run. For example, specifying `2` will allow child tests to run two at a time.
+#### tom.options
+The options set when creating the test.
 
 **Kind**: instance property of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
-**Default**: <code>10</code>  
 <a name="module_test-object-model--Tom+context"></a>
 
 #### tom.context : <code>TextContext</code>

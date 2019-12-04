@@ -10,14 +10,14 @@ async function start () {
     const test = new Test()
     a.ok(test.name)
     a.strictEqual(test.testFn, undefined)
-    a.strictEqual(test.timeout, 10000)
+    a.strictEqual(test.options.timeout, 10000)
   })
 
   tom.test('new Test(name)', async function () {
     const test = new Test('name')
     a.strictEqual(test.name, 'name')
     a.strictEqual(test.testFn, undefined)
-    a.strictEqual(test.timeout, 10000)
+    a.strictEqual(test.options.timeout, 10000)
   })
 
   tom.test('new Test(name, testFn, options)', async function () {
@@ -26,7 +26,7 @@ async function start () {
     const test = new Test('one', testFn, options)
     a.strictEqual(test.name, 'one')
     a.strictEqual(test.testFn, testFn)
-    a.strictEqual(test.timeout, 1)
+    a.strictEqual(test.options.timeout, 1)
   })
 
   tom.test('new Test(testFn, options): default name and testFn', async function () {
@@ -35,7 +35,7 @@ async function start () {
     const test = new Test(testFn, options)
     a.ok(test.name)
     a.strictEqual(test.testFn, testFn)
-    a.strictEqual(test.timeout, 1)
+    a.strictEqual(test.options.timeout, 1)
   })
 
   tom.test('new Test(options): options only', async function () {
@@ -43,7 +43,7 @@ async function start () {
     const test = new Test(options)
     a.ok(test.name)
     a.strictEqual(test.testFn, undefined)
-    a.strictEqual(test.timeout, 1)
+    a.strictEqual(test.options.timeout, 1)
   })
 
   tom.test('new Test(name, options)', async function () {
@@ -51,7 +51,7 @@ async function start () {
     const test = new Test('one', options)
     a.strictEqual(test.name, 'one')
     a.strictEqual(test.testFn, undefined)
-    a.strictEqual(test.timeout, 1)
+    a.strictEqual(test.options.timeout, 1)
   })
 
   return tom
