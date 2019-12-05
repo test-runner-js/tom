@@ -9,7 +9,7 @@ async function start () {
   tom.test('new Test ({ skip: true })', async function () {
     const actuals = []
     const skippedTest = new Test(() => { actuals.push('one') }, { skip: true })
-    a.equal(skippedTest.markedSkip, true)
+    a.equal(skippedTest.disabledByOnly, false)
     await skippedTest.run()
     a.deepEqual(actuals, [])
   })

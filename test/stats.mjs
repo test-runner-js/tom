@@ -36,9 +36,9 @@ async function start () {
 
   tom.test('tom.stats: sync pass', async function () {
     const tom = new Test('test', function () {
-      let a = ''
+      let str = ''
       for (let i = 0; i < 1000; i++) {
-        a += 'kill some time'
+        str += 'kill some time'
       }
     })
     await tom.run()
@@ -49,9 +49,9 @@ async function start () {
 
   tom.test('tom.stats: sync fail', async function () {
     const tom = new Test('test', function () {
-      let a = ''
+      let str = ''
       for (let i = 0; i < 1000; i++) {
-        a += 'kill some time'
+        str += 'kill some time'
       }
       throw new Error('broken')
     })

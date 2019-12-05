@@ -3,7 +3,7 @@ import mixin from 'create-mixin/index.mjs'
 import CompositeClass from 'composite-class/index.mjs'
 import StateMachine from 'fsm-base/index.mjs'
 import TestContext from './lib/test-context.mjs'
-import { isPromise, isPlainObject } from 'typical/index.mjs';
+import { isPromise, isPlainObject } from 'typical/index.mjs'
 
 /**
  * @module test-object-model
@@ -17,6 +17,9 @@ import { isPromise, isPlainObject } from 'typical/index.mjs';
  * @param {number} [options.maxConcurrency] - The max concurrency that child tests will be able to run. For example, specifying `2` will allow child tests to run two at a time. Defaults to `10`.
  * @param {boolean} [options.skip] - Skip this test.
  * @param {boolean} [options.only] - Only run this test.
+ * @param {boolean} [options.before] - Run this test before its siblings.
+ * @param {boolean} [options.after] - Run this test after its siblings.
+ * @param {boolean} [options.todo] - Mark this test as incomplete.
  * @alias module:test-object-model
  */
 class Tom extends mixin(CompositeClass)(StateMachine) {
@@ -35,6 +38,11 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
       testFn = undefined
       name = ''
     }
+
+    /**
+     * Test state. Can be one of `pending`, `in-progress`, `skipped`, `ignored`, `todo`, `pass` or `fail`.
+     * @member {string} module:test-object-model#state
+     */
     super('pending', [
       { from: 'pending', to: 'in-progress' },
       { from: 'pending', to: 'skipped' },
@@ -43,6 +51,7 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
       { from: 'in-progress', to: 'pass' },
       { from: 'in-progress', to: 'fail' }
     ])
+
     /**
      * Test name
      * @type {string}
@@ -62,11 +71,6 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
     this.index = 1
 
     /**
-     * Test state. Can be one of `pending`, `start`, `skip`, `pass` or `fail`.
-     * @member {string} module:test-object-model#state
-     */
-
-    /**
      * True if the test has ended.
      * @type {boolean}
      */
@@ -83,11 +87,11 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
       maxConcurrency: 10
     }, options)
 
-    this.markedSkip = options.skip
-    this.markedOnly = options.only
-    this.markedBefore = options.before
-    this.markedAfter = options.after
-    this.markedTodo = options.todo
+    /**
+     * True if one or more different tests are marked as `only`.
+     * @type {boolean}
+     */
+    this.disabledByOnly = false
 
     /**
      * The options set when creating the test.
@@ -137,6 +141,9 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
 
   /**
    * Add a test group.
+   * @param {string} - Test name.
+   * @param {objects} - Config.
+   * @return {module:test-object-model}
    */
   group (name, options) {
     return this.test(name, options)
@@ -149,8 +156,8 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
    * @param {objects} - Config.
    * @return {module:test-object-model}
    */
-  test (name, testFn, options) {
-    /* validation */
+  test (name, testFn, options = {}) {
+    /* validate name */
     for (const child of this) {
       if (child.name === name) {
         throw new Error('Duplicate name: ' + name)
@@ -159,7 +166,7 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
     const test = new this.constructor(name, testFn, options)
     this.add(test)
     test.index = this.children.length
-    this._skipLogic()
+    test._disableNonOnlyTests()
     return test
   }
 
@@ -209,13 +216,13 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
   }
 
   _onlyExists () {
-    return Array.from(this.root()).some(t => t.markedOnly)
+    return Array.from(this.root()).some(t => t.options.only)
   }
 
-  _skipLogic () {
+  _disableNonOnlyTests () {
     if (this._onlyExists()) {
       for (const test of this.root()) {
-        test.markedSkip = !test.markedOnly
+        test.disabledByOnly = !test.options.only
       }
     }
   }
@@ -238,18 +245,27 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
   async run () {
     const performance = await this._getPerformance()
     if (this.testFn) {
-      if (this.markedSkip) {
-        this.setState('skipped', this)
-      } else if (this.markedTodo) {
-        this.setState('todo', this)
-      } else {
-        this.setState('in-progress', this)
+      if (this.disabledByOnly || this.options.skip) {
         /**
-         * Test start.
-         * @event module:test-object-model#start
+         * Test skipped.
+         * @event module:test-object-model#skipped
          * @param test {TestObjectModel} - The test node.
          */
-        this.emit('start', this)
+        this.setState('skipped', this)
+      } else if (this.options.todo) {
+        /**
+         * Test todo.
+         * @event module:test-object-model#todo
+         * @param test {TestObjectModel} - The test node.
+         */
+        this.setState('todo', this)
+      } else {
+        /**
+         * Test in-progress.
+         * @event module:test-object-model#in-progress
+         * @param test {TestObjectModel} - The test node.
+         */
+        this.setState('in-progress', this)
 
         this.stats.start = performance.now()
 
@@ -300,7 +316,7 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
         }
       }
     } else {
-      if (this.markedTodo) {
+      if (this.options.todo) {
         this.setState('todo', this)
       } else {
         /**
@@ -324,8 +340,7 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
     } else {
       this.index = 1
       this.resetState()
-      this.markedSkip = this.options.skip || false
-      this.markedOnly = this.options.only || false
+      this.disabledByOnly = false
     }
   }
 
@@ -334,7 +349,7 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
       const { performance } = await import('perf_hooks')
       return performance
     } else {
-      return performance
+      return window.performance
     }
   }
 
@@ -356,7 +371,7 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
       test = tests[0]
       this.validate(test)
     }
-    test._skipLogic()
+    test._disableNonOnlyTests()
     return test
   }
 

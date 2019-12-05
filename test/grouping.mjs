@@ -14,11 +14,11 @@ async function start () {
     two.test('2.1', () => '2.1')
     const result = Array.from(root).map(t => [t.name, t.state])
     a.deepEqual(result, [
-      [ 'root', 'pending' ],
-      [ 'one', 'pending' ],
-      [ '1.1', 'pending' ],
-      [ 'two', 'pending' ],
-      [ '2.1', 'pending' ]
+      ['root', 'pending'],
+      ['one', 'pending'],
+      ['1.1', 'pending'],
+      ['two', 'pending'],
+      ['2.1', 'pending']
     ])
   })
 

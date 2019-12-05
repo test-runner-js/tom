@@ -1,5 +1,4 @@
 import Test from '../index.mjs'
-import sleep from 'sleep-anywhere/index.mjs'
 import Tom from 'test-object-model'
 import getAssert from 'isomorphic-assert'
 

@@ -9,7 +9,7 @@ async function start () {
   tom.test('test.run(): event order, passing test', async function () {
     const actuals = []
     const test = new Test('one', () => actuals.push('body'))
-    test.on('start', test => actuals.push('start'))
+    test.on('in-progress', test => actuals.push('start'))
     test.on('pass', test => actuals.push('pass'))
     test.on('end', test => actuals.push('end'))
     await test.run()
@@ -22,7 +22,7 @@ async function start () {
       actuals.push('body')
       throw new Error('broken')
     })
-    test.on('start', test => actuals.push('start'))
+    test.on('in-progress', test => actuals.push('start'))
     test.on('fail', test => actuals.push('fail'))
     test.on('end', test => actuals.push('end'))
     try {
@@ -40,7 +40,7 @@ async function start () {
       actuals.push('body')
       return Promise.reject(new Error('broken'))
     })
-    test.on('start', test => actuals.push('start'))
+    test.on('in-progress', test => actuals.push('start'))
     test.on('fail', test => actuals.push('fail'))
     test.on('end', test => actuals.push('end'))
     try {
@@ -98,7 +98,7 @@ async function start () {
   tom.test("no test function: ignore, don't start, skip, pass or fail event", async function () {
     const actuals = []
     const test = new Test('one')
-    test.on('start', test => actuals.push('start'))
+    test.on('in-progress', test => actuals.push('start'))
     test.on('skip', test => actuals.push('skip'))
     test.on('pass', test => actuals.push('pass'))
     test.on('fail', test => actuals.push('fail'))

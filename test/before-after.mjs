@@ -8,24 +8,24 @@ async function start () {
 
   tom.test('before option', async function () {
     const test = new Test('one', { before: true })
-    a.equal(test.markedBefore, true)
+    a.equal(test.options.before, true)
   })
 
   tom.test('before method', async function () {
     const test = new Test()
     const one = test.before('one')
-    a.equal(one.markedBefore, true)
+    a.equal(one.options.before, true)
   })
 
   tom.test('after option', async function () {
     const test = new Test('one', { after: true })
-    a.equal(test.markedAfter, true)
+    a.equal(test.options.after, true)
   })
 
   tom.test('after method', async function () {
     const test = new Test()
     const one = test.after('one')
-    a.equal(one.markedAfter, true)
+    a.equal(one.options.after, true)
   })
 
   return tom

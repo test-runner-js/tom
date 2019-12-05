@@ -9,7 +9,7 @@ async function start () {
   tom.test('new Test ({ todo: true })', async function () {
     const actuals = []
     const test = new Test(() => { actuals.push('one') }, { todo: true })
-    a.equal(test.markedTodo, true)
+    a.equal(test.options.todo, true)
     await test.run()
     a.deepEqual(actuals, [])
   })
