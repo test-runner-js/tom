@@ -30,6 +30,8 @@
             * [.disabledByOnly](#module_test-object-model--Tom+disabledByOnly) : <code>boolean</code>
             * [.options](#module_test-object-model--Tom+options)
             * [.context](#module_test-object-model--Tom+context) : <code>TextContext</code>
+            * [.type](#module_test-object-model--Tom+type) ⇒ <code>string</code>
+            * [.toSkip](#module_test-object-model--Tom+toSkip) ⇒ <code>booolean</code>
             * [.stats](#module_test-object-model--Tom+stats) : <code>object</code>
                 * [.start](#module_test-object-model--Tom+stats.start) : <code>number</code>
                 * [.end](#module_test-object-model--Tom+stats.end) : <code>number</code>
@@ -74,6 +76,7 @@
 | [options.before] | <code>boolean</code> | Run this test before its siblings. |
 | [options.after] | <code>boolean</code> | Run this test after its siblings. |
 | [options.todo] | <code>boolean</code> | Mark this test as incomplete. |
+| [options.group] | <code>boolean</code> | Mark this test as a group. |
 
 <a name="module_test-object-model--Tom+state"></a>
 
@@ -127,6 +130,18 @@ The options set when creating the test.
 
 #### tom.context : <code>TextContext</code>
 The text execution context.
+
+**Kind**: instance property of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
+<a name="module_test-object-model--Tom+type"></a>
+
+#### tom.type ⇒ <code>string</code>
+Returns `test`, `group` or `todo`.
+
+**Kind**: instance property of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
+<a name="module_test-object-model--Tom+toSkip"></a>
+
+#### tom.toSkip ⇒ <code>booolean</code>
+Returns `true` if this test was marked to be skipped by usage of `skip` or `only`.
 
 **Kind**: instance property of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
 <a name="module_test-object-model--Tom+stats"></a>
