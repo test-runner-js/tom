@@ -1023,7 +1023,7 @@ class Tom extends createMixin(Composite)(StateMachine) {
 
   async _getPerformance () {
     if (typeof window === 'undefined') {
-      const { performance } = await new Promise(function (resolve) { resolve(_interopNamespace(require('perf_hooks'))); });
+      const { performance } = await Promise.resolve().then(function () { return _interopNamespace(require('perf_hooks')); });
       return performance
     } else {
       return window.performance
