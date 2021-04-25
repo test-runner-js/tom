@@ -3,7 +3,6 @@
 [![Gihub repo dependents](https://badgen.net/github/dependents-repo/test-runner-js/test-object-model)](https://github.com/test-runner-js/test-object-model/network/dependents?dependent_type=REPOSITORY)
 [![Gihub package dependents](https://badgen.net/github/dependents-pkg/test-runner-js/test-object-model)](https://github.com/test-runner-js/test-object-model/network/dependents?dependent_type=PACKAGE)
 [![Build Status](https://travis-ci.org/test-runner-js/test-object-model.svg?branch=master)](https://travis-ci.org/test-runner-js/test-object-model)
-[![Coverage Status](https://coveralls.io/repos/github/test-runner-js/test-object-model/badge.svg)](https://coveralls.io/github/test-runner-js/test-object-model)
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](https://github.com/feross/standard)
 
 # test-object-model
@@ -12,7 +11,7 @@
 
 Used for defining a test suite for use with a compatible runner. The model describes your test functions, how they are grouped, the order in which they should run, the config for each (timeout, max concurrency etc.)
 
-It is supplied as input to a compatible runner, for example: [test-runner](https://github.com/test-runner-js/cli), [web-runner](https://github.com/test-runner-js/web-runner), [esm-runner](https://github.com/test-runner-js/esm-runner), [mc-runner](https://github.com/test-runner-js/mc-runner).
+It is supplied as input to a compatible runner, for example: [test-runner](https://github.com/test-runner-js/cli) or [web-runner](https://github.com/test-runner-js/web-runner).
 
 ## Synopsis
 
@@ -33,10 +32,10 @@ tom.test('A failing test', function () {
 export default tom
 ```
 
-Save the above to file named `test.mjs`, you can now run this test suite in several ways. For example, you can run it in Node.js by supplying it as input to `esm-runner`.
+Save the above to file named `test.mjs`, you can now run this test suite in several ways. For example, you can run it in Node.js by supplying it as input to `test-runner`.
 
 ```
-$ esm-runner tmp/synopsis.mjs
+$ test-runner tmp/synopsis.mjs
 
 Start: 2 tests loaded
 
@@ -100,8 +99,36 @@ tom.only('name', function () {
 Group.
 
 ```js
-tom.test('name')
+const myGroup = tom.group('My group')
 ```
+
+Before and after
+
+```js
+tom.before('name', function () {
+  // test
+})
+
+tom.after('name', function () {
+  // test
+})
+
+```
+
+Todo
+
+```js
+tom.todo('name', function () {
+  // Complete later
+})
+```
+
+Reset a completed test, ready to run again.
+
+```js
+tom.reset()
+```
+
 
 ## Documentation
 
