@@ -1,12 +1,14 @@
-[![view on npm](https://img.shields.io/npm/v/test-object-model.svg)](https://www.npmjs.org/package/test-object-model)
-[![npm module downloads](https://img.shields.io/npm/dt/test-object-model.svg)](https://www.npmjs.org/package/test-object-model)
+[![view on npm](https://badgen.net/npm/v/test-object-model)](https://www.npmjs.org/package/test-object-model)
+[![npm module downloads](https://badgen.net/npm/dt/test-object-model)](https://www.npmjs.org/package/test-object-model)
+[![Gihub repo dependents](https://badgen.net/github/dependents-repo/test-runner-js/test-object-model)](https://github.com/test-runner-js/test-object-model/network/dependents?dependent_type=REPOSITORY)
+[![Gihub package dependents](https://badgen.net/github/dependents-pkg/test-runner-js/test-object-model)](https://github.com/test-runner-js/test-object-model/network/dependents?dependent_type=PACKAGE)
 [![Build Status](https://travis-ci.org/test-runner-js/test-object-model.svg?branch=master)](https://travis-ci.org/test-runner-js/test-object-model)
-[![Dependency Status](https://badgen.net/david/dep/test-runner-js/test-object-model)](https://david-dm.org/test-runner-js/test-object-model)
+[![Coverage Status](https://coveralls.io/repos/github/test-runner-js/test-object-model/badge.svg)](https://coveralls.io/github/test-runner-js/test-object-model)
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](https://github.com/feross/standard)
 
-***This project and documentation are a work in progress***.
-
 # test-object-model
+
+***This project and documentation are a work in progress***.
 
 Used for defining a test suite for use with a compatible runner. The model describes your test functions, how they are grouped, the order in which they should run, the config for each (timeout, max concurrency etc.)
 
@@ -107,4 +109,4 @@ tom.test('name')
 
 * * *
 
-&copy; 2018-19 Lloyd Brookes \<75pound@gmail.com\>.
+&copy; 2018-21 Lloyd Brookes \<75pound@gmail.com\>.
