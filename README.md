@@ -1,11 +1,12 @@
-[![view on npm](https://badgen.net/npm/v/test-object-model)](https://www.npmjs.org/package/test-object-model)
-[![npm module downloads](https://badgen.net/npm/dt/test-object-model)](https://www.npmjs.org/package/test-object-model)
-[![Gihub repo dependents](https://badgen.net/github/dependents-repo/test-runner-js/test-object-model)](https://github.com/test-runner-js/test-object-model/network/dependents?dependent_type=REPOSITORY)
-[![Gihub package dependents](https://badgen.net/github/dependents-pkg/test-runner-js/test-object-model)](https://github.com/test-runner-js/test-object-model/network/dependents?dependent_type=PACKAGE)
-[![Build Status](https://travis-ci.org/test-runner-js/test-object-model.svg?branch=master)](https://travis-ci.org/test-runner-js/test-object-model)
+[![view on npm](https://badgen.net/npm/v/@test-runner/tom)](https://www.npmjs.org/package/@test-runner/tom)
+[![npm module downloads](https://badgen.net/npm/dt/@test-runner/tom)](https://www.npmjs.org/package/@test-runner/tom)
+[![Gihub repo dependents](https://badgen.net/github/dependents-repo/test-runner-js/tom)](https://github.com/test-runner-js/tom/network/dependents?dependent_type=REPOSITORY)
+[![Gihub package dependents](https://badgen.net/github/dependents-pkg/test-runner-js/tom)](https://github.com/test-runner-js/tom/network/dependents?dependent_type=PACKAGE)
+[![Node.js CI](https://github.com/test-runner-js/tom/actions/workflows/node.js.yml/badge.svg)](https://github.com/test-runner-js/tom/actions/workflows/node.js.yml)
+[![Coverage Status](https://coveralls.io/repos/github/test-runner-js/tom/badge.svg)](https://coveralls.io/github/test-runner-js/tom)
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](https://github.com/feross/standard)
 
-# test-object-model
+# @test-runner/tom
 
 ***This project and documentation are a work in progress***.
 
@@ -43,7 +44,7 @@ Start: 2 tests loaded
 ⨯ synopsis A failing test
 
    Error: This failed
-       at TestContext.<anonymous> (file:///Users/lloyd/Documents/test-runner-js/test-object-model/tmp/synopsis.mjs:10:9)
+       at TestContext.<anonymous> (file:///Users/lloyd/Documents/test-runner-js/tom/tmp/synopsis.mjs:10:9)
        ...
        at processTimers (internal/timers.js:475:7)
 
@@ -132,8 +133,9 @@ tom.reset()
 
 ## Documentation
 
-* [API reference](https://github.com/test-runner-js/test-object-model/blob/master/docs/API.md)
+* [API reference](https://github.com/test-runner-js/tom/blob/master/docs/API.md)
 
 * * *
 
 &copy; 2018-21 Lloyd Brookes \<75pound@gmail.com\>.
+

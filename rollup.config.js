@@ -1,13 +1,23 @@
-const { nodeResolve } = require('@rollup/plugin-node-resolve')
+import { nodeResolve } from '@rollup/plugin-node-resolve'
 
-module.exports = [
+export default [
   {
     input: 'index.mjs',
     output: {
       file: 'dist/index.mjs',
       format: 'esm'
     },
-    external: ['assert', 'events', 'perf_hooks'],
+    external: [],
+    plugins: [nodeResolve({ preferBuiltins: true })]
+  },
+  {
+    input: 'index.mjs',
+    output: {
+      file: 'dist/index.cjs',
+      format: 'cjs',
+      exports: 'auto'
+    },
+    external: [],
     plugins: [nodeResolve({ preferBuiltins: true })]
   }
 ]

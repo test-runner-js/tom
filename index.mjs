@@ -1,9 +1,9 @@
-import raceTimeout from 'race-timeout-anywhere/index.mjs'
+import raceTimeout from 'race-timeout-anywhere'
 import mixin from 'create-mixin/index.mjs'
 import CompositeClass from 'composite-class/index.mjs'
-import StateMachine from 'fsm-base/index.mjs'
+import StateMachine from 'fsm-base'
 import TestContext from './lib/test-context.mjs'
-import { isPromise, isPlainObject, isString, isFunction } from 'typical/index.mjs';
+import { isPromise, isPlainObject, isString, isFunction } from 'typical'
 
 /**
  * @module test-object-model
