@@ -22,7 +22,7 @@
     "node": ">=14"
   },
   "scripts": {
-    "test": "npm run dist && npm run test:esm && npm run test:web",
+    "test": "npm run dist && npm run test:esm",
     "test:esm": "test-runner --view.hide-skips test/*.mjs",
     "test:web": "web-runner test/*.mjs",
     "dist": "rollup -c",

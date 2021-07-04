@@ -19,7 +19,7 @@ It is supplied as input to a compatible runner, for example: [test-runner](https
 Trivial example creating a TOM containing two tests - one pass and one fail. Create a test by supplying a name and test function to `tom.test`. If the function throws or rejects the test is considered a fail.
 
 ```js
-import Tom from 'test-object-model'
+import Tom from '@test-runner/tom'
 const tom = new Tom()
 
 tom.test('A successful test', function () {
