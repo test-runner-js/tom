@@ -513,14 +513,14 @@ class TestContext {
  * @module typical
  * @typicalname t
  * @example
- * const t = require('typical')
+ * import * as t from 'typical'
  * const allDefined = array.every(t.isDefined)
  */
 
 /**
  * A plain object is a simple object literal, it is not an instance of a class. Returns true if the input `typeof` is `object` and directly decends from `Object`.
  *
- * @param {*} - the input to test
+ * @param {*} input - The input to test
  * @returns {boolean}
  * @static
  * @example
@@ -549,7 +549,7 @@ function isPlainObject (input) {
 
 /**
  * Returns true if the input value is defined.
- * @param {*} - the input to test
+ * @param {*} input - The input to test
  * @returns {boolean}
  * @static
  */
@@ -559,7 +559,7 @@ function isDefined (input) {
 
 /**
  * Returns true if the input is a Promise.
- * @param {*} - the input to test
+ * @param {*} input - The input to test
  * @returns {boolean}
  * @static
  */
@@ -575,7 +575,7 @@ function isPromise (input) {
 
 /**
  * Returns true if the input value is a string. The equivalent of `typeof input === 'string'` for use in funcitonal contexts.
- * @param {*} - the input to test
+ * @param {*} input - The input to test
  * @returns {boolean}
  * @static
  */
@@ -585,7 +585,7 @@ function isString (input) {
 
 /**
  * Returns true if the input value is a function. The equivalent of `typeof input === 'function'` for use in funcitonal contexts.
- * @param {*} - the input to test
+ * @param {*} input - The input to test
  * @returns {boolean}
  * @static
  */
@@ -978,6 +978,13 @@ class Tom extends createMixin(Composite)(StateMachine) {
   }
 
   /**
+   * Used in the @test-runner/core stats.
+   */
+  getTestCount () {
+    return Array.from(this).filter(t => t.testFn).length
+  }
+
+  /**
    * If more than one TOM instances are supplied, combine them into a common root.
    * @param {Array.<Tom>} tests
    * @param {string} [name]
@@ -1014,4 +1021,4 @@ class Tom extends createMixin(Composite)(StateMachine) {
   }
 }
 
-export default Tom;
+export { Tom as default };

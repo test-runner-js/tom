@@ -1,5 +1,5 @@
-import Test from '../index.mjs'
-import sleep from 'sleep-anywhere/index.mjs'
+import Test from '../index.js'
+import sleep from 'sleep-anywhere'
 import Tom from '@test-runner/tom'
 import getAssert from 'isomorphic-assert'
 

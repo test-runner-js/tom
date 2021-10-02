@@ -1,8 +1,8 @@
 import raceTimeout from 'race-timeout-anywhere'
-import mixin from 'create-mixin/index.mjs'
-import CompositeClass from 'composite-class/index.mjs'
+import mixin from 'create-mixin'
+import CompositeClass from 'composite-class'
 import StateMachine from 'fsm-base'
-import TestContext from './lib/test-context.mjs'
+import TestContext from './lib/test-context.js'
 import { isPromise, isPlainObject, isString, isFunction } from 'typical'
 
 /**
@@ -387,6 +387,13 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
     } else {
       return window.performance
     }
+  }
+
+  /**
+   * Used in the @test-runner/core stats.
+   */
+  getTestCount () {
+    return Array.from(this).filter(t => t.testFn).length
   }
 
   /**

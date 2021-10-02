@@ -9,14 +9,12 @@ function _interopNamespace(e) {
         var d = Object.getOwnPropertyDescriptor(e, k);
         Object.defineProperty(n, k, d.get ? d : {
           enumerable: true,
-          get: function () {
-            return e[k];
-          }
+          get: function () { return e[k]; }
         });
       }
     });
   }
-  n['default'] = e;
+  n["default"] = e;
   return Object.freeze(n);
 }
 
@@ -535,14 +533,14 @@ class TestContext {
  * @module typical
  * @typicalname t
  * @example
- * const t = require('typical')
+ * import * as t from 'typical'
  * const allDefined = array.every(t.isDefined)
  */
 
 /**
  * A plain object is a simple object literal, it is not an instance of a class. Returns true if the input `typeof` is `object` and directly decends from `Object`.
  *
- * @param {*} - the input to test
+ * @param {*} input - The input to test
  * @returns {boolean}
  * @static
  * @example
@@ -571,7 +569,7 @@ function isPlainObject (input) {
 
 /**
  * Returns true if the input value is defined.
- * @param {*} - the input to test
+ * @param {*} input - The input to test
  * @returns {boolean}
  * @static
  */
@@ -581,7 +579,7 @@ function isDefined (input) {
 
 /**
  * Returns true if the input is a Promise.
- * @param {*} - the input to test
+ * @param {*} input - The input to test
  * @returns {boolean}
  * @static
  */
@@ -597,7 +595,7 @@ function isPromise (input) {
 
 /**
  * Returns true if the input value is a string. The equivalent of `typeof input === 'string'` for use in funcitonal contexts.
- * @param {*} - the input to test
+ * @param {*} input - The input to test
  * @returns {boolean}
  * @static
  */
@@ -607,7 +605,7 @@ function isString (input) {
 
 /**
  * Returns true if the input value is a function. The equivalent of `typeof input === 'function'` for use in funcitonal contexts.
- * @param {*} - the input to test
+ * @param {*} input - The input to test
  * @returns {boolean}
  * @static
  */
@@ -997,6 +995,13 @@ class Tom extends createMixin(Composite)(StateMachine) {
     } else {
       return window.performance
     }
+  }
+
+  /**
+   * Used in the @test-runner/core stats.
+   */
+  getTestCount () {
+    return Array.from(this).filter(t => t.testFn).length
   }
 
   /**

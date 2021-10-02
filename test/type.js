@@ -1,4 +1,4 @@
-import Test from '../index.mjs'
+import Test from '../index.js'
 import Tom from '@test-runner/tom'
 import getAssert from 'isomorphic-assert'
 
