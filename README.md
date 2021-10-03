@@ -9,9 +9,9 @@
 
 ***This project and documentation are a work in progress***.
 
-TOM is an acronym for Test Object Model, it defines a test suite model in the same way the DOM defines a web document. Used for defining a test suite for use with a compatible runner. The model describes your tests, how they are grouped, the order in which they should run and the config for each (timeout, max concurrency etc.)
+A TOM (Test Object Model) is a data structure that defines a test suite in the same way a DOM defines a web document. The model describes your tests, how they are grouped, the order in which they should run and the config for each (timeout, max concurrency etc.)
 
-A TOM is supplied as input to a compatible runner, for example: [test-runner](https://github.com/test-runner-js/cli) or [web-runner](https://github.com/test-runner-js/web-runner).
+Once defined, a TOM can be executed by a compatible runner, for example: [test-runner](https://github.com/test-runner-js/cli) or [web-runner](https://github.com/test-runner-js/web-runner).
 
 ## Synopsis
 
