@@ -3,20 +3,19 @@
 [![Gihub repo dependents](https://badgen.net/github/dependents-repo/test-runner-js/tom)](https://github.com/test-runner-js/tom/network/dependents?dependent_type=REPOSITORY)
 [![Gihub package dependents](https://badgen.net/github/dependents-pkg/test-runner-js/tom)](https://github.com/test-runner-js/tom/network/dependents?dependent_type=PACKAGE)
 [![Node.js CI](https://github.com/test-runner-js/tom/actions/workflows/node.js.yml/badge.svg)](https://github.com/test-runner-js/tom/actions/workflows/node.js.yml)
-[![Coverage Status](https://coveralls.io/repos/github/test-runner-js/tom/badge.svg)](https://coveralls.io/github/test-runner-js/tom)
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](https://github.com/feross/standard)
 
 # @test-runner/tom
 
 ***This project and documentation are a work in progress***.
 
-Used for defining a test suite for use with a compatible runner. The model describes your test functions, how they are grouped, the order in which they should run, the config for each (timeout, max concurrency etc.)
+TOM is an acronym for Test Object Model, it defines a test suite model in the same way the DOM defines a web document. Used for defining a test suite for use with a compatible runner. The model describes your tests, how they are grouped, the order in which they should run and the config for each (timeout, max concurrency etc.)
 
-It is supplied as input to a compatible runner, for example: [test-runner](https://github.com/test-runner-js/cli) or [web-runner](https://github.com/test-runner-js/web-runner).
+A TOM is supplied as input to a compatible runner, for example: [test-runner](https://github.com/test-runner-js/cli) or [web-runner](https://github.com/test-runner-js/web-runner).
 
 ## Synopsis
 
-Trivial example creating a TOM containing two tests - one pass and one fail. Create a test by supplying a name and test function to `tom.test`. If the function throws or rejects the test is considered a fail.
+Trivial example building a TOM containing two tests - one pass and one fail. A test is created by supplying a name and function to `tom.test`. Later, when executed by the runner, if the function throws or rejects then the test is considered a fail.
 
 ```js
 import Tom from '@test-runner/tom'
@@ -33,10 +32,10 @@ tom.test('A failing test', function () {
 export default tom
 ```
 
-Save the above to file named `test.mjs`, you can now run this test suite in several ways. For example, you can run it in Node.js by supplying it as input to `test-runner`.
+Save the above to file named `test.js`, you can now run this test suite in several ways. For example, you can run it in Node.js by supplying it as input to [test-runner](https://github.com/test-runner-js/test-runner).
 
 ```
-$ test-runner tmp/synopsis.mjs
+$ test-runner test.js
 
 Start: 2 tests loaded
 
@@ -52,10 +51,11 @@ Start: 2 tests loaded
 Completed in 10ms. Pass: 1, fail: 1, skip: 0.
 ```
 
-To confirm the test suite and the code under test is isomorphic you can run the same TOM in the browser (Chromium) using `web-runner`.
+Or, to verify the code under test is isomorphic, you can run the same TOM in the browser (Chromium) using [web-runner](https://github.com/test-runner-js/web-runner).
+
 
 ```
-$ web-runner tmp/synopsis.mjs
+$ web-runner test.js
 
 Start: 2 tests loaded
 
@@ -81,7 +81,7 @@ tom.test('name', function () {
 })
 ```
 
-Skip a test.
+Skip a test. You can revisit this test later.
 
 ```js
 tom.skip('name', function () {
@@ -97,13 +97,17 @@ tom.only('name', function () {
 })
 ```
 
-Group.
+Create a sub-group.
 
 ```js
-const myGroup = tom.group('My group')
+const groupOne = tom.group('My group')
+
+groupOne.test('first test in the group', function () {
+  // test
+})
 ```
 
-Before and after
+Define tests to be run before and after the main tests in the group.
 
 ```js
 tom.before('name', function () {
@@ -116,7 +120,7 @@ tom.after('name', function () {
 
 ```
 
-Todo
+Todo. This will highlighted in test results to remind you to revisit it later.
 
 ```js
 tom.todo('name', function () {

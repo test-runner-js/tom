@@ -46,6 +46,7 @@
             * [.after()](#module_test-object-model--Tom+after) ⇒ [<code>Tom</code>](#exp_module_test-object-model--Tom)
             * [.run()](#module_test-object-model--Tom+run) ⇒ <code>Promise</code>
             * [.reset()](#module_test-object-model--Tom+reset)
+            * [.getTestCount()](#module_test-object-model--Tom+getTestCount)
             * ["skipped" (test)](#module_test-object-model--Tom+event_skipped)
             * ["todo" (test)](#module_test-object-model--Tom+event_todo)
             * ["in-progress" (test)](#module_test-object-model--Tom+event_in-progress)
@@ -246,6 +247,12 @@ Execute the stored test function.
 
 #### tom.reset()
 Reset state
+
+**Kind**: instance method of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
+<a name="module_test-object-model--Tom+getTestCount"></a>
+
+#### tom.getTestCount()
+Used in the @test-runner/core stats.
 
 **Kind**: instance method of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
 <a name="module_test-object-model--Tom+event_skipped"></a>
