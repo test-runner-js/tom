@@ -321,7 +321,7 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
      */
     this.setState('in-progress', this)
 
-    this.stats.start = performance.now()
+    this.stats.start = this.performance.now()
 
     try {
       this.context = new TestContext({ name: this.name, index: this.index })

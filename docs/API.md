@@ -21,7 +21,6 @@
     * [Tom](#exp_module_test-object-model--Tom) ⏏
         * [new Tom([name], [testFn], [options])](#new_module_test-object-model--Tom_new)
         * _instance_
-            * [.state](#module_test-object-model--Tom+state) : <code>string</code>
             * [.name](#module_test-object-model--Tom+name) : <code>string</code>
             * [.testFn](#module_test-object-model--Tom+testFn) : <code>function</code>
             * [.index](#module_test-object-model--Tom+index) : <code>number</code>
@@ -30,12 +29,10 @@
             * [.disabledByOnly](#module_test-object-model--Tom+disabledByOnly) : <code>boolean</code>
             * [.options](#module_test-object-model--Tom+options)
             * [.context](#module_test-object-model--Tom+context) : <code>TextContext</code>
+            * [.state](#module_test-object-model--Tom+state) : <code>string</code>
             * [.type](#module_test-object-model--Tom+type) ⇒ <code>string</code>
             * [.toSkip](#module_test-object-model--Tom+toSkip) ⇒ <code>booolean</code>
             * [.stats](#module_test-object-model--Tom+stats) : <code>object</code>
-                * [.start](#module_test-object-model--Tom+stats.start) : <code>number</code>
-                * [.end](#module_test-object-model--Tom+stats.end) : <code>number</code>
-                * [.duration](#module_test-object-model--Tom+stats.duration) : <code>number</code>
             * [.toString()](#module_test-object-model--Tom+toString) ⇒ <code>string</code>
             * [.group(name, options)](#module_test-object-model--Tom+group) ⇒ [<code>Tom</code>](#exp_module_test-object-model--Tom)
             * [.test(name, testFn, options)](#module_test-object-model--Tom+test) ⇒ [<code>Tom</code>](#exp_module_test-object-model--Tom)
@@ -47,8 +44,8 @@
             * [.run()](#module_test-object-model--Tom+run) ⇒ <code>Promise</code>
             * [.reset()](#module_test-object-model--Tom+reset)
             * [.getTestCount()](#module_test-object-model--Tom+getTestCount)
-            * ["skipped" (test)](#module_test-object-model--Tom+event_skipped)
             * ["todo" (test)](#module_test-object-model--Tom+event_todo)
+            * ["skipped" (test)](#module_test-object-model--Tom+event_skipped)
             * ["ignored" (test)](#module_test-object-model--Tom+event_ignored)
             * ["in-progress" (test)](#module_test-object-model--Tom+event_in-progress)
             * ["pass" (test, result)](#module_test-object-model--Tom+event_pass)
@@ -56,6 +53,10 @@
         * _static_
             * [.combine(tests, [name])](#module_test-object-model--Tom.combine) ⇒ <code>Tom</code>
             * [.validate(tom)](#module_test-object-model--Tom.validate) ⇒ <code>boolean</code>
+        * _inner_
+            * [~start](#module_test-object-model--Tom..start) : <code>number</code>
+            * [~end](#module_test-object-model--Tom..end) : <code>number</code>
+            * [~duration](#module_test-object-model--Tom..duration) : <code>number</code>
 
 <a name="exp_module_test-object-model--Tom"></a>
 
@@ -79,12 +80,6 @@
 | [options.todo] | <code>boolean</code> | Mark this test as incomplete. |
 | [options.group] | <code>boolean</code> | Mark this test as a group. |
 
-<a name="module_test-object-model--Tom+state"></a>
-
-#### tom.state : <code>string</code>
-Test state. Can be one of `pending`, `in-progress`, `skipped`, `ignored`, `todo`, `pass` or `fail`.
-
-**Kind**: instance property of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
 <a name="module_test-object-model--Tom+name"></a>
 
 #### tom.name : <code>string</code>
@@ -133,6 +128,12 @@ The options set when creating the test.
 The text execution context.
 
 **Kind**: instance property of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
+<a name="module_test-object-model--Tom+state"></a>
+
+#### tom.state : <code>string</code>
+Test state. Can be one of `pending`, `in-progress`, `skipped`, `ignored`, `todo`, `pass` or `fail`.
+
+**Kind**: instance property of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
 <a name="module_test-object-model--Tom+type"></a>
 
 #### tom.type ⇒ <code>string</code>
@@ -151,30 +152,6 @@ Returns `true` if this test was marked to be skipped by usage of `skip` or `only
 Test execution stats
 
 **Kind**: instance namespace of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
-
-* [.stats](#module_test-object-model--Tom+stats) : <code>object</code>
-    * [.start](#module_test-object-model--Tom+stats.start) : <code>number</code>
-    * [.end](#module_test-object-model--Tom+stats.end) : <code>number</code>
-    * [.duration](#module_test-object-model--Tom+stats.duration) : <code>number</code>
-
-<a name="module_test-object-model--Tom+stats.start"></a>
-
-##### stats.start : <code>number</code>
-Start time.
-
-**Kind**: static property of [<code>stats</code>](#module_test-object-model--Tom+stats)  
-<a name="module_test-object-model--Tom+stats.end"></a>
-
-##### stats.end : <code>number</code>
-End time.
-
-**Kind**: static property of [<code>stats</code>](#module_test-object-model--Tom+stats)  
-<a name="module_test-object-model--Tom+stats.duration"></a>
-
-##### stats.duration : <code>number</code>
-Test execution duration.
-
-**Kind**: static property of [<code>stats</code>](#module_test-object-model--Tom+stats)  
 <a name="module_test-object-model--Tom+toString"></a>
 
 #### tom.toString() ⇒ <code>string</code>
@@ -255,10 +232,10 @@ Reset state
 Used in the @test-runner/core stats.
 
 **Kind**: instance method of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
-<a name="module_test-object-model--Tom+event_skipped"></a>
+<a name="module_test-object-model--Tom+event_todo"></a>
 
-#### "skipped" (test)
-Test skipped.
+#### "todo" (test)
+Test todo.
 
 **Kind**: event emitted by [<code>Tom</code>](#exp_module_test-object-model--Tom)  
 
@@ -266,10 +243,10 @@ Test skipped.
 | --- | --- | --- |
 | test | <code>TestObjectModel</code> | The test node. |
 
-<a name="module_test-object-model--Tom+event_todo"></a>
+<a name="module_test-object-model--Tom+event_skipped"></a>
 
-#### "todo" (test)
-Test todo.
+#### "skipped" (test)
+Test skipped.
 
 **Kind**: event emitted by [<code>Tom</code>](#exp_module_test-object-model--Tom)  
 
@@ -346,6 +323,24 @@ Returns true if the input is a valid test.
 | --- | --- | --- |
 | tom | [<code>test-object-model</code>](#module_test-object-model) | Input to test. |
 
+<a name="module_test-object-model--Tom..start"></a>
+
+#### Tom~start : <code>number</code>
+Start time.
+
+**Kind**: inner property of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
+<a name="module_test-object-model--Tom..end"></a>
+
+#### Tom~end : <code>number</code>
+End time.
+
+**Kind**: inner property of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
+<a name="module_test-object-model--Tom..duration"></a>
+
+#### Tom~duration : <code>number</code>
+Test execution duration.
+
+**Kind**: inner property of [<code>Tom</code>](#exp_module_test-object-model--Tom)  
 <a name="TestContext"></a>
 
 ## TestContext
