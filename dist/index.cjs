@@ -940,16 +940,14 @@ class Tom extends createMixin(Composite)(StateMachine) {
           this._testPassed(result);
           return result
         } catch (err) {
-          this._testFailed(err);
-          return Promise.reject(err)
+          return Promise.reject(this._testFailed(err))
         }
       } else {
         this._testPassed(testResult);
         return testResult
       }
     } catch (err) {
-      this._testFailed(err);
-      throw err
+      throw this._testFailed(err)
     }
 
   }
@@ -968,7 +966,7 @@ class Tom extends createMixin(Composite)(StateMachine) {
   }
 
   _testFailed (err) {
-    new TestFailError(this.name, err);
+    const testFailError = new TestFailError(this.name, err);
     this.result = err;
     this.stats.finish(performance.now());
 
@@ -978,7 +976,8 @@ class Tom extends createMixin(Composite)(StateMachine) {
      * @param test {TestObjectModel} - The test node.
      * @param err {Error} - The exception thrown.
      */
-    this.setState('fail', this, err);
+    this.setState('fail', this, testFailError);
+    return testFailError
   }
 
   /**
@@ -1051,7 +1050,7 @@ class Tom extends createMixin(Composite)(StateMachine) {
 
 class TestFailError extends Error {
   constructor (name, cause) {
-    super('Test failed: ' + name);
+    super(`Test failed [${name}]`);
     /* Used to differentiate a test suite fail (expected) from a library bug (unexpected) */
     this.isTestFail = true;
     this.cause = cause;
