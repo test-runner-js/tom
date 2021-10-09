@@ -62,7 +62,7 @@ async function start () {
       await test.run()
       throw new Error('should not reach here')
     } catch (err) {
-      a.ok(/broken/.test(err.message))
+      a.ok(/broken/.test(err.cause.message))
     } finally {
       a.strictEqual(test.ended, true)
     }

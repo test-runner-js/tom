@@ -16,7 +16,7 @@ async function start () {
       test.run()
         .then(() => a.ok(false, 'should not reach here'))
         .catch(err => {
-          a.ok(/Timeout expired/.test(err.message))
+          a.ok(/Timeout expired/.test(err.cause.message))
           a.equal(test.state, 'fail')
         }),
       sleep(350).then(() => {

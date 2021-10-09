@@ -26,7 +26,7 @@ async function start () {
       await tom.run()
       throw new Error('should not reach here')
     } catch (err) {
-      a.ok(/broken/.test(err.message))
+      a.ok(/broken/.test(err.cause.message))
     } finally {
       a.ok(tom.stats.start > 0)
       a.ok(tom.stats.end > tom.stats.start)
@@ -59,7 +59,7 @@ async function start () {
       await tom.run()
       throw new Error('should not reach here')
     } catch (err) {
-      a.ok(/broken/.test(err.message))
+      a.ok(/broken/.test(err.cause.message))
     } finally {
       a.ok(tom.stats.start > 0)
       a.ok(tom.stats.end > tom.stats.start)

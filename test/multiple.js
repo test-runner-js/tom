@@ -19,7 +19,7 @@ async function start () {
       await two.run()
       throw new Error('should not reach here')
     } catch (err) {
-      a.ok(/broken/.test(err.message))
+      a.ok(/broken/.test(err.cause.message))
       actuals.push('broken')
     } finally {
       a.deepEqual(actuals, ['one-pass', 'two-fail', 'broken'])
@@ -37,7 +37,7 @@ async function start () {
     try {
       await Promise.all([one.run(), two.run()])
     } catch (err) {
-      a.ok(/broken/.test(err.message))
+      a.ok(/broken/.test(err.cause.message))
     } finally {
       a.deepEqual(actuals, ['one-pass', 'two-fail'])
     }
@@ -55,7 +55,7 @@ async function start () {
       await Promise.all([one.run(), two.run()])
       throw new Error('should not reach here')
     } catch (err) {
-      a.ok(/broken/.test(err.message))
+      a.ok(/broken/.test(err.cause.message))
     } finally {
       a.deepEqual(actuals, ['one-pass', 'two-fail'])
     }
@@ -72,7 +72,7 @@ async function start () {
     try {
       await Promise.all([one.run(), two.run()])
     } catch (err) {
-      a.ok(/broken/.test(err.message))
+      a.ok(/broken/.test(err.cause.message))
     } finally {
       a.deepEqual(actuals, ['two-fail', 'one-pass'])
     }

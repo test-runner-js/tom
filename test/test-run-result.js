@@ -14,17 +14,18 @@ async function start () {
   })
 
   tom.test('failing sync test', async function () {
-    const err = new Error('failed')
+    const failedErr = new Error('failed')
     const test = new Test('tom', function () {
-      throw err
+      throw failedErr
     })
     try {
       await test.run()
       throw new Error('should not reach here')
     } catch (err) {
-      a.ok(/failed/.test(err.message))
+      a.ok(/failed/.test(err.cause.message))
+      a.strictEqual(err.isTestFail, true)
     } finally {
-      a.strictEqual(test.result, err)
+      a.strictEqual(test.result, failedErr)
     }
   })
 
@@ -36,16 +37,17 @@ async function start () {
   })
 
   tom.test('failing async test: rejected', async function () {
-    const err = new Error('failed')
+    const failedErr = new Error('failed')
     const test = new Test('tom', async function () {
-      throw err
+      throw failedErr
     })
     try {
       await test.run()
       throw new Error('should not reach here')
     } catch (err) {
-      a.ok(/failed/.test(err.message))
-      a.ok(test.result === err)
+      a.ok(/failed/.test(err.cause.message))
+      a.strictEqual(err.isTestFail, true)
+      a.strictEqual(test.result, err.cause)
     }
   })
 

@@ -40,7 +40,7 @@ async function start () {
       throw new Error('should not reach here')
     } catch (err) {
       a.strictEqual(test.state, 'fail')
-      a.ok(/asdf is not defined/.test(err.message))
+      a.ok(/asdf is not defined/.test(err.cause.message))
     }
   })
 

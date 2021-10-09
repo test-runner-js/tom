@@ -28,7 +28,7 @@ async function start () {
     try {
       await test.run()
     } catch (err) {
-      a.equal(err.message, 'broken')
+      a.equal(err.cause.message, 'broken')
     } finally {
       a.deepEqual(actuals, ['start', 'body', 'fail', 'end'])
     }
@@ -46,7 +46,7 @@ async function start () {
     try {
       await test.run()
     } catch (err) {
-      a.equal(err.message, 'broken')
+      a.equal(err.cause.message, 'broken')
     } finally {
       a.deepEqual(actuals, ['start', 'body', 'fail', 'end'])
     }
@@ -83,13 +83,13 @@ async function start () {
     })
     test.on('fail', (t, err) => {
       a.equal(t, test)
-      a.equal(err.message, 'broken')
+      a.equal(err.cause.message, 'broken')
       actuals.push('fail')
     })
     try {
       await test.run()
     } catch (err) {
-      a.equal(err.message, 'broken')
+      a.equal(err.cause.message, 'broken')
     } finally {
       a.deepEqual(actuals, ['fail'])
     }
