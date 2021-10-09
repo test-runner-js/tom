@@ -346,7 +346,7 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
 
   _testPassed (result) {
     this.result = result
-    this.stats.finish(performance.now())
+    this.stats.finish(this.performance.now())
 
     /**
      * Test pass.
@@ -360,7 +360,7 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
   _testFailed (err) {
     const testFailError = new TestFailError(this.name, err)
     this.result = err
-    this.stats.finish(performance.now())
+    this.stats.finish(this.performance.now())
 
     /**
      * Test fail.
