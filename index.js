@@ -23,7 +23,7 @@ import { isPromise, isPlainObject, isString, isFunction } from 'typical'
  * @param {boolean} [options.group] - Mark this test as a group.
  * @alias module:test-object-model
  */
-class Tom extends mixin(CompositeClass)(StateMachine) {
+class Tom extends CompositeClass {
   /**
    * Test name
    * @type {string}
@@ -439,6 +439,8 @@ class Tom extends mixin(CompositeClass)(StateMachine) {
     }
   }
 }
+
+StateMachine.mixInto(Tom)
 
 class TestFailError extends Error {
   constructor (name, cause) {
