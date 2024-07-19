@@ -1,5 +1,4 @@
 import raceTimeout from 'race-timeout-anywhere'
-import mixin from 'create-mixin'
 import CompositeClass from 'composite-class'
 import StateMachine from 'fsm-base'
 import TestContext from './lib/test-context.js'
@@ -23,7 +22,7 @@ import { isPromise, isPlainObject, isString, isFunction } from 'typical'
  * @param {boolean} [options.group] - Mark this test as a group.
  * @alias module:test-object-model
  */
-class Tom extends CompositeClass {
+class Tom extends EventTarget {
   /**
    * Test name
    * @type {string}
@@ -98,6 +97,7 @@ class Tom extends CompositeClass {
   context
 
   constructor (name, testFn, options) {
+    super()
     if (name) {
       if (isString(name)) {
         if (isPlainObject(testFn)) {
@@ -124,7 +124,7 @@ class Tom extends CompositeClass {
      * Test state. Can be one of `pending`, `in-progress`, `skipped`, `ignored`, `todo`, `pass` or `fail`.
      * @member {string} module:test-object-model#state
      */
-    super('pending', [
+    this._initStateMachine('pending', [
       { from: 'pending', to: 'in-progress' },
       { from: 'pending', to: 'skipped' },
       { from: 'pending', to: 'ignored' },
@@ -270,9 +270,12 @@ class Tom extends CompositeClass {
     if (state === 'pass' || state === 'fail') {
       this.ended = true
     }
-    super.setState(state, target, data)
+    // super.setState(state, target, data)
+    this.state = state
+    this.dispatchEvent(new CustomEvent(state, { detail: { target, data } }))
     if (state === 'pass' || state === 'fail') {
-      this.emit('end')
+      // this.emit('end')
+      this.dispatchEvent(new CustomEvent('end'))
     }
   }
 
@@ -341,7 +344,6 @@ class Tom extends CompositeClass {
     } catch (err) {
       throw this._testFailed(err)
     }
-
   }
 
   _testPassed (result) {
@@ -441,6 +443,7 @@ class Tom extends CompositeClass {
 }
 
 StateMachine.mixInto(Tom)
+CompositeClass.mixInto(Tom)
 
 class TestFailError extends Error {
   constructor (name, cause) {

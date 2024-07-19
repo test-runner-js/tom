@@ -1,56 +1,50 @@
-import Test from '../index.js'
-import Tom from '@test-runner/tom'
-import getAssert from 'isomorphic-assert'
+import Test from '@test-runner/tom'
+import { strict as a } from 'assert'
 
-async function start () {
-  const tom = new Tom()
-  const a = await getAssert()
+const test = new Map()
 
-  tom.test('duplicate test name', async function () {
-    const tom = new Test()
-    tom.test('one', () => 1)
-    a.throws(
-      () => tom.test('one', () => 1),
-      /Duplicate name/
-    )
+test.set('duplicate test name', async function () {
+  const tom = new Test()
+  tom.test('one', () => 1)
+  a.throws(
+    () => tom.test('one', () => 1),
+    /Duplicate name/
+  )
+})
+
+test.set('deep duplicate test name', async function () {
+  const tom = new Test('tom')
+  const child = tom.test('one', () => 1)
+  a.throws(
+    () => child.test('one', () => 1),
+    /duplicate/i
+  )
+})
+
+test.set('.test() not chainable', async function () {
+  const tom = new Test()
+  const result = tom.test('one', () => 1)
+  a.notStrictEqual(result, tom)
+})
+
+test.set('bug in test function', async function () {
+  const test = new Test('one', function () {
+    asdf()
   })
 
-  tom.test('deep duplicate test name', async function () {
-    const tom = new Test('tom')
-    const child = tom.test('one', () => 1)
-    a.throws(
-      () => child.test('one', () => 1),
-      /duplicate/i
-    )
-  })
+  try {
+    await test.run()
+    throw new Error('should not reach here')
+  } catch (err) {
+    a.strictEqual(test.state, 'fail')
+    a.ok(/asdf is not defined/.test(err.cause.message))
+  }
+})
 
-  tom.test('.test() not chainable', async function () {
-    const tom = new Test()
-    const result = tom.test('one', () => 1)
-    a.notStrictEqual(result, tom)
-  })
+test.set('tom.toString()', async function () {
+  const tom = new Test('test name')
+  const result = `toString: ${tom}`
+  a.equal(result, 'toString: test name')
+})
 
-  tom.test('bug in test function', async function () {
-    const test = new Test('one', function () {
-      asdf()
-    })
-
-    try {
-      await test.run()
-      throw new Error('should not reach here')
-    } catch (err) {
-      a.strictEqual(test.state, 'fail')
-      a.ok(/asdf is not defined/.test(err.cause.message))
-    }
-  })
-
-  tom.test('tom.toString()', async function () {
-    const tom = new Test('test name')
-    const result = `toString: ${tom}`
-    a.equal(result, 'toString: test name')
-  })
-
-  return tom
-}
-
-export default start()
+export { test }

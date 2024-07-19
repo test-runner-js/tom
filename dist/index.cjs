@@ -55,6 +55,7 @@ class Composite {
 
   /**
    * Add a child
+   * @param {Composite} child - the child node to add
    * @returns {Composite}
    */
   add (child) {
@@ -171,6 +172,21 @@ class Composite {
     }
     addParent(this);
     return output
+  }
+
+  /**
+   * @param {object} - The target class (or constructor function) to receive the state machine behaviour.
+   */
+  static mixInto (target) {
+    for (const methodName of ['children', 'parent', 'add', 'append', 'prepend', 'remove', 'level', 'getDescendentCount', 'tree', 'root', 'inspect', 'parents', Symbol.iterator]) {
+      const sourceMethod = Object.getOwnPropertyDescriptor(this.prototype, methodName);
+      if (target.prototype === undefined) {
+        Object.defineProperty(target, methodName, sourceMethod);
+      } else {
+        Object.defineProperty(target.prototype, methodName, sourceMethod);
+      }
+    }
+    return target
   }
 }
 
@@ -460,7 +476,7 @@ function isFunction (input) {
  * @param {boolean} [options.group] - Mark this test as a group.
  * @alias module:test-object-model
  */
-class Tom extends Composite {
+class Tom extends EventTarget {
   /**
    * Test name
    * @type {string}
@@ -535,6 +551,7 @@ class Tom extends Composite {
   context
 
   constructor (name, testFn, options) {
+    super();
     if (name) {
       if (isString(name)) {
         if (isPlainObject(testFn)) {
@@ -561,7 +578,7 @@ class Tom extends Composite {
      * Test state. Can be one of `pending`, `in-progress`, `skipped`, `ignored`, `todo`, `pass` or `fail`.
      * @member {string} module:test-object-model#state
      */
-    super('pending', [
+    this._initStateMachine('pending', [
       { from: 'pending', to: 'in-progress' },
       { from: 'pending', to: 'skipped' },
       { from: 'pending', to: 'ignored' },
@@ -707,9 +724,12 @@ class Tom extends Composite {
     if (state === 'pass' || state === 'fail') {
       this.ended = true;
     }
-    super.setState(state, target, data);
+    // super.setState(state, target, data)
+    this.state = state;
+    this.dispatchEvent(new CustomEvent(state, { detail: { target, data } }));
     if (state === 'pass' || state === 'fail') {
-      this.emit('end');
+      // this.emit('end')
+      this.dispatchEvent(new CustomEvent('end'));
     }
   }
 
@@ -778,7 +798,6 @@ class Tom extends Composite {
     } catch (err) {
       throw this._testFailed(err)
     }
-
   }
 
   _testPassed (result) {
@@ -878,6 +897,7 @@ class Tom extends Composite {
 }
 
 StateMachine.mixInto(Tom);
+Composite.mixInto(Tom);
 
 class TestFailError extends Error {
   constructor (name, cause) {

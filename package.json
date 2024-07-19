@@ -20,29 +20,25 @@
   ],
   "license": "MIT",
   "engines": {
-    "node": ">=12.17"
+    "node": ">=20"
   },
   "scripts": {
     "test": "npm run dist && npm run test:ci",
-    "test:ci": "test-runner --view.hide-skips test/*.js",
-    "test:web": "web-runner test/*.js",
+    "test:ci": "nature testB test/*.js",
     "dist": "rollup -c",
     "docs": "jsdoc2md index.js lib/*.js > docs/API.md"
   },
   "dependencies": {
-    "composite-class": "^2.0.1",
-    "create-mixin": "^3.0.0",
+    "composite-class": "^3.0.0-0",
     "fsm-base": "^0.9.0",
     "race-timeout-anywhere": "^2.0.0",
     "typical": "^7.1.1"
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^15.2.3",
-    "isomorphic-assert": "^1.0.0",
     "jsdoc-to-markdown": "^8.0.1",
     "rollup": "^4.18.0",
-    "sleep-anywhere": "^2.1.1",
-    "test-runner": "^0.10.1"
+    "sleep-anywhere": "^2.1.1"
   },
   "standard": {
     "ignore": [

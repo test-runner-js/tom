@@ -1,34 +1,28 @@
-import Test from '../index.js'
-import Tom from '@test-runner/tom'
-import getAssert from 'isomorphic-assert'
+import Test from '@test-runner/tom'
+import { strict as a } from 'assert'
 
-async function start () {
-  const tom = new Tom()
-  const a = await getAssert()
+const test = new Map()
 
-  tom.test('valid test', async function () {
-    const tom = new Test('one', () => 1)
-    a.doesNotThrow(
-      () => Test.validate(tom)
-    )
-  })
+test.set('valid test', async function () {
+  const tom = new Test('one', () => 1)
+  a.doesNotThrow(
+    () => Test.validate(tom)
+  )
+})
 
-  tom.test('invalid test', async function () {
-    const tom = {}
-    a.throws(
-      () => Test.validate(tom),
-      /valid tom required/i
-    )
-  })
+test.set('invalid test', async function () {
+  const tom = {}
+  a.throws(
+    () => Test.validate(tom),
+    /valid tom required/i
+  )
+})
 
-  tom.test('invalid test 2', async function () {
-    a.throws(
-      () => Test.validate(),
-      /valid tom required/i
-    )
-  })
+test.set('invalid test 2', async function () {
+  a.throws(
+    () => Test.validate(),
+    /valid tom required/i
+  )
+})
 
-  return tom
-}
-
-export default start()
+export { test }
