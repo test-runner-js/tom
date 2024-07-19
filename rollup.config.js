@@ -9,15 +9,5 @@ export default [
     },
     external: [],
     plugins: [nodeResolve({ preferBuiltins: true })]
-  },
-  {
-    input: 'index.js',
-    output: {
-      file: 'dist/index.cjs',
-      format: 'cjs',
-      exports: 'auto'
-    },
-    external: [],
-    plugins: [nodeResolve({ preferBuiltins: true })]
   }
 ]

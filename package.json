@@ -3,12 +3,12 @@
   "author": "Lloyd Brookes <75pound@gmail.com>",
   "version": "0.9.1",
   "description": "Define a Test Object Model",
-  "repository": "https://github.com/test-runner-js/tom",
-  "type": "module",
-  "exports": {
-    "import": "./index.js",
-    "require": "./dist/index.cjs"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/test-runner-js/tom.git"
   },
+  "type": "module",
+  "exports": "./index.js",
   "keywords": [
     "test-runner",
     "test",
@@ -24,7 +24,7 @@
   },
   "scripts": {
     "test": "npm run dist && npm run test:ci",
-    "test:ci": "nature testB test/*.js",
+    "test:ci": "nature @test-nature/test-runner test/*.js",
     "dist": "rollup -c",
     "docs": "jsdoc2md index.js lib/*.js > docs/API.md"
   },
@@ -36,9 +36,9 @@
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^15.2.3",
+    "@test-nature/test-runner": "^0.1.0",
     "jsdoc-to-markdown": "^8.0.1",
-    "rollup": "^4.18.0",
-    "sleep-anywhere": "^2.1.1"
+    "rollup": "^4.18.0"
   },
   "standard": {
     "ignore": [
