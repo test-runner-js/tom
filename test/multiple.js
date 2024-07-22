@@ -1,6 +1,5 @@
 import Test from '@test-runner/tom'
 import { strict as a } from 'assert'
-// import { setTimeout as sleep } from 'node:timers/promises'
 
 const test = new Map()
 const only = new Map()

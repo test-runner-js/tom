@@ -24,7 +24,7 @@
   },
   "scripts": {
     "test": "npm run dist && npm run test:ci",
-    "test:ci": "nature @test-nature/test-runner test/*.js",
+    "test:ci": "nature @nature-zone/minimal-runner test/*.js",
     "dist": "rollup -c",
     "docs": "jsdoc2md index.js lib/*.js > docs/API.md"
   },
@@ -35,10 +35,9 @@
     "typical": "^7.1.1"
   },
   "devDependencies": {
-    "@rollup/plugin-node-resolve": "^15.2.3",
-    "@test-nature/test-runner": "^0.1.0",
+    "@nature-zone/minimal-runner": "^0.1.0",
     "jsdoc-to-markdown": "^8.0.1",
-    "rollup": "^4.18.0"
+    "nature": "^0.6.2"
   },
   "standard": {
     "ignore": [
